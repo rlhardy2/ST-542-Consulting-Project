@@ -1,4 +1,4 @@
-# Load the package, read data, and manipulate
+# Loading necessary packages
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -10,39 +10,48 @@ library(MASS)
 library(lme4)
 library(tidyverse)
 library(multcomp)
+library(multcompView)
+library(biostat3)
+library(multcompView)
 
-setwd("~/Documents/nc state/Statistics/2024 Distance")
-scalecount1 <- read.csv(file="/Users/jbookwa/Documents/nc state/Statistics/2024 Distance/distance numbers v7.csv",strip.white=TRUE)
+#### Data cleaning
+
+# Reading in the data
+scalecount1 <- read.csv(file = "distance numbers v7 (study 2).csv", strip.white=TRUE)
+
+# Adding column names
 colnames(scalecount1) <- c("Label","Type", "Twigab","Date","Livescale1","Deadscale1","Livescale2","Deadscale2",
                           "Livescale3","Deadscale3","Prespara","Presscalenewgr","Presfungus","encarsia","notes")
-#just getting columns I need
-scalecount1 = subset(scalecount1, select = c("Label","Type", "Twigab","Date","Livescale1","Deadscale1","Livescale2","Deadscale2",
-                                           "Livescale3","Deadscale3","Prespara","Presfungus","encarsia"))
 
-#extract and create new column with treatment
-scalecount1$Treatment<-
-  substring(scalecount1$Label, first=4, last=4)
+# Sub-setting the data
+scalecount1 <- subset(scalecount1, select = c("Label","Type", "Twigab","Date","Livescale1",
+                                              "Deadscale1","Livescale2","Deadscale2",
+                                              "Livescale3","Deadscale3","Prespara","Presfungus",
+                                              "encarsia"))
 
-scalecount1<-scalecount1 %>% drop_na(Livescale1)
+# Extract and create new column with treatment
+scalecount1$Treatment <- substring(scalecount1$Label, first=4, last=4)
+
+scalecount1 <- scalecount1 %>% drop_na(Livescale1)
 
 
-#getting zero and 1s as pres and abs
+# Getting 0s and 1s for presence and absence
 scalecount1$Prespara<-replace(scalecount1$Prespara, scalecount1$Prespara=="yes", 1)
 scalecount1$Prespara<-replace(scalecount1$Prespara, scalecount1$Prespara=="no", 0)
 scalecount1$Presfungus<-replace(scalecount1$Presfungus, scalecount1$Presfungus=="yes", 1)
 scalecount1$Presfungus<-replace(scalecount1$Presfungus, scalecount1$Presfungus=="no", 0)
 
-
+# Making the chosen variables numeric
 scalecount1 <- scalecount1 %>% 
   mutate(across(c(Livescale1, Deadscale1, Livescale2, Deadscale2, Livescale3, Deadscale3), as.numeric))
 str(scalecount1)
 
-#removing labels that were not collected
+# Removing labels that were not collected
 #scalecount1<-scalecount1 %>% drop_na(Livescale1)
 #scalecount1<-scalecount1 %>% drop_na(Livescale2)
 #scalecount1<-scalecount1 %>% drop_na(Livescale3)
 
-#figuring out percentage of EHS to cryptomeria 
+# Figuring out percentage of EHS to cryptomeria 
 #scalecount1<-scalecount1 %>% 
 #  mutate(SUMlivescale = rowSums(across(c(Livescale1,Livescale2,Livescale3)),na.rm = TRUE))
 
@@ -58,7 +67,7 @@ str(scalecount1)
 #print(tmeans)
 
 
-#making a new table that adds the EHS and cryptomeria 
+# Making a new table that adds the EHS and cryptomeria 
 scalecountboth<- scalecount1 %>% 
   group_by(Label,Twigab, Date, Treatment) %>% 
   dplyr::summarize(across(where(is.numeric), sum))
@@ -70,7 +79,7 @@ scalecountboth_NoNA<-scalecountboth
 scalecountboth$Treatment<-as.factor(scalecountboth$Treatment)
 scalecountboth$Twigab<-as.factor(scalecountboth$Twigab)
 
-####must use across NOT SELECT - this is for getting mean scale#####
+####must use across NOT SELECT - this is for getting mean scale
 scalecountboth_NoNA<-scalecountboth_NoNA %>% 
   mutate(Meanlivescale = rowMeans(across(c(Livescale1,Livescale2,Livescale3)),na.rm = TRUE))
 
@@ -85,21 +94,20 @@ scalecountboth_NoNA<-scalecountboth_NoNA %>%
 #str(scalecountboth)
 #gm <- glm(Livescale1 ~ Treatment , 
 #            data = scalecountboth,
-#             family = "poisson")                                                         
+#             family = "poisson")
 #summary(gm)  
-########
 
 
 #gm <- glm(Livescale1 ~ Treatment , 
 #          data = scalecountboth,
-#          family = "poisson")                                                         
+#          family = "poisson")
 #summary(gm)  
 
 
 scalecount_July <- subset(scalecountboth_NoNA, grepl('July',Date))
 scalecount_Nov <- subset(scalecountboth_NoNA, grepl('Nov',Date))
 
-#####July kruskal#####
+#####July kruskal
 kruskal.test(Livescale1 ~ Treatment, data = scalecount_July)
   #Kruskal-Wallis chi-squared = 3.3811, df = 3, p-value = 0.3365
 
@@ -159,7 +167,7 @@ ggsave(Meanlivescale_plot_Nov, file="Meanlivescale_plot_Nov.pdf",
 
 
 
-##encarsia####
+##encarsia
 scalecountencar<-scalecount_Nov
 
 
@@ -217,7 +225,7 @@ ggsave(encarsia_plot, file="encarsia_plot.pdf",
 
 
 
-##fungus#########
+##fungus
 
 #extract and create new column with treatment-
 scalecountfung2<-scalecount_Nov

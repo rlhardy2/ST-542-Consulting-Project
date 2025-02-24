@@ -1,4 +1,4 @@
-# Load the package, read data, and manipulate
+# Loading necessary packages
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -14,10 +14,10 @@ library(multcompView)
 library(biostat3)
 library(multcompView)
 
-# Reading in the data
-scalecount <- read.csv(file="acety counting v2 (study 3).csv",strip.white=TRUE)
-
 #### Data cleaning
+
+# Reading in the data
+scalecount <- read.csv(file = "acety counting v2 (study 3).csv", strip.white=TRUE)
 
 # Adding column names
 colnames(scalecount) <- c("Label", "Twigab","EHSLivescale1","EHSDeadscale1","EHSLivescale2","EHSDeadscale2",
