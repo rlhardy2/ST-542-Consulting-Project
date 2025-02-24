@@ -119,7 +119,9 @@ livescale_plot_mean <- ggplot(data=tmeans_mean,
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   geom_errorbar(aes(ymin=Mean-se, ymax=Mean+se), position = position_dodge(0.9), width = 0,
                 show.legend = FALSE, color="black") +
-  labs(x="Treatment", y="Mean Numbers of Live EHS on 10 needles of This Year's Growth") +
+  labs(x = "Treatment",
+       y = "Mean",
+       title = "Mean Numbers of Live EHS on 10 needles \n of This Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -128,9 +130,11 @@ livescale_plot_mean <- ggplot(data=tmeans_mean,
         axis.title.y=element_text(size=18),
         axis.text.y=element_text(size=18),
         legend.text = element_text(size = 14),
-        legend.title = element_text(size = 18)
-  )+scale_x_discrete(label = labels)+
-scale_fill_manual(values = c("#CC6600","red","#9999FF","#0072B2","green4"))  
+        legend.title = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5)
+  ) +
+  scale_x_discrete(label = labels) +
+  scale_fill_manual(values = c("#CC6600","red","#9999FF","#0072B2","green4"))  
 livescale_plot_mean
 
 
@@ -141,7 +145,9 @@ livescale_plots_sum <- ggplot(data=tmeans_sum,
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   geom_errorbar(aes(ymin=Mean-se, ymax=Mean+se), position = position_dodge(0.9), width = 0,
                 show.legend = FALSE, color="black") +
-  labs(x="Treatment", y="Mean Numbers of Live EHS on 10 needles of This Year's Growth") +
+  labs(x = "Treatment",
+       y = "Mean",
+       title = "Mean Numbers of Live EHS on 10 needles \n of This Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -150,8 +156,9 @@ livescale_plots_sum <- ggplot(data=tmeans_sum,
         axis.title.y=element_text(size=18),
         axis.text.y=element_text(size=18),
         legend.text = element_text(size = 14),
-        legend.title = element_text(size = 18)
-  )+
+        legend.title = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5)
+  ) +
   scale_fill_manual(values = c("#CC6600","red","#9999FF","#0072B2","green4")) 
 livescale_plots_sum
 
@@ -162,6 +169,7 @@ shapiro.test(scalecountall$Meanlivescale)
 # Kruskal-Wallis test for mean live-scale
 kruskal.test(Meanlivescale ~ Treatment, data = scalecountall)
 
+# THIS DOESN'T WORK -- gives error message about ties
 letters < -pairwise.wilcox.test(scalecountall$Meanlivescale, scalecountall$Treatment,
                                 p.adjust.method = "BH")
 letters
@@ -233,7 +241,9 @@ livescale_plots_para <- ggplot(data=tmeans1,
                               ), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
 
-  labs(x="Treatment", y="Percentage of parasitism on 10 needles of This Year's Growth") +
+  labs(x = "Treatment",
+       y = "Percentage",
+       title = "Percentage of parasitism on 10 needles \n of This Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -242,9 +252,10 @@ livescale_plots_para <- ggplot(data=tmeans1,
         axis.title.y = element_text(size=18),
         axis.text.y = element_text(size=18),
         legend.text = element_text(size = 14),
-        legend.title = element_text(size = 18)
-  )+scale_x_discrete(label = labels)
-
+        legend.title = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5)
+  ) +
+  scale_x_discrete(label = labels)
 livescale_plots_para
 ggsave(livescale_plots_para, file="livescale_plots_para.pdf", 
        width = 6, height=4)
@@ -265,7 +276,7 @@ tmeans_fungus <- scalecount_nozero %>%
   )
 print(tmeans_fungus)
 
-# Percentage of fungus presence in a group
+# Percentage of fungus presence in a group (Rachel added this code)
 tmeans2 <- scalecount_nozero %>% 
   group_by(Treatment) %>% 
   summarise(
@@ -286,7 +297,9 @@ livescale_plots_fungus <- ggplot(data=tmeans_fungus,
                                aes(x=Treatment, y=Mean
                                ), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
-  labs(x="Treatment", y="Percentage of entofungus on 10 needles of this Year's Growth") +
+  labs(x="Treatment",
+       y = "Percentage",
+       title = "Percentage of entofungus on 10 needles \n of this Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -295,9 +308,10 @@ livescale_plots_fungus <- ggplot(data=tmeans_fungus,
         axis.title.y=element_text(size=18),
         axis.text.y=element_text(size=18),
         legend.text = element_text(size = 14),
-        legend.title = element_text(size = 18)
-  )+scale_x_discrete(label = labels)
-  
+        legend.title = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5)
+  ) +
+  scale_x_discrete(label = labels)
 livescale_plots_fungus
 ggsave(livescale_plots_fungus, file="livescale_plots_fungus.pdf", 
        width = 6, height=4)
