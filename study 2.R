@@ -36,10 +36,10 @@ scalecount1 <- scalecount1 %>% drop_na(Livescale1)
 
 
 # Getting 0s and 1s for presence and absence
-scalecount1$Prespara<-replace(scalecount1$Prespara, scalecount1$Prespara=="yes", 1)
-scalecount1$Prespara<-replace(scalecount1$Prespara, scalecount1$Prespara=="no", 0)
-scalecount1$Presfungus<-replace(scalecount1$Presfungus, scalecount1$Presfungus=="yes", 1)
-scalecount1$Presfungus<-replace(scalecount1$Presfungus, scalecount1$Presfungus=="no", 0)
+scalecount1$Prespara <- replace(scalecount1$Prespara, scalecount1$Prespara=="yes", 1)
+scalecount1$Prespara <- replace(scalecount1$Prespara, scalecount1$Prespara=="no", 0)
+scalecount1$Presfungus <- replace(scalecount1$Presfungus, scalecount1$Presfungus=="yes", 1)
+scalecount1$Presfungus <- replace(scalecount1$Presfungus, scalecount1$Presfungus=="no", 0)
 
 # Making the chosen variables numeric
 scalecount1 <- scalecount1 %>% 
@@ -66,67 +66,69 @@ str(scalecount1)
 #  )
 #print(tmeans)
 
-
 # Making a new table that adds the EHS and cryptomeria 
-scalecountboth<- scalecount1 %>% 
+scalecountboth <- scalecount1 %>% 
   group_by(Label,Twigab, Date, Treatment) %>% 
   dplyr::summarize(across(where(is.numeric), sum))
+scalecountboth
+
+# Getting new column 
+# Get another data frame to send to no NA- this is the column we will use
+# No NA means no missing values -- this is a data set with no missing values
+scalecountboth_NoNA <- scalecountboth
+scalecountboth$Treatment <- as.factor(scalecountboth$Treatment)
+scalecountboth$Twigab <- as.factor(scalecountboth$Twigab)
 
 
-#getting new column 
-#get another dataframe to send to no NA- this is the column we will use
-scalecountboth_NoNA<-scalecountboth
-scalecountboth$Treatment<-as.factor(scalecountboth$Treatment)
-scalecountboth$Twigab<-as.factor(scalecountboth$Twigab)
+# Must use across NOT SELECT - this is for getting mean scale
 
-####must use across NOT SELECT - this is for getting mean scale
-scalecountboth_NoNA<-scalecountboth_NoNA %>% 
-  mutate(Meanlivescale = rowMeans(across(c(Livescale1,Livescale2,Livescale3)),na.rm = TRUE))
+# Mean live-scale
+scalecountboth_NoNA <- scalecountboth_NoNA %>% 
+  mutate(Meanlivescale = rowMeans(across(c(Livescale1, Livescale2, Livescale3)), na.rm = TRUE))
+scalecountboth_NoNA
 
-
-scalecountboth_NoNA<-scalecountboth_NoNA %>% 
+# Mean dead-scale
+scalecountboth_NoNA <- scalecountboth_NoNA %>% 
   mutate(Meandeadscale = rowMeans(across(c(Deadscale1, Deadscale2, Deadscale3)), na.rm = TRUE))
+scalecountboth_NoNA
 
+scalecountboth <- as.data.frame(scalecountboth)
+head(scalecountboth)
 
+# This is a Poisson model, but the response is live-scale1
+gm <- glm(Livescale1 ~ Treatment,
+          data = scalecountboth,
+          family = "poisson")
+summary(gm)
 
+#### Below starts analysis by month (July and November)
 
-#scalecountboth<-as.data.frame(scalecountboth)
-#str(scalecountboth)
-#gm <- glm(Livescale1 ~ Treatment , 
-#            data = scalecountboth,
-#             family = "poisson")
-#summary(gm)  
+# Data sets for July and November
+scalecount_July <- subset(scalecountboth_NoNA, grepl('July', Date))
+scalecount_Nov <- subset(scalecountboth_NoNA, grepl('Nov', Date))
 
-
-#gm <- glm(Livescale1 ~ Treatment , 
-#          data = scalecountboth,
-#          family = "poisson")
-#summary(gm)  
-
-
-scalecount_July <- subset(scalecountboth_NoNA, grepl('July',Date))
-scalecount_Nov <- subset(scalecountboth_NoNA, grepl('Nov',Date))
-
-#####July kruskal
+# July Kruskal -- again, we are only using live-scale1 for some reason??
+# I think we should be using mean live-scale instead?
 kruskal.test(Livescale1 ~ Treatment, data = scalecount_July)
-  #Kruskal-Wallis chi-squared = 3.3811, df = 3, p-value = 0.3365
+# Kruskal-Wallis chi-squared = 3.3811, df = 3, p-value = 0.3365
 
-#modelg_scale<-glht(gm, mcp(Treatment="Tukey"))
+# Not sure what's going on here??
+modelg_scale <- glht(gm, mcp(Treatment = "Tukey"))
 #table_glht(modelg_scale)
 
-
-
-###Nov kruskal
+# November Kruskal -- here we are using mean live-scale
 kruskal.test(Meanlivescale ~ Treatment, data = scalecount_Nov)
+# Kruskal-Wallis chi-squared = 17.059, df = 3, p-value = 0.0006873
 
-#Kruskal-Wallis chi-squared = 17.059, df = 3, p-value = 0.0006873
-pairwise.wilcox.test(scalecount_Nov$Meanlivescale, scalecount_Nov$Treatment,
+# Pairwise Wilcox test -- gives same error about "ties"
+pairwise.wilcox.test(scalecount_Nov$Meanlivescale,
+                     scalecount_Nov$Treatment,
                      p.adjust.method = "BH")
 
          #1      2        3     
-#2     0.0087   -         -     
-#3    0.0159   0.3992   -     
-#4      0.7103 0.0086.  0.0104
+#2     0.0087    -        -     
+#3     0.0159  0.3992     -     
+#4     0.7103  0.0086.  0.0104  
 
 tmeans <- scalecount_Nov %>% 
   group_by(Treatment) %>% 
