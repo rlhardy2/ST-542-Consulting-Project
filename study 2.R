@@ -125,15 +125,19 @@ pairwise.wilcox.test(scalecount_Nov$Meanlivescale,
                      scalecount_Nov$Treatment,
                      p.adjust.method = "BH")
 
+
+# Not sure what this table is -- I guess it came from the pairwise testing?
          #1      2        3     
 #2     0.0087    -        -     
 #3     0.0159  0.3992     -     
 #4     0.7103  0.0086.  0.0104  
 
+
+# Treatment means for November
 tmeans <- scalecount_Nov %>% 
   group_by(Treatment) %>% 
   dplyr::summarize(
-    Mean=round(mean(Meanlivescale, na.rm = T),3),
+    Mean = round(mean(Meanlivescale, na.rm = T), 3),
     sd = sd(Meanlivescale),
     n = n(),
     se = sd / sqrt(n),
@@ -142,16 +146,16 @@ tmeans <- scalecount_Nov %>%
 print(tmeans)
 
 
-
-# treatment means as bar plots
+# Treatment means as bar plots for November
 labels <- c("Pyri/May", "Ace/May", "Pyri/May + Ace/June", "No Treatment")
-Meanlivescale_plot_Nov <- ggplot(data=tmeans, 
-                             aes(x=Treatment, y=Mean
-                             ), na.rm = T) +
+Meanlivescale_plot_Nov <- ggplot(data = tmeans, 
+                                 aes(x = Treatment, y = Mean), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   geom_errorbar(aes(ymin=Mean-sd, ymax=Mean+sd), position = position_dodge(0.9), width = 0,
                 show.legend = FALSE, color="black") +
-  labs(x="Treatment", y="Mean Numbers of Live EHS & Crypto Scale on 10 needles") +
+  labs(x = "Treatment",
+       y = "Mean",
+       title = "Mean Numbers of Live EHS & Crypto Scale \n on 10 needles") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -160,35 +164,33 @@ Meanlivescale_plot_Nov <- ggplot(data=tmeans,
         axis.title.y=element_text(size=18),
         axis.text.y=element_text(size=18),
         legend.text = element_text(size = 14),
-        legend.title = element_text(size = 18)
-  )+
+        legend.title = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5)
+  ) +
   scale_fill_brewer(palette = "Dark2")+ scale_x_discrete(label = labels)
 Meanlivescale_plot_Nov
 ggsave(Meanlivescale_plot_Nov, file="Meanlivescale_plot_Nov.pdf", 
        width = 6, height=4)
 
 
+#### Encarsia (November)
 
-##encarsia
-scalecountencar<-scalecount_Nov
+scalecountencar <- scalecount_Nov
 
+# Remove twigs with no scale
+# Some samples only have one twig, dropping those
+scalecountencar <- scalecountencar %>% drop_na(encarsia)
 
-#remove twigs with no scale
-
-scalecountencar<-scalecountencar %>% drop_na(encarsia) #some samples only have one twig, dropping those
-
+# Kruskal-Wallis test for encarsia
 kruskal.test(encarsia ~ Treatment, data = scalecountencar)
-#Kruskal-Wallis chi-squared = 2.0473, df = 3, p-value = 0.5626
-#no difference among treatments
+# Kruskal-Wallis chi-squared = 2.0473, df = 3, p-value = 0.5626
+# No difference among treatments
 
-
-
-
-
+# Treatment means for encarsia
 tmeans <- scalecountencar %>% 
   group_by(Treatment) %>% 
   dplyr::summarize(
-    Mean=round(mean(encarsia, na.rm = T),3),
+    Mean = round(mean(encarsia, na.rm = T),3),
     sd = sd(encarsia),
     n = n(),
     se = sd / sqrt(n),
@@ -197,15 +199,16 @@ tmeans <- scalecountencar %>%
 print(tmeans)
 
 
-# treatment means as bar plots
+# Treatment means for encarsia as bar plots
 labels <- c("Pyri/May", "Ace/May", "Pyri/May + Ace/June", "No Treatment")
-encarsia_plot<- ggplot(data=tmeans, 
-                                 aes(x=Treatment, y=Mean
-                                 ), na.rm = T) +
+encarsia_plot<- ggplot(data = tmeans, 
+                       aes(x = Treatment, y = Mean), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   geom_errorbar(aes(ymin=Mean-sd, ymax=Mean+sd), position = position_dodge(0.9), width = 0,
                 show.legend = FALSE, color="black") +
-  labs(x="Treatment", y="Mean numbers of Encarsia ") +
+  labs(x = "Treatment",
+       y = "Mean",
+       title = "Mean numbers of Encarsia") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -214,7 +217,8 @@ encarsia_plot<- ggplot(data=tmeans,
         axis.title.y=element_text(size=18),
         axis.text.y=element_text(size=18),
         legend.text = element_text(size = 14),
-        legend.title = element_text(size = 18)
+        legend.title = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5)
   )+
   scale_fill_brewer(palette = "Dark2")+ scale_x_discrete(label = labels)
 encarsia_plot
@@ -222,33 +226,25 @@ ggsave(encarsia_plot, file="encarsia_plot.pdf",
        width = 6, height=4)
 
 
+#### Fungus (November)
+
+scalecountfung2 <- scalecount_Nov
 
 
+# Remove twigs with no scale
+# Some samples only have one twig, dropping those
+scalecountfung2 <- scalecountfung2[rowSums(scalecountfung2[, 6:11] == 0) < 2,]
+scalecountfung2 <- scalecountfung2 %>% drop_na(Label)
 
-
-
-##fungus
-
-#extract and create new column with treatment-
-scalecountfung2<-scalecount_Nov
-
-
-#remove twigs with no scale
-
-scalecountfung2<-scalecountfung2[rowSums(scalecountfung2[, 6:11] == 0) < 2,]
-scalecountfung2<-scalecountfung2 %>% drop_na(Label) #some samples only have one twig, dropping those
-
-#percentage of presence in a group
-tmeans2<-scalecountfung2 %>% 
+# Percentage of presence in a group -- this code below is giving an error!!
+tmeans2 <- scalecountfung2 %>% 
   group_by(Treatment) %>% 
   summarise(
     percent_yes = mean(Prespara == 1),
     percent_yes100 = round(percent_yes*100),
   )
 
-tmeans2$Collection<-"Nov"
-scalecountfung2$Prespara<-as.numeric(scalecountfung2$Prespara)
+tmeans2$Collection <- "Nov"
+scalecountfung2$Prespara <- as.numeric(scalecountfung2$Prespara)
 shapiro.test(scalecountfung2$Prespara)
-
-
 
