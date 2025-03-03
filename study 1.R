@@ -16,7 +16,7 @@ library(multcompView)
 ## PREPROCESSING ##
 
 # read in file
-scalecount <- read.csv(file="EHS count 2024 v7 (study 1).csv",strip.white=TRUE)
+scalecount <- read.csv(file="EHS count 2024 v7 (study 1).csv", strip.white=TRUE)
 colnames(scalecount) <- c("Label", "County","Twigab","Date","Counter","Livescale1","Deadscale1","Livescale2","Deadscale2",
                           "Livescale3","Deadscale3","Prespara","Presfungus","Presscalenewgr","encarsia")
 
@@ -55,7 +55,7 @@ scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="n"
 scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="N", 0)
 scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="no", 0)
 
-# change counts to factors
+# change Treatment and County to factors
 scalecount <- scalecount %>% 
   mutate(across(c(Treatment, County), as.factor))
 
@@ -75,8 +75,8 @@ scalecount<-scalecount %>% drop_na(Livescale1)
 
 #scalecount has both July and November counts in it
 
-#getting first count- July 
-
+# getting first count- July
+# "scalecount1" henceforth refers to July collection
 scalecount1 <- subset(scalecount, grepl('July',Date))
 
 # Treatment survival means
@@ -136,10 +136,7 @@ print(tmeans)
 
 #by county
 # Treatment survival means for second (November) scale count
-# (Where was the scalecount2 variable declared?)
-
-# declaring here, need to test
-scalecount2 <- subset(scalecount, grepl('November',Date))
+scalecount2 <- subset(scalecount, grepl('November', Date))
 tmeans_county2 <- scalecount2 %>% 
   group_by(Treatment, County) %>% 
   dplyr::summarize(
@@ -178,7 +175,7 @@ Meanlivescale_plot_county
 ggsave(Meanlivescale_plot_county, file="Meanlivescale_plot_county.pdf", 
        width = 6, height=4)
 
-#november collection plot
+# November collection plot, by county
 labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 Meanlivescale_plot_county2 <- ggplot(data=tmeans_county2, 
                                      aes(x=Treatment, y=Mean, fill=County, colour=County
@@ -226,13 +223,6 @@ pairwise.wilcox.test(scalecount2$Livescale1, scalecount2$Treatment,
                      p.adjust.method = "BH")
 
 
-
-
-
-
-
-
-
 ###looking at percentages of parasitized ####
 
 #first count:
@@ -242,11 +232,11 @@ scalecountfung1<-scalecount1
 
 
 #remove twigs with no scale
-
+# Note: Ask client about meaning of 0 counts!! 
 scalecountfung1<-scalecountfung1[rowSums(scalecountfung1[, 6:11] == 0) < 2,]
 scalecountfung1<-scalecountfung1 %>% drop_na(Label) #some samples only have one twig, dropping those
 
-#percentage of presence in a group
+# Treatment means - percentage of parasitism in July collection
 tmeans1<-scalecountfung1 %>% 
   group_by(Treatment) %>% 
   summarise(
@@ -258,13 +248,17 @@ tmeans1$Collection<-"July"
 #checking to make sure we are getting the presence absence mean percentage 
 #write.csv(scalecountfung1,"~/Downloads/scalecountfung1.csv", row.names = FALSE)
 
+# Convert presence of parasitism to numeric and perform normality check
 scalecountfung1$Prespara<-as.numeric(scalecountfung1$Prespara)
 shapiro.test(scalecountfung1$Prespara)
 
 #W = 0.58143, p-value < 2.2e-16 . less than .05, thus data is non normal
+
+# perform Kruskal-Wallis test and Wilcox text
 #first count:
 kruskal.test(Prespara ~ Treatment, data = scalecountfung1)
 
+# Note - cannot compute exact value due to ties
 pairwise.wilcox.test(scalecountfung1$Prespara, scalecountfung1$Treatment,
                      p.adjust.method = "BH")
 
@@ -273,7 +267,7 @@ pairwise.wilcox.test(scalecountfung1$Prespara, scalecountfung1$Treatment,
 #  3 0.161 0.032 -    
 #  4 0.766 0.388 0.124
 
-####parastism just in July plot not used####
+####parasitism just in July plot not used####
 labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 scalecountfung1_para_plot <- ggplot(data=tmeans, 
                                     aes(x=Treatment, y=percent_yes100
@@ -307,10 +301,11 @@ ggsave(Meanlivescale_plot_second, file="Parasitism_plot_first.pdf",
 scalecountfung2<-scalecount2
 
 #remove twigs with no scale and only one twig
+# ASK - why remove samples with only one twig?
 scalecountfung2<-scalecountfung2[rowSums(scalecountfung2[, 6:11] == 0) < 2,]
 scalecountfung2<-scalecountfung2 %>% drop_na(Label) #some samples only have one twig, dropping those
 
-#percentage of presence of fungi in a group
+#percentage of parasitism in a group
 tmeans2<-scalecountfung2 %>% 
   group_by(Treatment) %>% 
   summarise(
@@ -320,12 +315,15 @@ tmeans2<-scalecountfung2 %>%
 
 tmeans2$Collection<-"Nov"
 scalecountfung2$Prespara<-as.numeric(scalecountfung2$Prespara)
+
+# check normality
 shapiro.test(scalecountfung2$Prespara)
 
 #W = 0.58143, p-value < 2.2e-16 . less than .05, thus data is non normal
 #first count:
 kruskal.test(Prespara ~ Treatment, data = scalecountfung2)
 
+# This one does run! Probably because the 0s were removed?
 pairwise.wilcox.test(scalecountfung2$Prespara, scalecountfung2$Treatment,
                      p.adjust.method = "BH")
 
@@ -340,7 +338,8 @@ pairwise.wilcox.test(scalecountfung2$Prespara, scalecountfung2$Treatment,
 # combine parasitic tables
 para_table<-dplyr::bind_rows(tmeans1, tmeans2)
 
-#make plot for both parasitic count
+#make plot for parasitism count
+# label with treatment dates
 labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 
 para_plot <- ggplot(data=para_table, 
@@ -370,7 +369,7 @@ ggsave(para_plot, file="Pres_mean_plot.pdf",
 ####presence of fungi####
 #by county
 
-# Treatment survival means
+# Treatment survival means - November
 tmeans_fungus <- scalecount2 %>% 
   group_by(County) %>% 
   summarise(
