@@ -20,8 +20,9 @@ library(multcompView)
 scalecount1 <- read.csv(file = "distance numbers v7 (study 2).csv", strip.white=TRUE)
 
 # Adding column names
-colnames(scalecount1) <- c("Label","Type", "Twigab","Date","Livescale1","Deadscale1","Livescale2","Deadscale2",
-                          "Livescale3","Deadscale3","Prespara","Presscalenewgr","Presfungus","encarsia","notes")
+colnames(scalecount1) <- c("Label","Type", "Twigab","Date","Livescale1","Deadscale1","Livescale2",
+                           "Deadscale2","Livescale3","Deadscale3","Prespara",
+                          "Presscalenewgr","Presfungus","encarsia","notes")
 
 # Sub-setting the data
 scalecount1 <- subset(scalecount1, select = c("Label","Type", "Twigab","Date","Livescale1",
@@ -79,7 +80,6 @@ scalecountboth_NoNA <- scalecountboth
 scalecountboth$Treatment <- as.factor(scalecountboth$Treatment)
 scalecountboth$Twigab <- as.factor(scalecountboth$Twigab)
 
-
 # Must use across NOT SELECT - this is for getting mean scale
 
 # Mean live-scale
@@ -94,6 +94,8 @@ scalecountboth_NoNA
 
 scalecountboth <- as.data.frame(scalecountboth)
 head(scalecountboth)
+
+#### End of data cleaning
 
 # This is a Poisson model, but the response is live-scale1
 gm <- glm(Livescale1 ~ Treatment,

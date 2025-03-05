@@ -22,7 +22,8 @@ scalecount <- read.csv(file = "acety counting v2 (study 3).csv", strip.white=TRU
 # Adding column names
 colnames(scalecount) <- c("Label", "Twigab","EHSLivescale1","EHSDeadscale1","EHSLivescale2","EHSDeadscale2",
                           "EHSLivescale3","EHSDeadscale3","Prespara","CryptoLivescale1","CryptoDeadscale1",
-                          "CryptoLivescale2","CryptoDeadscale2","CryptoLivescale3","CryptoDeadscale3","Presfungus")
+                          "CryptoLivescale2","CryptoDeadscale2","CryptoLivescale3","CryptoDeadscale3",
+                          "Presfungus")
 
 # Creating live-scale and dead-scale variables
 scalecount$Livescale1 <- scalecount$EHSLivescale1 + scalecount$CryptoLivescale1
@@ -315,6 +316,3 @@ livescale_plots_fungus <- ggplot(data=tmeans_fungus,
 livescale_plots_fungus
 ggsave(livescale_plots_fungus, file="livescale_plots_fungus.pdf", 
        width = 6, height=4)
-
-
-
