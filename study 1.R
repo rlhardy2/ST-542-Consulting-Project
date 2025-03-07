@@ -12,6 +12,8 @@ library(tidyverse)
 library(multcomp) 
 library(multcompView)
 
+source("graphing functions.r")
+
 
 ## PREPROCESSING ##
 
@@ -94,20 +96,10 @@ print(tmeans_all)
 # Treatment labels
 trt_labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 
-# Exploratory plot 1 - treatment mean of live EHS distribution
-get_hist_livescale <- function(data, collection_date) {
-  hist_livescale <- ggplot(data=data, aes(x=Meanlivescale, fill=Treatment)) + 
-                  geom_histogram(binwidth=1) + 
-                  labs(x="Mean Live Scale") + 
-                  facet_wrap(~Treatment) + 
-                  scale_fill_discrete(labels=trt_labels) + 
-                  labs(title=paste("Study 1 - Mean Numbers of Live EHS,",
-                                   collection_date))
-  return(hist_livescale)
-}
-
-get_hist_livescale(scalecount_july, "July")
-get_hist_livescale(scalecount_nov, "Nov")
+get_hist_livescale(scalecount_july, collection_date="July", study=1, 
+                   labels=trt_labels)
+get_hist_livescale(scalecount_nov, collection_date="Nov", study=1, 
+                   labels=trt_labels)
 
 # treatment means as bar plots
 Meanlivescale_plot_all <- ggplot(data=tmeans_all, 
@@ -288,8 +280,8 @@ pairwise.wilcox.test(scalecountfung_july$Prespara, scalecountfung_july$Treatment
 #extract and create new column with treatment-
 scalecountfung2<-scalecount_nov
 
-#remove twigs with no scale and only one twig
-# ASK - why remove samples with only one twig?
+#remove twigs with no scale and only one shoot
+# Remove twigs without scale - if there wasn't EHS this was already counted as 0
 scalecountfung2<-scalecountfung2[rowSums(scalecountfung2[, 6:11] == 0) < 2,]
 scalecountfung2<-scalecountfung2 %>% drop_na(Label) #some samples only have one twig, dropping those
 
@@ -321,42 +313,12 @@ pairwise.wilcox.test(scalecountfung2$Prespara, scalecountfung2$Treatment,
 #3 0.021 0.205 -    
 #4 0.238 0.885 0.205
 
-
-# COMBINING DATA
-
 # combine parasitic tables
 para_table<-dplyr::bind_rows(tmeans_july_para, tmeans_nov_para)
 
 #make plot for parasitism count
 # label with treatment dates
 trt_labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
-
-# plot means by collection date and an X value (treatment, county)
-plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_labels) {
-  x_sym <- ensym(x_str)
-  y_sym <- ensym(y_str)
-  trt_coll_plot <- ggplot(data=data, 
-                          aes(x={{x_sym}}, y={{y_sym}}, 
-                              fill=Collection, colour=Collection
-                          ), na.rm = T) +
-    geom_bar(stat="identity", 
-             position = position_dodge2(width = 0.9, preserve = "single"))  +
-    labs(x=x_str, y="Presence Mean Percentage", title=title) +
-    theme_bw() + 
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          axis.text.x=element_text(angle = 45, vjust = 0.5, size=18), 
-          axis.title.x = element_text(size=18),
-          axis.title.y=element_text(size=18),
-          axis.text.y=element_text(size=18),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 18)
-    )+
-    scale_fill_brewer(palette = "Dark2") +
-    scale_color_brewer(palette = "Dark2")  + scale_x_discrete(label = labels)
-  
-  return(trt_coll_plot)
-}
 
 para_plot <- plot_means_by_collection(data=para_table, 
                                           title="Study 1 - Parasitism Means Percentages",
@@ -365,10 +327,6 @@ para_plot <- plot_means_by_collection(data=para_table,
 para_plot
 ggsave(para_plot, file="Pres_mean_plot.pdf", 
        width = 6, height=10)
-
-
-# distribution of parasitized "yes"
-get_hist_livescale(scalecount_july, "July")
 
 
 ####presence of fungi####
