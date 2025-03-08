@@ -228,7 +228,7 @@ Meanlivescale_plot_county_nov
 ggsave(Meanlivescale_plot_county2, file="Meanlivescale_plot_county2.pdf", 
        width = 6, height=4)
 
-#### Shapiro-Wilk tests (Rachel) ####
+#### Shapiro-Wilk tests (code by Rachel) ####
 
 ## For July
 
@@ -242,15 +242,15 @@ shapiro.test(scalecount_nov$Meanlivescale)
 shapiro.test(scalecount_nov$Sumlivescale)
 shapiro.test(scalecount_nov$encarsia)
 
-#### Kruskal-Wallis tests (Rachel) ####
+#### Kruskal-Wallis tests (code by Rachel) ####
 
 ## For whole data set (not sure if this is necessary)
 
 kruskal.test(Meanlivescale ~ Treatment, data = scalecount)
 kruskal.test(Sumlivescale ~ Treatment, data = scalecount)
 kruskal.test(encarsia ~ Treatment, data = scalecount)
-kruskal.test(Prespara ~ Treatment, data = scalecount)
-kruskal.test(Presfungus ~ Treatment, data = scalecount)
+kruskal.test(Prespara ~ Treatment, data = scalecount) #Idk if this is appropriate?
+kruskal.test(Presfungus ~ Treatment, data = scalecount) #Idk if this is appropriate?
 
 ## For July
 
