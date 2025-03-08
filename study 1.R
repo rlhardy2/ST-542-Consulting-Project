@@ -15,7 +15,7 @@ library(multcompView)
 source("graphing functions.r")
 
 
-## PREPROCESSING ##
+### PREPROCESSING ###
 
 # read in file
 scalecount <- read.csv(file="EHS count 2024 v7 (study 1).csv", strip.white=TRUE)
@@ -72,6 +72,12 @@ scalecount<-scalecount %>%
 scalecount<-scalecount %>% 
   mutate(Meandeadscale = rowMeans(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
 
+# New variables for sum of live-scale and dead-scale (sums the three shoots)
+scalecount<-scalecount %>% 
+  mutate(Sumlivescale = rowSums(dplyr::select(., Livescale1, Livescale2, Livescale3), na.rm = TRUE))
+scalecount<-scalecount %>% 
+  mutate(Sumdeadscale = rowSums(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
+
 #removing labels that were not collected
 scalecount<-scalecount %>% drop_na(Livescale1)
 
@@ -100,6 +106,18 @@ get_hist_livescale(scalecount_july, collection_date="July", study=1,
                    labels=trt_labels)
 get_hist_livescale(scalecount_nov, collection_date="Nov", study=1, 
                    labels=trt_labels)
+
+get_hist(data=scalecount_july, 
+         x_str="Sumlivescale", 
+         x_lab="Sum",
+         title="Study 1 - Sum of Live EHS, July",
+         labels=trt_labels)
+
+get_hist(data=scalecount_nov, 
+         x_str="Sumlivescale", 
+         x_lab="Sum",
+         title="Study 1 - Sum of Live EHS, Nov",
+         labels=trt_labels)
 
 # treatment means as bar plots
 Meanlivescale_plot_all <- ggplot(data=tmeans_all, 

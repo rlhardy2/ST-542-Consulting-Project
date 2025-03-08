@@ -94,6 +94,12 @@ scalecountboth_NoNA <- scalecountboth_NoNA %>%
   mutate(Meandeadscale = rowMeans(across(c(Deadscale1, Deadscale2, Deadscale3)), na.rm = TRUE))
 scalecountboth_NoNA
 
+# New variables for sum of live-scale and dead-scale (sums the three shoots)
+scalecountboth_NoNA <-scalecountboth_NoNA %>% 
+  mutate(Sumlivescale = rowSums(across(c(Livescale1, Livescale2, Livescale3)), na.rm = TRUE))
+scalecountboth_NoNA <-scalecountboth_NoNA  %>% 
+  mutate(Sumdeadscale = rowSums(across(c(Deadscale1, Deadscale2, Deadscale3)), na.rm = TRUE))
+
 scalecountboth <- as.data.frame(scalecountboth)
 head(scalecountboth)
 
@@ -130,7 +136,11 @@ pairwise.wilcox.test(scalecount_Nov$Meanlivescale,
                      scalecount_Nov$Treatment,
                      p.adjust.method = "BH")
 
+library(FSA)
 
+dunnTest(Meanlivescale ~ Treatment,
+         data=scalecount_Nov,
+         method="bonferroni")
 # Not sure what this table is -- I guess it came from the pairwise testing?
          #1      2        3     
 #2     0.0087    -        -     
@@ -195,9 +205,21 @@ plot_means_by_collection(data=tmeans_table,
                          x_str="Treatment", y_str="Mean", labels=labels)
 
 
-# Histograms
+# Histograms of means
 get_hist_livescale(scalecount_July, "July", 2, labels)
 get_hist_livescale(scalecount_Nov, "Nov", 2, labels)
+
+# Histograms of sums
+get_hist(data=scalecount_july, 
+         x_str="Sumlivescale", 
+         x_lab="Sum",
+         title="Study 2 - Sum of Live EHS, July",
+         labels=labels)
+get_hist(data=scalecount_nov, 
+         x_str="Sumlivescale", 
+         x_lab="Sum",
+         title="Study 2 - Sum of Live EHS, Nov",
+         labels=labels)
 
 
 #### Encarsia (November)

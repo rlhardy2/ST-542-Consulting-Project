@@ -122,7 +122,7 @@ livescale_plot_mean <- ggplot(data=tmeans_mean,
                 show.legend = FALSE, color="black") +
   labs(x = "Treatment",
        y = "Mean",
-       title = "Mean Numbers of Live EHS on 10 needles \n of This Year's Growth") +
+       title = "Study 3 - Mean Numbers of Live EHS on 10 needles \n of This Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -139,7 +139,7 @@ livescale_plot_mean <- ggplot(data=tmeans_mean,
 livescale_plot_mean
 
 
-#### treatment means as bar plots don't use
+tmeans_sum$Treatment <- factor(tmeans_sum$Treatment, levels=c("2","1","3","5","4"))
 livescale_plots_sum <- ggplot(data=tmeans_sum, 
                          aes(x=Treatment, y=Mean
                          ), na.rm = T) +
@@ -148,7 +148,7 @@ livescale_plots_sum <- ggplot(data=tmeans_sum,
                 show.legend = FALSE, color="black") +
   labs(x = "Treatment",
        y = "Mean",
-       title = "Mean Numbers of Live EHS on 10 needles \n of This Year's Growth") +
+       title = "Study 3 - Mean Sums of Live EHS on 10 needles \n of This Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -160,8 +160,27 @@ livescale_plots_sum <- ggplot(data=tmeans_sum,
         legend.title = element_text(size = 18),
         plot.title = element_text(hjust = 0.5)
   ) +
+  scale_x_discrete(label = labels) +
   scale_fill_manual(values = c("#CC6600","red","#9999FF","#0072B2","green4")) 
 livescale_plots_sum
+
+
+# Get histograms
+scalecountall$Treatment <- factor(scalecountall$Treatment,
+                                  levels=c("2","1","3","5","4"))
+get_hist(data=scalecountall, 
+         x_str="Meanlivescale", 
+         x_lab="Mean",
+         title="Study 3 - Mean of Live EHS",
+         labels=labels)
+
+get_hist(data=scalecountall, 
+         x_str="Sumlivescale", 
+         x_lab="Sum",
+         title="Study 3 - Sum of Live EHS",
+         labels=labels)
+
+
 
 # Shapiro-Wilk normality test
 shapiro.test(scalecountall$Meanlivescale)
@@ -244,7 +263,7 @@ livescale_plots_para <- ggplot(data=tmeans1,
 
   labs(x = "Treatment",
        y = "Percentage",
-       title = "Percentage of parasitism on 10 needles \n of This Year's Growth") +
+       title = "Study 3 - Percentage of parasitism on 10 needles \n of This Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -293,6 +312,7 @@ pairwise.wilcox.test(scalecount_nozero$Presfungus, scalecount_nozero$Treatment,
                      p.adjust.method = "BH")
 
 # Treatment means as bar plots for fungus no zeros
+# Simplified "entofungus" to just "fungus" for ST542 report
 tmeans_fungus$Treatment <- factor(tmeans_fungus$Treatment, levels=c("2","1","3","5","4"))
 livescale_plots_fungus <- ggplot(data=tmeans_fungus, 
                                aes(x=Treatment, y=Mean
@@ -300,7 +320,7 @@ livescale_plots_fungus <- ggplot(data=tmeans_fungus,
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   labs(x="Treatment",
        y = "Percentage",
-       title = "Percentage of entofungus on 10 needles \n of this Year's Growth") +
+       title = "Study 3 - Percentage of Fungus on 10 needles \n of this Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
