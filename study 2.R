@@ -14,6 +14,8 @@ library(multcompView)
 library(biostat3)
 library(multcompView)
 
+source("graphing functions.r")
+
 #### Data cleaning
 
 # Reading in the data
@@ -34,7 +36,6 @@ scalecount1 <- subset(scalecount1, select = c("Label","Type", "Twigab","Date","L
 scalecount1$Treatment <- substring(scalecount1$Label, first=4, last=4)
 
 scalecount1 <- scalecount1 %>% drop_na(Livescale1)
-
 
 # Getting 0s and 1s for presence and absence
 scalecount1$Prespara <- replace(scalecount1$Prespara, scalecount1$Prespara=="yes", 1)
@@ -68,8 +69,9 @@ str(scalecount1)
 #print(tmeans)
 
 # Making a new table that adds the EHS and cryptomeria 
+# Added - Prespara - same # of observations with and without, so safe to add
 scalecountboth <- scalecount1 %>% 
-  group_by(Label,Twigab, Date, Treatment) %>% 
+  group_by(Label,Twigab, Date, Treatment, Prespara) %>% 
   dplyr::summarize(across(where(is.numeric), sum))
 scalecountboth
 
@@ -92,6 +94,12 @@ scalecountboth_NoNA <- scalecountboth_NoNA %>%
   mutate(Meandeadscale = rowMeans(across(c(Deadscale1, Deadscale2, Deadscale3)), na.rm = TRUE))
 scalecountboth_NoNA
 
+# New variables for sum of live-scale and dead-scale (sums the three shoots)
+scalecountboth_NoNA <-scalecountboth_NoNA %>% 
+  mutate(Sumlivescale = rowSums(across(c(Livescale1, Livescale2, Livescale3)), na.rm = TRUE))
+scalecountboth_NoNA <-scalecountboth_NoNA  %>% 
+  mutate(Sumdeadscale = rowSums(across(c(Deadscale1, Deadscale2, Deadscale3)), na.rm = TRUE))
+
 scalecountboth <- as.data.frame(scalecountboth)
 head(scalecountboth)
 
@@ -108,6 +116,7 @@ summary(gm)
 # Data sets for July and November
 scalecount_July <- subset(scalecountboth_NoNA, grepl('July', Date))
 scalecount_Nov <- subset(scalecountboth_NoNA, grepl('Nov', Date))
+
 
 # July Kruskal -- again, we are only using live-scale1 for some reason??
 # I think we should be using mean live-scale instead?
@@ -127,16 +136,19 @@ pairwise.wilcox.test(scalecount_Nov$Meanlivescale,
                      scalecount_Nov$Treatment,
                      p.adjust.method = "BH")
 
+library(FSA)
 
+dunnTest(Meanlivescale ~ Treatment,
+         data=scalecount_Nov,
+         method="bonferroni")
 # Not sure what this table is -- I guess it came from the pairwise testing?
          #1      2        3     
 #2     0.0087    -        -     
 #3     0.0159  0.3992     -     
 #4     0.7103  0.0086.  0.0104  
 
-
 # Treatment means for November
-tmeans <- scalecount_Nov %>% 
+tmeans_nov <- scalecount_Nov %>% 
   group_by(Treatment) %>% 
   dplyr::summarize(
     Mean = round(mean(Meanlivescale, na.rm = T), 3),
@@ -145,12 +157,25 @@ tmeans <- scalecount_Nov %>%
     se = sd / sqrt(n),
     cv = sd/Mean * 100
   )
-print(tmeans)
+tmeans_nov$Collection<-"Nov"
+print(tmeans_nov)
+
+tmeans_july <- scalecount_July %>% 
+  group_by(Treatment) %>% 
+  dplyr::summarize(
+    Mean = round(mean(Meanlivescale, na.rm = T), 3),
+    sd = sd(Meanlivescale),
+    n = n(),
+    se = sd / sqrt(n),
+    cv = sd/Mean * 100
+  )
+tmeans_july$Collection<-"July"
 
 
+# Original bar plots from Dr. Bookwalter
 # Treatment means as bar plots for November
 labels <- c("Pyri/May", "Ace/May", "Pyri/May + Ace/June", "No Treatment")
-Meanlivescale_plot_Nov <- ggplot(data = tmeans, 
+Meanlivescale_plot_Nov <- ggplot(data = tmeans_nov, 
                                  aes(x = Treatment, y = Mean), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   geom_errorbar(aes(ymin=Mean-sd, ymax=Mean+sd), position = position_dodge(0.9), width = 0,
@@ -174,22 +199,46 @@ Meanlivescale_plot_Nov
 ggsave(Meanlivescale_plot_Nov, file="Meanlivescale_plot_Nov.pdf", 
        width = 6, height=4)
 
+tmeans_table <- dplyr::bind_rows(tmeans_july, tmeans_nov)
+plot_means_by_collection(data=tmeans_table, 
+                         title="Study 2 - Mean Live EHS & Crypto Scale",
+                         x_str="Treatment", y_str="Mean", labels=labels)
+
+
+# Histograms of means
+get_hist_livescale(scalecount_July, "July", 2, labels)
+get_hist_livescale(scalecount_Nov, "Nov", 2, labels)
+
+# Histograms of sums
+get_hist(data=scalecount_july, 
+         x_str="Sumlivescale", 
+         x_lab="Sum",
+         title="Study 2 - Sum of Live EHS, July",
+         labels=labels)
+get_hist(data=scalecount_nov, 
+         x_str="Sumlivescale", 
+         x_lab="Sum",
+         title="Study 2 - Sum of Live EHS, Nov",
+         labels=labels)
+
 
 #### Encarsia (November)
 
-scalecountencar <- scalecount_Nov
+scalecountencar_nov <- scalecount_Nov
+scalecountencar_july <- scalecount_July
 
 # Remove twigs with no scale
 # Some samples only have one twig, dropping those
-scalecountencar <- scalecountencar %>% drop_na(encarsia)
+scalecountencar_nov <- scalecountencar_nov %>% drop_na(encarsia)
+scalecountencar_july <- scalecountencar_july %>% drop_na(encarsia)
 
 # Kruskal-Wallis test for encarsia
-kruskal.test(encarsia ~ Treatment, data = scalecountencar)
+kruskal.test(encarsia ~ Treatment, data = scalecountencar_nov)
 # Kruskal-Wallis chi-squared = 2.0473, df = 3, p-value = 0.5626
 # No difference among treatments
 
-# Treatment means for encarsia
-tmeans <- scalecountencar %>% 
+# Treatment means for encarsia - Nov, July
+tmeans_encar_nov <- scalecountencar_nov %>% 
   group_by(Treatment) %>% 
   dplyr::summarize(
     Mean = round(mean(encarsia, na.rm = T),3),
@@ -198,12 +247,27 @@ tmeans <- scalecountencar %>%
     se = sd / sqrt(n),
     cv = sd/Mean * 100
   )
-print(tmeans)
+tmeans_encar_nov$Collection<-"Nov"
+print(tmeans_encar_nov)
 
+tmeans_encar_july <- scalecountencar_july %>% 
+  group_by(Treatment) %>% 
+  dplyr::summarize(
+    Mean = round(mean(encarsia, na.rm = T),3),
+    sd = sd(encarsia),
+    n = n(),
+    se = sd / sqrt(n),
+    cv = sd/Mean * 100
+  )
+tmeans_encar_july$Collection<-"July"
+
+# Put both data sets in one table for graphing
+encar_table_trt <- dplyr::bind_rows(tmeans_encar_july, 
+                                    tmeans_encar_nov)
 
 # Treatment means for encarsia as bar plots
 labels <- c("Pyri/May", "Ace/May", "Pyri/May + Ace/June", "No Treatment")
-encarsia_plot<- ggplot(data = tmeans, 
+encarsia_plot<- ggplot(data = tmeans_encar_nov, 
                        aes(x = Treatment, y = Mean), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   geom_errorbar(aes(ymin=Mean-sd, ymax=Mean+sd), position = position_dodge(0.9), width = 0,
@@ -227,26 +291,60 @@ encarsia_plot
 ggsave(encarsia_plot, file="encarsia_plot.pdf", 
        width = 6, height=4)
 
+# Plot of both July and November means
+tmeans_encar_plot_trt <- 
+  plot_means_by_collection(data=encar_table_trt, 
+                                title="Study 2 - Mean Encarsia Count",
+                                x_str="Treatment",
+                                y_str="Mean",
+                                labels = labels)
+tmeans_encar_plot_trt
+
+# Histograms
+get_hist_encarsia(data=scalecountencar_july, collection_date="July", study=2, labels=labels)
+get_hist_encarsia(data=scalecountencar_nov, collection_date="Nov", study=2, labels=labels)
 
 #### Fungus (November)
 
-scalecountfung2 <- scalecount_Nov
-
+scalecountfung_july <- scalecount_July
+scalecountfung_nov <- scalecount_Nov
 
 # Remove twigs with no scale
 # Some samples only have one twig, dropping those
-scalecountfung2 <- scalecountfung2[rowSums(scalecountfung2[, 6:11] == 0) < 2,]
-scalecountfung2 <- scalecountfung2 %>% drop_na(Label)
+scalecountfung_july <- scalecountfung_july[rowSums(scalecountfung_july[, 6:11] == 0) < 2,]
+scalecountfung_july <- scalecountfung_july %>% drop_na(Label)
+scalecountfung_nov <- scalecountfung_nov[rowSums(scalecountfung_nov[, 6:11] == 0) < 2,]
+scalecountfung_nov <- scalecountfung_nov %>% drop_na(Label)
 
-# Percentage of presence in a group -- this code below is giving an error!!
-tmeans2 <- scalecountfung2 %>% 
+scalecountfung_july$Prespara <- as.numeric(scalecountfung_july$Prespara)
+scalecountfung_nov$Prespara <- as.numeric(scalecountfung_nov$Prespara)
+
+# Percentage of presence in a group
+# Fixed code after adding Prespara to scalecount processing
+tmeans_fung_nov <- scalecountfung_nov %>% 
   group_by(Treatment) %>% 
   summarise(
     percent_yes = mean(Prespara == 1),
     percent_yes100 = round(percent_yes*100),
   )
+tmeans_fung_nov$Collection <- "Nov"
 
-tmeans2$Collection <- "Nov"
-scalecountfung2$Prespara <- as.numeric(scalecountfung2$Prespara)
-shapiro.test(scalecountfung2$Prespara)
+tmeans_fung_july <- scalecountfung_july %>% 
+  group_by(Treatment) %>% 
+  summarise(
+    percent_yes = mean(Prespara == 1),
+    percent_yes100 = round(percent_yes*100),
+  )
+tmeans_fung_july$Collection <- "July"
+
+fungus_table_trt <- dplyr::bind_rows(tmeans_fungus_trt_july, 
+                                     tmeans_fungus_trt_nov)
+
+plot_means_by_collection(data=fungus_table_trt, 
+                         title="Study 2 - Mean Presence Percentage of Fungus",
+                         x_str="Treatment",
+                         y_str="percent_yes100",
+                         labels=labels)
+
+shapiro.test(scalecountfung_nov$Prespara)
 
