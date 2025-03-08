@@ -117,9 +117,22 @@ summary(gm)
 scalecount_July <- subset(scalecountboth_NoNA, grepl('July', Date))
 scalecount_Nov <- subset(scalecountboth_NoNA, grepl('Nov', Date))
 
+#### Shapiro-Wilk tests ####
 
-# July Kruskal -- again, we are only using live-scale1 for some reason??
-# I think we should be using mean live-scale instead?
+## For July
+
+shapiro.test(scalecount_July$Meanlivescale)
+shapiro.test(scalecount_July$Sumlivescale)
+shapiro.test(scalecount_July$encarsia)
+
+## For November
+
+shapiro.test(scalecount_Nov$Meanlivescale)
+shapiro.test(scalecount_Nov$Sumlivescale)
+shapiro.test(scalecount_Nov$encarsia)
+
+
+# July Kruskal -- need to change this to mean live scale!!
 kruskal.test(Livescale1 ~ Treatment, data = scalecount_July)
 # Kruskal-Wallis chi-squared = 3.3811, df = 3, p-value = 0.3365
 
