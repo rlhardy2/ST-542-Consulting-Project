@@ -227,6 +227,19 @@ Meanlivescale_plot_county_nov
 ggsave(Meanlivescale_plot_county2, file="Meanlivescale_plot_county2.pdf", 
        width = 6, height=4)
 
+#### Shapiro-Wilk tests ####
+
+## For July
+
+shapiro.test(scalecount_july$Meanlivescale)
+shapiro.test(scalecount_july$Sumlivescale)
+shapiro.test(scalecount_july$encarsia)
+
+## For November
+
+shapiro.test(scalecount_nov$Meanlivescale)
+shapiro.test(scalecount_nov$Sumlivescale)
+shapiro.test(scalecount_nov$encarsia)
 
 ##### ##Kruskal wallace, will use: ####
 shapiro.test(scalecount_july$Livescale1)
