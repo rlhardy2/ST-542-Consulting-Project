@@ -135,9 +135,6 @@ tmeans <- scalecount1 %>%
   )
 print(tmeans)
 
-#by county
-# Treatment survival means for second (November) scale count
-scalecount2 <- subset(scalecount, grepl('November', Date))
 tmeans_county2 <- scalecount2 %>% 
   group_by(Treatment, County) %>% 
   dplyr::summarize(
@@ -205,7 +202,7 @@ ggsave(Meanlivescale_plot_county2, file="Meanlivescale_plot_county2.pdf",
        width = 6, height=4)
 
 
-##### ##Kruskal wallace, will use: ####
+##### ##Kruskal-Wallis, will use: ####
 shapiro.test(scalecount1$Livescale1)
 #W = 0.58685, p-value < 2.2e-16 . less than .05, thus data is non normal
 #first count:
