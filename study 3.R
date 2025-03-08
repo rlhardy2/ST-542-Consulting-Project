@@ -184,7 +184,7 @@ get_hist(data=scalecountall,
 
 # Shapiro-Wilk normality test
 shapiro.test(scalecountall$Meanlivescale)
-# p-value lower than 0.05, therefore non-normal distribution. use nonparametric test
+shapiro.test(scalecountall$Sumlivescale)
 
 # Kruskal-Wallis test for mean live-scale
 kruskal.test(Meanlivescale ~ Treatment, data = scalecountall)
