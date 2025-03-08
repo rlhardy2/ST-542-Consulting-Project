@@ -86,6 +86,7 @@ scalecount<-scalecount %>% drop_na(Livescale1)
 # getting first count- July
 # "scalecount_july" henceforth refers to July collection
 scalecount_july <- subset(scalecount, grepl('July',Date))
+scalecount_nov <- subset(scalecount, grepl('November', Date))
 
 # Treatment survival means
 tmeans_all <- scalecount_july %>% 
@@ -147,7 +148,7 @@ ggsave(Meanlivescale_plot_all, file="Meanlivescale_plot_all.pdf",
 ##
 
 
-####by county#####
+##by county##
 # Treatment survival means for July scale count
 tmeans_county_july <- scalecount_july %>% 
   group_by(Treatment, County) %>% 
@@ -227,7 +228,7 @@ Meanlivescale_plot_county_nov
 ggsave(Meanlivescale_plot_county2, file="Meanlivescale_plot_county2.pdf", 
        width = 6, height=4)
 
-#### Shapiro-Wilk tests ####
+#### Shapiro-Wilk tests (Rachel) ####
 
 ## For July
 
@@ -241,10 +242,31 @@ shapiro.test(scalecount_nov$Meanlivescale)
 shapiro.test(scalecount_nov$Sumlivescale)
 shapiro.test(scalecount_nov$encarsia)
 
-##### ##Kruskal wallace, will use: ####
-shapiro.test(scalecount_july$Livescale1)
+#### Kruskal-Wallis tests (Rachel) ####
 
-#W = 0.58685, p-value < 2.2e-16 . less than .05, thus data is non normal
+## For whole data set (not sure if this is necessary)
+
+kruskal.test(Meanlivescale ~ Treatment, data = scalecount)
+kruskal.test(Sumlivescale ~ Treatment, data = scalecount)
+kruskal.test(encarsia ~ Treatment, data = scalecount)
+kruskal.test(Prespara ~ Treatment, data = scalecount)
+kruskal.test(Presfungus ~ Treatment, data = scalecount)
+
+## For July
+
+kruskal.test(Meanlivescale ~ Treatment, data = scalecount_july)
+kruskal.test(Sumlivescale ~ Treatment, data = scalecount_july)
+kruskal.test(encarsia ~ Treatment, data = scalecount_july)
+
+## For November
+
+kruskal.test(Meanlivescale ~ Treatment, data = scalecount_nov)
+kruskal.test(Sumlivescale ~ Treatment, data = scalecount_nov)
+kruskal.test(encarsia ~ Treatment, data = scalecount_nov)
+
+
+
+
 #first count:
 kruskal.test(Livescale1 ~ Treatment, data = scalecount_july)
 
@@ -261,7 +283,7 @@ pairwise.wilcox.test(scalecount_nov$Livescale1, scalecount_nov$Treatment,
                      p.adjust.method = "BH")
 
 
-###looking at percentages of parasitized ####
+###looking at percentages of parasitized ###
 
 #first count:
 
@@ -361,7 +383,7 @@ ggsave(para_plot, file="Pres_mean_plot.pdf",
        width = 6, height=10)
 
 
-####presence of fungi####
+##presence of fungi##
 #by county
 
 # Treatment survival means - November, by county (not by treatment?)
@@ -462,7 +484,7 @@ kruskal.test(Prespara ~ Treatment, data = scalecount_novmitchell)
 pairwise.wilcox.test(scalecount_novmitchell$Prespara, scalecountfung2$Treatment,
                      p.adjust.method = "BH")
 
-###encarsia########
+##encarsia##
 
 # Encarsia originally only looked at for Nov?
 scalecountencar_nov <- scalecount_nov
