@@ -234,9 +234,9 @@ tmeans_para <- scalecountall %>%
   )
 print(tmeans_para)
 
-# Now with no zeros: taking out all samples in which no EHS were found
+# Now with no zeros: taking out all samples in which no scale was found
 scalecount_nozero <- scalecountall
-scalecount_nozero <- scalecount_nozero[rowSums(scalecount_nozero[, 3:6] == 0) < 2,]
+scalecount_nozero <- scalecount_nozero %>% filter(Meanlivescale > 0)
 
 # Percentage of parasitism presence in a group
 tmeans1 <- scalecount_nozero %>% 
@@ -250,6 +250,7 @@ print(tmeans1)
 # Kruskal-Wallis Test for presence of parasitism
 kruskal.test(Prespara ~ Treatment, data = scalecount_nozero)
 
+# This doesn't work
 pairwise.wilcox.test(scalecount_nozero$Prespara, scalecount_nozero$Treatment,
                      p.adjust.method = "BH")
 
