@@ -74,7 +74,7 @@ scalecount<-scalecount %>%
   mutate(Sumdeadscale = rowSums(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
 
 # Removing labels that were not collected
-scalecount<-scalecount %>% drop_na(Livescale1)
+scalecount <- scalecount %>% drop_na(Livescale1)
 
 # Making new data set
 scalecountall <- scalecount[ -c(5:10) ]
