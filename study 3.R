@@ -182,12 +182,13 @@ get_hist(data=scalecountall,
 
 
 
-# Shapiro-Wilk normality test
+#### Shapiro-Wilk tests (code by Rachel) ####
 shapiro.test(scalecountall$Meanlivescale)
 shapiro.test(scalecountall$Sumlivescale)
 
-# Kruskal-Wallis test for mean live-scale
+#### Kruskal-Wallis tests (code by Rachel) ####
 kruskal.test(Meanlivescale ~ Treatment, data = scalecountall)
+kruskal.test(Sumlivescale ~ Treatment, data = scalecountall)
 
 # THIS DOESN'T WORK -- gives error message about ties
 letters < -pairwise.wilcox.test(scalecountall$Meanlivescale, scalecountall$Treatment,

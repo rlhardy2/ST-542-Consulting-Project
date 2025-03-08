@@ -111,13 +111,15 @@ gm <- glm(Livescale1 ~ Treatment,
           family = "poisson")
 summary(gm)
 
+
+
 #### Below starts analysis by month (July and November)
 
 # Data sets for July and November
 scalecount_July <- subset(scalecountboth_NoNA, grepl('July', Date))
 scalecount_Nov <- subset(scalecountboth_NoNA, grepl('Nov', Date))
 
-#### Shapiro-Wilk tests ####
+#### Shapiro-Wilk tests (code by Rachel) ####
 
 ## For July
 
@@ -131,18 +133,31 @@ shapiro.test(scalecount_Nov$Meanlivescale)
 shapiro.test(scalecount_Nov$Sumlivescale)
 shapiro.test(scalecount_Nov$encarsia)
 
+#### Kruskal-Wallis tests (code by Rachel) ####
 
-# July Kruskal -- need to change this to mean live scale!!
-kruskal.test(Livescale1 ~ Treatment, data = scalecount_July)
-# Kruskal-Wallis chi-squared = 3.3811, df = 3, p-value = 0.3365
+## For whole data set (not sure if this is necessary)
+
+kruskal.test(Meanlivescale ~ Treatment, data = scalecountboth_NoNA)
+kruskal.test(Sumlivescale ~ Treatment, data = scalecountboth_NoNA)
+kruskal.test(encarsia ~ Treatment, data = scalecountboth_NoNA)
+
+## For July
+
+kruskal.test(Meanlivescale ~ Treatment, data = scalecount_July)
+kruskal.test(Sumlivescale ~ Treatment, data = scalecount_July)
+kruskal.test(encarsia ~ Treatment, data = scalecount_July)
+
+## For November
+
+kruskal.test(Meanlivescale ~ Treatment, data = scalecount_Nov)
+kruskal.test(Sumlivescale ~ Treatment, data = scalecount_Nov)
+kruskal.test(encarsia ~ Treatment, data = scalecount_Nov)
+
 
 # Not sure what's going on here??
 modelg_scale <- glht(gm, mcp(Treatment = "Tukey"))
 #table_glht(modelg_scale)
 
-# November Kruskal -- here we are using mean live-scale
-kruskal.test(Meanlivescale ~ Treatment, data = scalecount_Nov)
-# Kruskal-Wallis chi-squared = 17.059, df = 3, p-value = 0.0006873
 
 # Pairwise Wilcox test -- gives same error about "ties"
 pairwise.wilcox.test(scalecount_Nov$Meanlivescale,
