@@ -164,6 +164,7 @@ pairwise.wilcox.test(scalecount_Nov$Meanlivescale,
                      scalecount_Nov$Treatment,
                      p.adjust.method = "BH")
 
+# Just a preliminary Dunn test
 library(FSA)
 
 dunnTest(Meanlivescale ~ Treatment,
@@ -236,6 +237,14 @@ plot_means_by_collection(data=tmeans_table,
 # Histograms of means
 get_hist_livescale(scalecount_July, "July", 2, labels)
 get_hist_livescale(scalecount_Nov, "Nov", 2, labels)
+
+get_hist_all_trt(scalecount_July, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 2 - Mean Live Scale, All Treatments, July",
+                 labels=labels)
+
+get_hist_all_trt(scalecount_Nov, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 2 - Mean Live Scale, All Treatments, Nov",
+                 labels=labels)
 
 # Histograms of sums
 get_hist(data=scalecount_July, 
@@ -331,6 +340,17 @@ tmeans_encar_plot_trt
 # Histograms
 get_hist_encarsia(data=scalecountencar_july, collection_date="July", study=2, labels=labels)
 get_hist_encarsia(data=scalecountencar_nov, collection_date="Nov", study=2, labels=labels)
+
+get_hist_all_trt(scalecountencar_july, x_str="encarsia", 
+                 x_lab="Count",
+                 title="Study 2 - Encarsia Count, All Treatments, July",
+                 labels=labels)
+
+get_hist_all_trt(scalecountencar_nov, x_str="Meanlivescale", 
+                 x_lab="Count",
+                 title="Study 2 - Encarsia Count, All Treatments, Nov",
+                 labels=labels)
+
 
 #### Fungus (November) (This is actually parasitism!)
 # I suspect fungus wasn't analyzed because 

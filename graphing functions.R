@@ -33,13 +33,13 @@ plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_label
 # Histograms - one plot for each treatment
 get_hist <- function(data, x_str, x_lab, title, labels) {
   x_sym <- ensym(x_str)
-  hist_livescale <- ggplot(data=data, aes(x={{x_sym}}, fill=Treatment)) + 
+  hist <- ggplot(data=data, aes(x={{x_sym}}, fill=Treatment)) + 
     geom_histogram(binwidth=1) + 
     labs(x=x_lab) + 
     facet_wrap(~Treatment) + 
     scale_fill_discrete(labels=labels) + 
     labs(title=title)
-  return(hist_livescale)
+  return(hist)
 }
 
 # Histogram of mean livescale
@@ -54,5 +54,16 @@ get_hist_encarsia <- function(data, collection_date, study, labels) {
   title <- paste("Study", study, "- Encarsia Count,", collection_date)
   return (get_hist(data=data, x_str="encarsia", 
                    x_lab="Encarsia Count", title=title, labels=labels))
+}
+
+# Histogram, all treatments merged
+get_hist_all_trt <- function(data, x_str, x_lab, title, labels) {
+  x_sym <- ensym(x_str)
+  hist <- ggplot(data=data, aes(x={{x_sym}})) + 
+    geom_histogram(binwidth=1) + 
+    labs(x=x_lab) + 
+    scale_fill_discrete(labels=labels) + 
+    labs(title=title)
+  return(hist)
 }
 

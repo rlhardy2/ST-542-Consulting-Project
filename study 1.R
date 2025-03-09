@@ -107,6 +107,14 @@ get_hist_livescale(scalecount_july, collection_date="July", study=1,
 get_hist_livescale(scalecount_nov, collection_date="Nov", study=1, 
                    labels=trt_labels)
 
+get_hist_all_trt(scalecount_july, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 1 - Mean Live Scale, All Treatments, July",
+                 labels=trt_labels)
+
+get_hist_all_trt(scalecount_nov, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 1 - Mean Live Scale, All Treatments, Nov",
+                 labels=trt_labels)
+
 get_hist(data=scalecount_july, 
          x_str="Sumlivescale", 
          x_lab="Sum",
@@ -197,7 +205,7 @@ Meanlivescale_plot_county_july <- ggplot(data=tmeans_county_july,
 Meanlivescale_plot_county_july
 
 # save as a PDF image July collection 
-ggsave(Meanlivescale_plot_county, file="Meanlivescale_plot_county.pdf", 
+ggsave(Meanlivescale_plot_county_july, file="Meanlivescale_plot_county_july.pdf", 
        width = 6, height=4)
 
 # November collection plot, by county
@@ -224,7 +232,7 @@ Meanlivescale_plot_county_nov <- ggplot(data=tmeans_county_nov,
 Meanlivescale_plot_county_nov
 
 # save as a PDF image  - plot of mean live scale, november collection
-ggsave(Meanlivescale_plot_county2, file="Meanlivescale_plot_county2.pdf", 
+ggsave(Meanlivescale_plot_county_nov, file="Meanlivescale_plot_county_nov.pdf", 
        width = 6, height=4)
 
 #### Shapiro-Wilk tests (code by Rachel) ####
@@ -518,7 +526,7 @@ tmeans_encar_nov <- scalecountencar_nov %>%
     cv = sd/Mean * 100
   )
 tmeans_encar_nov$Collection<-"Nov"
-print(tmeans_encar)
+print(tmeans_encar_nov)
 
 encar_table_trt <- dplyr::bind_rows(tmeans_encar_july, 
                                      tmeans_encar_nov)
@@ -554,7 +562,7 @@ ggsave(scalecountencar_plot, file="Encarsia means.pdf",
        width = 6, height=4)
 
 
-# TODO: should convert into function
+# TODO: should call function
 ggplot(data=scalecountencar_july, aes(x=encarsia, fill=Treatment)) + 
   geom_histogram(binwidth=2) + 
   labs(x="Encarsia Count") + 
@@ -571,15 +579,26 @@ ggplot(data=scalecountencar_nov, aes(x=encarsia, fill=Treatment)) +
   labs(title=paste("Study 1 - Encarsia Count,",
                    "Nov"))
 
+get_hist_all_trt(scalecountencar_july, x_str="encarsia", 
+                 x_lab="Count",
+                 title="Study 1 - Encarsia Count, All Treatments, July",
+                 labels=labels)
+
+get_hist_all_trt(scalecountencar_nov, x_str="Meanlivescale", 
+                 x_lab="Count",
+                 title="Study 1 - Encarsia Count, All Treatments, Nov",
+                 labels=labels)
+
 
 #scalecountfung2$Prespara<-as.numeric(scalecountfung2$Prespara)
-shapiro.test(scalecountencar$encarsia)
+shapiro.test(scalecountencar_july$encarsia)
+shapiro.test(scalecountencar_nov$encarsia)
 
 #W = 0.64279, p-value < 2.2e-16 not normal
 kruskal.test(encarsia ~ Treatment, data = scalecountencar)
 #Kruskal-Wallis chi-squared = 10.057, df = 3, p-value = 0.01809 significant
 
-pairwise.wilcox.test(scalecountencar$encarsia, scalecountencar$Treatment,
+pairwise.wilcox.test(scalecountencar_july$encarsia, scalecountencar$Treatment,
                      p.adjust.method = "BH")
 #1         2      3     
 #2 0.4788 -      -     

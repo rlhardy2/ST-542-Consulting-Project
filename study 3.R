@@ -183,6 +183,9 @@ get_hist(data=scalecountall,
          title="Study 3 - Sum of Live Scale Insects",
          labels=labels)
 
+get_hist_all_trt(scalecountall, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 3 - Mean Live Scale, All Treatments",
+                 labels=labels)
 
 
 #### Shapiro-Wilk tests (code by Rachel) ####
