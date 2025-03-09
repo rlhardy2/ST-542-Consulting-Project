@@ -14,7 +14,6 @@ library(multcompView)
 
 source("graphing functions.r")
 
-
 ### PREPROCESSING ###
 
 # read in file
@@ -265,8 +264,6 @@ kruskal.test(Sumlivescale ~ Treatment, data = scalecount_nov)
 kruskal.test(encarsia ~ Treatment, data = scalecount_nov)
 
 
-
-
 #first count:
 kruskal.test(Livescale1 ~ Treatment, data = scalecount_july)
 
@@ -375,9 +372,12 @@ para_table<-dplyr::bind_rows(tmeans_july_para, tmeans_nov_para)
 trt_labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 
 para_plot <- plot_means_by_collection(data=para_table, 
-                                          title="Study 1 - Parasitism Means Percentages",
+                                          title="Study 1 - Mean Presence Percentage of Parasitism",
                                           x_str="Treatment",
-                                          y_str="percent_yes100")
+                                          y_str="percent_yes100",
+                                          labels=trt_labels,
+                                          y_lab="Percent"
+                                      )
 para_plot
 ggsave(para_plot, file="Pres_mean_plot.pdf", 
        width = 6, height=10)
@@ -409,9 +409,10 @@ fungus_table_county <- dplyr::bind_rows(tmeans_fungus_july, tmeans_fungus_nov)
 # Plot for county with both July and November
 county_labels <- c("Ashe", "Avery", "Mitchell", "Watauga")
 plot_means_by_collection(data=fungus_table_county, 
-                         title="Study 1 - Mean Presence Percentage of Fungus", 
+                         title="Study 1 - Mean Presence Percentage of Fungus by County", 
                          x_str="County",
                          y_str="percent_yes100",
+                         y_lab="Percent",
                          labels=county_labels)
 
 # November-only plot for County
@@ -459,7 +460,8 @@ fungus_table_trt <- dplyr::bind_rows(tmeans_fungus_trt_july,
 tmeans_fungus_plot_trt <- plot_means_by_collection(data=fungus_table_trt, 
                                                    title="Study 1 - Mean Presence Percentage of Fungus",
                                                    x_str="Treatment",
-                                                   y_str="percent_yes100")
+                                                   y_str="percent_yes100",
+                                                   y_lab="Percent")
 ggsave(tmeans_fungus_plot_trt, file="tmeans_fungus_plot_trt.pdf", 
        width = 4, height=6)
 
@@ -544,7 +546,7 @@ scalecountencar_plot <- ggplot(data=tmeans_encar_nov,
         axis.text.y=element_text(size=18),
         legend.text = element_text(size = 14),
         legend.title = element_text(size = 18)
-  )+
+  ) +
   scale_fill_brewer(palette = "Dark2")+
   scale_color_brewer(palette = "Dark2")  + scale_x_discrete(label = trt_labels)
 scalecountencar_plot
@@ -568,7 +570,6 @@ ggplot(data=scalecountencar_nov, aes(x=encarsia, fill=Treatment)) +
   scale_fill_discrete(labels=trt_labels) + 
   labs(title=paste("Study 1 - Encarsia Count,",
                    "Nov"))
-
 
 
 #scalecountfung2$Prespara<-as.numeric(scalecountfung2$Prespara)

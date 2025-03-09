@@ -14,6 +14,8 @@ library(multcompView)
 library(biostat3)
 library(multcompView)
 
+source("graphing functions.r")
+
 #### Data cleaning
 
 # Reading in the data
@@ -112,6 +114,7 @@ tmeans_sum <- scalecountall %>%
 print(tmeans_sum)
 
 ###### treatment means as bar plots- use this one
+# Technically this says EHS, but there are *some* cryptomeria scale? about 5 observations with
 labels <- c("Acetamiprid", "Dinotefuron", "Sulfoxaflor", "Flupyradifurone", "No Treatment" )
 tmeans_mean$Treatment <- factor(tmeans_mean$Treatment, levels=c("2","1","3","5","4"))
 livescale_plot_mean <- ggplot(data=tmeans_mean, 
@@ -122,7 +125,7 @@ livescale_plot_mean <- ggplot(data=tmeans_mean,
                 show.legend = FALSE, color="black") +
   labs(x = "Treatment",
        y = "Mean",
-       title = "Study 3 - Mean Numbers of Live EHS on 10 needles \n of This Year's Growth") +
+       title = "Study 3 - Mean Live EHS & Crypto Scale") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -148,7 +151,7 @@ livescale_plots_sum <- ggplot(data=tmeans_sum,
                 show.legend = FALSE, color="black") +
   labs(x = "Treatment",
        y = "Mean",
-       title = "Study 3 - Mean Sums of Live EHS on 10 needles \n of This Year's Growth") +
+       title = "Study 3 - Mean Sums of Live Scale on 10 needles \n of This Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -170,14 +173,14 @@ scalecountall$Treatment <- factor(scalecountall$Treatment,
                                   levels=c("2","1","3","5","4"))
 get_hist(data=scalecountall, 
          x_str="Meanlivescale", 
-         x_lab="Mean",
-         title="Study 3 - Mean of Live EHS",
+         x_lab="Mean Live Scale",
+         title="Study 3 - Mean Numbers of Live Scale Insects",
          labels=labels)
 
 get_hist(data=scalecountall, 
          x_str="Sumlivescale", 
-         x_lab="Sum",
-         title="Study 3 - Sum of Live EHS",
+         x_lab="Sum of Live Scale",
+         title="Study 3 - Sum of Live Scale Insects",
          labels=labels)
 
 
@@ -191,12 +194,12 @@ kruskal.test(Meanlivescale ~ Treatment, data = scalecountall)
 kruskal.test(Sumlivescale ~ Treatment, data = scalecountall)
 
 # THIS DOESN'T WORK -- gives error message about ties
-letters < -pairwise.wilcox.test(scalecountall$Meanlivescale, scalecountall$Treatment,
-                                p.adjust.method = "BH")
-letters
+#letters < -pairwise.wilcox.test(scalecountall$Meanlivescale, scalecountall$Treatment,
+ #                               p.adjust.method = "BH")
+#letters
 
-comparison_letters <- multcompLetters(letters$p.value)
-comparison_letters
+#comparison_letters <- multcompLetters(letters$p.value)
+#comparison_letters
 
 #1 Dinotefuran   
 #2 Acetampirid  
@@ -210,43 +213,30 @@ comparison_letters
 #4 1.4e-06 1.9e-07 2.6e-05 -      
 #5 0.00231 0.00015 0.03909 0.05070
 
-multcompLetters2(letters)
+#multcompLetters2(letters)
 
 # Error due to ties, ties are thrown out ??
 
 # Looking at poisson as well
-poisson.model <- glm(Sumlivescale ~ Treatment,
-                     family = 'poisson', data = scalecountall)
-summary(poisson.model)
+#poisson.model <- glm(Sumlivescale ~ Treatment,
+#                     family = 'poisson', data = scalecountall)
+#summary(poisson.model)
 
 # Making Prespara and Presfungus variables numeric
 scalecountall <- scalecountall %>% 
   mutate(across(c(Prespara, Presfungus), as.numeric))
-
-# Percentage of parasitism in a treatment
-tmeans_para <- scalecountall %>% 
-  group_by(Treatment) %>% 
-  dplyr::summarize(
-    Mean = round(mean(Prespara, na.rm = T),2),
-    sd = sd(Prespara),
-    n = n(),
-    se = sd / sqrt(n),
-    cv = sd/Mean * 100
-  )
-print(tmeans_para)
 
 # Now with no zeros: taking out all samples in which no scale was found
 scalecount_nozero <- scalecountall
 scalecount_nozero <- scalecount_nozero %>% filter(Meanlivescale > 0)
 
 # Percentage of parasitism presence in a group
-tmeans1 <- scalecount_nozero %>% 
+tmeans_para <- scalecount_nozero %>% 
   group_by(Treatment) %>% 
   summarise(
     percent_yes = mean(Prespara == 1),
     percent_yes100 = round(percent_yes*100),
   )
-print(tmeans1)
 
 # Kruskal-Wallis Test for presence of parasitism
 kruskal.test(Prespara ~ Treatment, data = scalecount_nozero)
@@ -257,15 +247,15 @@ pairwise.wilcox.test(scalecount_nozero$Prespara, scalecount_nozero$Treatment,
 
 # Treatment means as bar plots for parasitism no zeros
 labels <- c("Acetamiprid", "Dinotefuron", "Sulfoxaflor", "Flupyradifurone", "No Treatment" )
-tmeans1$Treatment <- factor(tmeans1$Treatment, levels=c("2","1","3","5","4"))
-livescale_plots_para <- ggplot(data=tmeans1,
-                              aes(x=Treatment, y=percent_yes
+tmeans_para$Treatment <- factor(tmeans_para$Treatment, levels=c("2","1","3","5","4"))
+livescale_plots_para <- ggplot(data=tmeans_para,
+                              aes(x=Treatment, y=percent_yes100
                               ), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
 
   labs(x = "Treatment",
-       y = "Percentage",
-       title = "Study 3 - Percentage of parasitism on 10 needles \n of This Year's Growth") +
+       y = "Percent",
+       title = "Study 3 - Mean Presence Percentage of Parasitism") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -286,26 +276,13 @@ ggsave(livescale_plots_para, file="livescale_plots_para.pdf",
 scalecount_nozero <- scalecount_nozero %>% 
   mutate(across(c(Presfungus), as.numeric))
 
-# Percentage of fungus in a treatment
-tmeans_fungus <- scalecount_nozero %>% 
-  group_by(Treatment) %>% 
-  dplyr::summarize(
-    Mean=round(mean(Presfungus, na.rm = T),2),
-    sd = sd(Presfungus),
-    n = n(),
-    se = sd / sqrt(n),
-    cv = sd/Mean * 100
-  )
-print(tmeans_fungus)
-
 # Percentage of fungus presence in a group (Rachel added this code)
-tmeans2 <- scalecount_nozero %>% 
+tmeans_fungus <- scalecount_nozero %>% 
   group_by(Treatment) %>% 
   summarise(
     percent_yes = mean(Presfungus == 1),
     percent_yes100 = round(percent_yes*100),
   )
-print(tmeans2)
 
 # Kruskal-Wallis Test for presence of fungus
 kruskal.test(Presfungus ~ Treatment, data = scalecount_nozero)
@@ -317,12 +294,12 @@ pairwise.wilcox.test(scalecount_nozero$Presfungus, scalecount_nozero$Treatment,
 # Simplified "entofungus" to just "fungus" for ST542 report
 tmeans_fungus$Treatment <- factor(tmeans_fungus$Treatment, levels=c("2","1","3","5","4"))
 livescale_plots_fungus <- ggplot(data=tmeans_fungus, 
-                               aes(x=Treatment, y=Mean
+                               aes(x=Treatment, y=percent_yes100
                                ), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   labs(x="Treatment",
-       y = "Percentage",
-       title = "Study 3 - Percentage of Fungus on 10 needles \n of this Year's Growth") +
+       y = "Percent",
+       title = "Study 3 - Mean Presence Percentage of Fungus") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),

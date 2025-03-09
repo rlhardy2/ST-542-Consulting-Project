@@ -4,7 +4,7 @@ library(ggplot2)
 
 # plot means by collection date and an X value (treatment, county)
 # "data" should have the tmeans format illustrated in Study 1
-plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_labels) {
+plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_labels, y_lab=y_str) {
   x_sym <- ensym(x_str)
   y_sym <- ensym(y_str)
   trt_coll_plot <- ggplot(data=data, 
@@ -13,7 +13,7 @@ plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_label
                           ), na.rm = T) +
     geom_bar(stat="identity", 
              position = position_dodge2(width = 0.9, preserve = "single"))  +
-    labs(x=x_str, y=y_str, title=title) +
+    labs(x=x_str, y=y_lab, title=title) +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
@@ -45,7 +45,7 @@ get_hist <- function(data, x_str, x_lab, title, labels) {
 # Histogram of mean livescale
 # outputs one plot for each treatment
 get_hist_livescale <- function(data, collection_date, study, labels) {
-  title <- paste("Study", study, "- Mean Numbers of Live EHS,", collection_date)
+  title <- paste("Study", study, "- Mean Numbers of Live Scale Insects,", collection_date)
   return (get_hist(data=data, x_str="Meanlivescale", x_lab="Mean Live Scale",
                   title=title, labels=labels))
 }

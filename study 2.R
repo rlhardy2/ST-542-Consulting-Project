@@ -238,15 +238,15 @@ get_hist_livescale(scalecount_July, "July", 2, labels)
 get_hist_livescale(scalecount_Nov, "Nov", 2, labels)
 
 # Histograms of sums
-get_hist(data=scalecount_july, 
+get_hist(data=scalecount_July, 
          x_str="Sumlivescale", 
          x_lab="Sum",
-         title="Study 2 - Sum of Live EHS, July",
+         title="Study 2 - Sum of Live EHS & Crypto Scale, July",
          labels=labels)
-get_hist(data=scalecount_nov, 
+get_hist(data=scalecount_Nov, 
          x_str="Sumlivescale", 
          x_lab="Sum",
-         title="Study 2 - Sum of Live EHS, Nov",
+         title="Study 2 - Sum of Live EHS & Crypto Scale, Nov",
          labels=labels)
 
 
@@ -332,7 +332,8 @@ tmeans_encar_plot_trt
 get_hist_encarsia(data=scalecountencar_july, collection_date="July", study=2, labels=labels)
 get_hist_encarsia(data=scalecountencar_nov, collection_date="Nov", study=2, labels=labels)
 
-#### Fungus (November)
+#### Fungus (November) (This is actually parasitism!)
+# I suspect fungus wasn't analyzed because 
 
 scalecountfung_july <- scalecount_July
 scalecountfung_nov <- scalecount_Nov
@@ -349,6 +350,7 @@ scalecountfung_nov$Prespara <- as.numeric(scalecountfung_nov$Prespara)
 
 # Percentage of presence in a group
 # Fixed code after adding Prespara to scalecount processing
+# Wait this is actually parasitism, not fungus?
 tmeans_fung_nov <- scalecountfung_nov %>% 
   group_by(Treatment) %>% 
   summarise(
@@ -365,13 +367,14 @@ tmeans_fung_july <- scalecountfung_july %>%
   )
 tmeans_fung_july$Collection <- "July"
 
-fungus_table_trt <- dplyr::bind_rows(tmeans_fungus_trt_july, 
-                                     tmeans_fungus_trt_nov)
+fungus_table_trt <- dplyr::bind_rows(tmeans_fung_july, 
+                                     tmeans_fung_nov)
 
 plot_means_by_collection(data=fungus_table_trt, 
-                         title="Study 2 - Mean Presence Percentage of Fungus",
+                         title="Study 2 - Mean Presence Percentage of Parasitism",
                          x_str="Treatment",
                          y_str="percent_yes100",
+                         y_lab="Percent",
                          labels=labels)
 
 shapiro.test(scalecountfung_nov$Prespara)
