@@ -36,8 +36,20 @@
 #                     family = 'poisson', data = scalecountall)
 #summary(poisson.model)
 
+#### Code below is unncessary?
 
+# Kruskal-Wallis Test for presence of parasitism
+kruskal.test(Prespara ~ Treatment, data = scalecount_nozero)
 
+# This doesn't work
+pairwise.wilcox.test(scalecount_nozero$Prespara, scalecount_nozero$Treatment,
+                     p.adjust.method = "BH")
 
+# Kruskal-Wallis Test for presence of fungus
+kruskal.test(Presfungus ~ Treatment, data = scalecount_nozero)
+
+# This doesn't work
+pairwise.wilcox.test(scalecount_nozero$Presfungus, scalecount_nozero$Treatment,
+                     p.adjust.method = "BH")
 
 

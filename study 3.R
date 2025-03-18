@@ -203,7 +203,7 @@ kruskal.test(Sumlivescale ~ Treatment, data = scalecountall)
 dunnTest(Meanlivescale ~ Treatment, data = scalecountall, method = "bh")
 dunnTest(Sumlivescale ~ Treatment, data = scalecountall, method = "bh")
 
-
+#### (6) Parasitism and Fungus Analysis ####
 
 # Making Prespara and Presfungus variables numeric
 scalecountall <- scalecountall %>% 
@@ -220,13 +220,6 @@ tmeans_para <- scalecount_nozero %>%
     percent_yes = mean(Prespara == 1),
     percent_yes100 = round(percent_yes*100),
   )
-
-# Kruskal-Wallis Test for presence of parasitism
-kruskal.test(Prespara ~ Treatment, data = scalecount_nozero)
-
-# This doesn't work
-pairwise.wilcox.test(scalecount_nozero$Prespara, scalecount_nozero$Treatment,
-                     p.adjust.method = "BH")
 
 # Treatment means as bar plots for parasitism no zeros
 labels <- c("Acetamiprid", "Dinotefuron", "Sulfoxaflor", "Flupyradifurone", "No Treatment" )
@@ -266,12 +259,6 @@ tmeans_fungus <- scalecount_nozero %>%
     percent_yes = mean(Presfungus == 1),
     percent_yes100 = round(percent_yes*100),
   )
-
-# Kruskal-Wallis Test for presence of fungus
-kruskal.test(Presfungus ~ Treatment, data = scalecount_nozero)
-
-pairwise.wilcox.test(scalecount_nozero$Presfungus, scalecount_nozero$Treatment,
-                     p.adjust.method = "BH")
 
 # Treatment means as bar plots for fungus no zeros
 # Simplified "entofungus" to just "fungus" for ST542 report
