@@ -11,26 +11,27 @@ library(lme4)
 library(tidyverse)
 library(multcomp) 
 library(multcompView)
+library(FSA)
 
 source("graphing functions.r")
 
-### PREPROCESSING ###
+#### (1) Data Pre-processing ####
 
-# read in file
+# Read in file
 scalecount <- read.csv(file="EHS count 2024 v7 (study 1).csv", strip.white=TRUE)
 colnames(scalecount) <- c("Label", "County","Twigab","Date","Counter","Livescale1","Deadscale1",
                           "Livescale2","Deadscale2","Livescale3","Deadscale3","Prespara","Presfungus",
                           "Presscalenewgr","encarsia")
 
-#delete columns with no info
+# Delete columns with no info
 scalecount <- scalecount[ -c(16:19) ]
 
-#extract and create new column with treatment
+# Extract and create new column with treatment
 scalecount$Treatment<-
   substring(scalecount$Label, first=4, last=4)
 
-#getting zero and 1s as presence and absence
-# parasitism
+# Getting zero and 1s as presence and absence
+# Parasitism
 scalecount$Prespara<-replace(scalecount$Prespara, scalecount$Prespara=="yes", 1)
 scalecount$Prespara<-replace(scalecount$Prespara, scalecount$Prespara=="y", 1)
 scalecount$Prespara<-replace(scalecount$Prespara, scalecount$Prespara=="Y", 1)
@@ -39,7 +40,7 @@ scalecount$Prespara<-replace(scalecount$Prespara, scalecount$Prespara=="n", 0)
 scalecount$Prespara<-replace(scalecount$Prespara, scalecount$Prespara=="N", 0)
 scalecount$Prespara<-replace(scalecount$Prespara, scalecount$Prespara=="no", 0)
 
-# scale new growth?
+# Scale new growth? (not important!)
 scalecount$Presscalenewgr<-replace(scalecount$Presscalenewgr, scalecount$Presscalenewgr=="yes", 1)
 scalecount$Presscalenewgr<-replace(scalecount$Presscalenewgr, scalecount$Presscalenewgr=="y", 1)
 scalecount$Presscalenewgr<-replace(scalecount$Presscalenewgr, scalecount$Presscalenewgr=="Y", 1)
@@ -48,7 +49,7 @@ scalecount$Presscalenewgr<-replace(scalecount$Presscalenewgr, scalecount$Pressca
 scalecount$Presscalenewgr<-replace(scalecount$Presscalenewgr, scalecount$Presscalenewgr=="N", 0)
 scalecount$Presscalenewgr<-replace(scalecount$Presscalenewgr, scalecount$Presscalenewgr=="no", 0)
 
-# presence of fungus
+# Presence of fungus
 scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="yes", 1)
 scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="y", 1)
 scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="Y", 1)
@@ -57,11 +58,11 @@ scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="n"
 scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="N", 0)
 scalecount$Presfungus<-replace(scalecount$Presfungus, scalecount$Presfungus=="no", 0)
 
-# change Treatment and County to factors
+# Change Treatment and County to factors
 scalecount <- scalecount %>% 
   mutate(across(c(Treatment, County), as.factor))
 
-# change counts to numeric
+# Change counts to numeric
 scalecount <- scalecount %>% 
   mutate(across(c(Livescale1, Deadscale1, Livescale2, Deadscale2, Livescale3, Deadscale3), as.numeric))
 
@@ -77,15 +78,16 @@ scalecount<-scalecount %>%
 scalecount<-scalecount %>% 
   mutate(Sumdeadscale = rowSums(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
 
-#removing labels that were not collected
+# Removing labels that were not collected
 scalecount<-scalecount %>% drop_na(Livescale1)
 
-#scalecount has both July and November counts in it
+# Note: scalecount has both July and November counts in it
 
-# getting first count- July
-# "scalecount_july" henceforth refers to July collection
-scalecount_july <- subset(scalecount, grepl('July',Date))
-scalecount_nov <- subset(scalecount, grepl('November', Date))
+# Getting first count- July
+scalecount_july <- subset(scalecount, grepl('July',Date)) # July data
+scalecount_nov <- subset(scalecount, grepl('November', Date)) #November data
+
+#### (2) Graphs and Table Summaries ####
 
 # Treatment survival means
 tmeans_all <- scalecount_july %>% 
@@ -127,14 +129,15 @@ get_hist(data=scalecount_nov,
          title="Study 1 - Sum of Live EHS, Nov",
          labels=trt_labels)
 
-# treatment means as bar plots
+# Treatment means as bar plots
 Meanlivescale_plot_all <- ggplot(data=tmeans_all, 
                                    aes(x=Treatment, y=Mean
                                    ), na.rm = T) +
   geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
   geom_errorbar(aes(ymin=Mean-se, ymax=Mean+se), position = position_dodge(0.9), width = 0,
                 show.legend = FALSE, color="black") +
-  labs(x="Treatment Date", y="Mean Live EHS", title="Study 1 - Mean Live EHS on 10 needles of Last Year's Growth") +
+  labs(x="Treatment Date", y="Mean Live EHS",
+       title="Study 1 - Mean Live EHS on 10 needles of Last Year's Growth") +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -152,10 +155,7 @@ ggsave(Meanlivescale_plot_all, file="Meanlivescale_plot_all.pdf",
        width = 6, height=4)
 
 
-##
-
-
-##by county##
+## By county ##
 # Treatment survival means for July scale count
 tmeans_county_july <- scalecount_july %>% 
   group_by(Treatment, County) %>% 
@@ -168,7 +168,7 @@ tmeans_county_july <- scalecount_july %>%
   )
 print(tmeans_county_july)
 
-#by county
+## By county ##
 # Treatment survival means for second (November) scale count
 scalecount_nov <- subset(scalecount, grepl('November', Date))
 tmeans_county_nov <- scalecount_nov %>% 
@@ -204,7 +204,7 @@ Meanlivescale_plot_county_july <- ggplot(data=tmeans_county_july,
   scale_color_brewer(palette = "Dark2") + scale_x_discrete(label = trt_labels)
 Meanlivescale_plot_county_july
 
-# save as a PDF image July collection 
+# Save as a PDF image July collection 
 ggsave(Meanlivescale_plot_county_july, file="Meanlivescale_plot_county_july.pdf", 
        width = 6, height=4)
 
@@ -231,11 +231,11 @@ Meanlivescale_plot_county_nov <- ggplot(data=tmeans_county_nov,
   scale_color_brewer(palette = "Dark2") + scale_x_discrete(label = trt_labels)
 Meanlivescale_plot_county_nov
 
-# save as a PDF image  - plot of mean live scale, november collection
+# Save as a PDF image  - plot of mean live scale, november collection
 ggsave(Meanlivescale_plot_county_nov, file="Meanlivescale_plot_county_nov.pdf", 
        width = 6, height=4)
 
-#### Shapiro-Wilk tests (code by Rachel) ####
+#### (3) Shapiro-Wilk Tests (code by Rachel) ####
 
 ## For July
 
@@ -249,7 +249,7 @@ shapiro.test(scalecount_nov$Meanlivescale)
 shapiro.test(scalecount_nov$Sumlivescale)
 shapiro.test(scalecount_nov$encarsia)
 
-#### Kruskal-Wallis tests (code by Rachel) ####
+#### (4) Kruskal-Wallis Tests (code by Rachel) ####
 
 ## For whole data set (not sure if this is necessary)
 
@@ -269,30 +269,30 @@ kruskal.test(Meanlivescale ~ Treatment, data = scalecount_nov)
 kruskal.test(Sumlivescale ~ Treatment, data = scalecount_nov)
 kruskal.test(encarsia ~ Treatment, data = scalecount_nov)
 
-#### Dunn's Test (code by Rachel) ####
+#### (5) Dunn's Test (code by Rachel) ####
+
+## For whole data set (not sure if this is necessary)
+
+dunnTest(Meanlivescale ~ Treatment, data = scalecount, method = "bh")
+dunnTest(Sumlivescale ~ Treatment, data = scalecount, method = "bh")
+dunnTest(encarsia ~ Treatment, data = scalecount, method = "bh") # Warning about missing data
+
+## For July
+
+dunnTest(Meanlivescale ~ Treatment, data = scalecount_july, method = "bh")
+dunnTest(Sumlivescale ~ Treatment, data = scalecount_july, method = "bh")
+dunnTest(encarsia ~ Treatment, data = scalecount_july, method = "bh") # Warning about missing data
+
+## For November
+
+dunnTest(Meanlivescale ~ Treatment, data = scalecount_nov, method = "bh")
+dunnTest(Sumlivescale ~ Treatment, data = scalecount_nov, method = "bh")
+dunnTest(encarsia ~ Treatment, data = scalecount_nov, method = "bh") # Warning about missing data
 
 
 
 
 
-
-
-## Old code for Kruskal-Wallis and Wilcoxon tests below ##
-
-#first count:
-kruskal.test(Livescale1 ~ Treatment, data = scalecount_july)
-
-pairwise.wilcox.test(scalecount_july$Livescale1, scalecount_july$Treatment,
-                     p.adjust.method = "BH")
-
-
-#second count:
-shapiro.test(scalecount_nov$Livescale1)
-#W = 0.65372, p-value < 2.2e-16 less than .05, thus data is non normal
-kruskal.test(Livescale1 ~ Treatment, data = scalecount_nov)
-
-pairwise.wilcox.test(scalecount_nov$Livescale1, scalecount_nov$Treatment,
-                     p.adjust.method = "BH")
 
 
 ###looking at percentages of parasitized ###
@@ -300,7 +300,7 @@ pairwise.wilcox.test(scalecount_nov$Livescale1, scalecount_nov$Treatment,
 #first count:
 
 #extract and create new column with treatment-
-scalecountfung_july<-scalecount_july
+scalecountfung_july <- scalecount_july
 
 
 #remove twigs with no scale
@@ -316,7 +316,7 @@ tmeans_july_para <-scalecountfung_july %>%
     percent_yes100 = round(percent_yes*100),
   )
 
-tmeans_july_para$Collection<-"July"
+tmeans_july_para$Collection <- "July"
 #checking to make sure we are getting the presence absence mean percentage 
 #write.csv(scalecountfung_july,"~/Downloads/scalecountfung_july.csv", row.names = FALSE)
 
