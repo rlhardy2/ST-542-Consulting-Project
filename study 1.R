@@ -87,6 +87,8 @@ scalecount<-scalecount %>% drop_na(Livescale1)
 scalecount_july <- subset(scalecount, grepl('July',Date)) # July data
 scalecount_nov <- subset(scalecount, grepl('November', Date)) #November data
 
+#### End of data cleaning
+
 #### (2) Graphs and Table Summaries ####
 
 # Treatment survival means

@@ -5,7 +5,8 @@
 ## Please move unnecessary stuff here so the original file will be more organized ##
 
 
-#### Old code for Kruskal-Wallis and Wilcoxon tests below ####
+
+#### Old code for Kruskal-Wallis and Wilcoxon tests below
 
 #first count:
 kruskal.test(Livescale1 ~ Treatment, data = scalecount_july)
