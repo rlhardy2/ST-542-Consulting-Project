@@ -256,8 +256,6 @@ shapiro.test(scalecount_nov$encarsia)
 kruskal.test(Meanlivescale ~ Treatment, data = scalecount)
 kruskal.test(Sumlivescale ~ Treatment, data = scalecount)
 kruskal.test(encarsia ~ Treatment, data = scalecount)
-kruskal.test(Prespara ~ Treatment, data = scalecount) #Idk if this is appropriate?
-kruskal.test(Presfungus ~ Treatment, data = scalecount) #Idk if this is appropriate?
 
 ## For July
 
@@ -271,6 +269,15 @@ kruskal.test(Meanlivescale ~ Treatment, data = scalecount_nov)
 kruskal.test(Sumlivescale ~ Treatment, data = scalecount_nov)
 kruskal.test(encarsia ~ Treatment, data = scalecount_nov)
 
+#### Dunn's Test (code by Rachel) ####
+
+
+
+
+
+
+
+## Old code for Kruskal-Wallis and Wilcoxon tests below ##
 
 #first count:
 kruskal.test(Livescale1 ~ Treatment, data = scalecount_july)
