@@ -13,10 +13,11 @@ library(multcomp)
 library(multcompView)
 library(biostat3)
 library(multcompView)
+library(FSA)
 
 source("graphing functions.r")
 
-#### Data cleaning
+#### (1) Data Pre-processing ####
 
 # Reading in the data
 scalecount1 <- read.csv(file = "distance numbers v7 (study 2).csv", strip.white=TRUE)
@@ -47,26 +48,6 @@ scalecount1$Presfungus <- replace(scalecount1$Presfungus, scalecount1$Presfungus
 scalecount1 <- scalecount1 %>% 
   mutate(across(c(Livescale1, Deadscale1, Livescale2, Deadscale2, Livescale3, Deadscale3), as.numeric))
 str(scalecount1)
-
-# Removing labels that were not collected
-#scalecount1<-scalecount1 %>% drop_na(Livescale1)
-#scalecount1<-scalecount1 %>% drop_na(Livescale2)
-#scalecount1<-scalecount1 %>% drop_na(Livescale3)
-
-# Figuring out percentage of EHS to cryptomeria 
-#scalecount1<-scalecount1 %>% 
-#  mutate(SUMlivescale = rowSums(across(c(Livescale1,Livescale2,Livescale3)),na.rm = TRUE))
-
-#tmeans <- scalecount1 %>% 
-#  group_by(Type) %>% 
-#  dplyr::summarize(
-#    Mean=round(mean(Livescale1, na.rm = T),3),
-#    sd = sd(Livescale1),
-#    n = n(),
-#    se = sd / sqrt(n),
-#   cv = sd/Mean * 100
-#  )
-#print(tmeans)
 
 # Making a new table that adds the EHS and cryptomeria 
 # Added - Prespara - same # of observations with and without, so safe to add
@@ -100,18 +81,10 @@ scalecountboth_NoNA <-scalecountboth_NoNA %>%
 scalecountboth_NoNA <-scalecountboth_NoNA  %>% 
   mutate(Sumdeadscale = rowSums(across(c(Deadscale1, Deadscale2, Deadscale3)), na.rm = TRUE))
 
-scalecountboth <- as.data.frame(scalecountboth)
-head(scalecountboth)
+# Making Treatment a factor variable
+scalecountboth_NoNA$Treatment <- as.factor(scalecountboth_NoNA$Treatment)
 
 #### End of data cleaning
-
-# This is a Poisson model, but the response is live-scale1
-gm <- glm(Livescale1 ~ Treatment,
-          data = scalecountboth,
-          family = "poisson")
-summary(gm)
-
-
 
 #### Below starts analysis by month (July and November)
 
@@ -119,7 +92,11 @@ summary(gm)
 scalecount_July <- subset(scalecountboth_NoNA, grepl('July', Date))
 scalecount_Nov <- subset(scalecountboth_NoNA, grepl('Nov', Date))
 
-#### Shapiro-Wilk tests (code by Rachel) ####
+# Making Treatment a factor variable
+scalecount_July$Treatment <- as.factor(scalecount_July$Treatment)
+scalecount_Nov$Treatment <- as.factor(scalecount_Nov$Treatment)
+
+#### (2) Shapiro-Wilk tests (code by Rachel) ####
 
 ## For July
 
@@ -133,7 +110,7 @@ shapiro.test(scalecount_Nov$Meanlivescale)
 shapiro.test(scalecount_Nov$Sumlivescale)
 shapiro.test(scalecount_Nov$encarsia)
 
-#### Kruskal-Wallis tests (code by Rachel) ####
+#### (3) Kruskal-Wallis tests (code by Rachel) ####
 
 ## For whole data set (not sure if this is necessary)
 
@@ -153,28 +130,30 @@ kruskal.test(Meanlivescale ~ Treatment, data = scalecount_Nov)
 kruskal.test(Sumlivescale ~ Treatment, data = scalecount_Nov)
 kruskal.test(encarsia ~ Treatment, data = scalecount_Nov)
 
+#### (4) Dunn's Test (code by Rachel) ####
 
-# Not sure what's going on here??
-modelg_scale <- glht(gm, mcp(Treatment = "Tukey"))
-#table_glht(modelg_scale)
+## For whole data set (not sure if this is necessary)
 
+dunnTest(Meanlivescale ~ Treatment, data = scalecountboth_NoNA,
+         method = "bh")
+dunnTest(Sumlivescale ~ Treatment, data = scalecountboth_NoNA,
+         method = "bh")
+dunnTest(encarsia ~ Treatment, data = scalecountboth_NoNA,
+         method = "bh") # Warning about missing data
 
-# Pairwise Wilcox test -- gives same error about "ties"
-pairwise.wilcox.test(scalecount_Nov$Meanlivescale,
-                     scalecount_Nov$Treatment,
-                     p.adjust.method = "BH")
+## For July
 
-# Just a preliminary Dunn test
-library(FSA)
+dunnTest(Meanlivescale ~ Treatment, data = scalecount_July, method = "bh")
+dunnTest(Sumlivescale ~ Treatment, data = scalecount_July, method = "bh")
+dunnTest(encarsia ~ Treatment, data = scalecount_July, method = "bh") #Warning about missing data
 
-dunnTest(Meanlivescale ~ Treatment,
-         data=scalecount_Nov,
-         method="bonferroni")
-# Not sure what this table is -- I guess it came from the pairwise testing?
-         #1      2        3     
-#2     0.0087    -        -     
-#3     0.0159  0.3992     -     
-#4     0.7103  0.0086.  0.0104  
+## For November
+
+dunnTest(Meanlivescale ~ Treatment, data = scalecount_Nov, method = "bh")
+dunnTest(Sumlivescale ~ Treatment, data = scalecount_Nov, method = "bh")
+dunnTest(encarsia ~ Treatment, data = scalecount_Nov, method = "bh") #Warning about missing data
+
+#### (5) Table Summaries ####
 
 # Treatment means for November
 tmeans_nov <- scalecount_Nov %>% 
@@ -200,6 +179,7 @@ tmeans_july <- scalecount_July %>%
   )
 tmeans_july$Collection<-"July"
 
+#### (6) Original Plots ####
 
 # Original bar plots from Dr. Bookwalter
 # Treatment means as bar plots for November
@@ -233,6 +213,7 @@ plot_means_by_collection(data=tmeans_table,
                          title="Study 2 - Mean Live EHS & Crypto Scale",
                          x_str="Treatment", y_str="Mean", labels=labels)
 
+#### (7) Graphical Summaries ####
 
 # Histograms of means
 get_hist_livescale(scalecount_July, "July", 2, labels)
@@ -259,7 +240,7 @@ get_hist(data=scalecount_Nov,
          labels=labels)
 
 
-#### Encarsia (November)
+#### (8) Encarsia Analysis ####
 
 scalecountencar_nov <- scalecount_Nov
 scalecountencar_july <- scalecount_July
@@ -351,9 +332,9 @@ get_hist_all_trt(scalecountencar_nov, x_str="Meanlivescale",
                  title="Study 2 - Encarsia Count, All Treatments, Nov",
                  labels=labels)
 
+#### (9) Parasitism Analysis ####
 
-#### Fungus (November) (This is actually parasitism!)
-# I suspect fungus wasn't analyzed because 
+#### Fungus (November) (This is actually parasitism!!!)
 
 scalecountfung_july <- scalecount_July
 scalecountfung_nov <- scalecount_Nov
@@ -396,6 +377,4 @@ plot_means_by_collection(data=fungus_table_trt,
                          y_str="percent_yes100",
                          y_lab="Percent",
                          labels=labels)
-
-shapiro.test(scalecountfung_nov$Prespara)
 
