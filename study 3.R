@@ -13,10 +13,11 @@ library(multcomp)
 library(multcompView)
 library(biostat3)
 library(multcompView)
+library(FSA)
 
 source("graphing functions.r")
 
-#### Data cleaning
+#### (1) Data Pre-processing ####
 
 # Reading in the data
 scalecount <- read.csv(file = "acety counting v2 (study 3).csv", strip.white=TRUE)
@@ -37,7 +38,8 @@ scalecount$Deadscale3 <- scalecount$EHSDeadscale3 + scalecount$CryptoDeadscale2
 
 scalecount<-subset(scalecount, select = -c(EHSLivescale1,EHSLivescale2,EHSLivescale3,EHSDeadscale1,
                                            EHSDeadscale2,EHSDeadscale3,CryptoLivescale1,
-                                           CryptoLivescale2,CryptoLivescale3,CryptoDeadscale1,CryptoDeadscale2,
+                                           CryptoLivescale2,CryptoLivescale3,CryptoDeadscale1,
+                                           CryptoDeadscale2,
                                            CryptoDeadscale3))
 
 # Getting 0s and 1s for presence and absence
@@ -60,8 +62,6 @@ scalecount$Presfungus <- replace(scalecount$Presfungus, scalecount$Presfungus=="
 # Making certain variables numeric
 scalecount <- scalecount %>% 
   mutate(across(c(Livescale1, Deadscale1, Livescale2, Deadscale2, Livescale3, Deadscale3), as.numeric))
-
-str(scalecount)
 
 # New variables for mean of live-scale and dead-scale (averages the three shoots)
 scalecount<-scalecount %>% 
@@ -89,6 +89,8 @@ scalecountall <- scalecountall %>% mutate(across(c(Treatment), as.factor))
 
 #### End of data cleaning
 
+#### (2) Graphical and Table Summaries ####
+
 # Treatment survival means (mean of the three shoots per sample)
 tmeans_mean <- scalecountall %>% 
   group_by(Treatment) %>% 
@@ -113,7 +115,7 @@ tmeans_sum <- scalecountall %>%
   )
 print(tmeans_sum)
 
-###### treatment means as bar plots- use this one
+#### Treatment means as bar plots (use this one)
 # Technically this says EHS, but there are *some* cryptomeria scale? about 5 observations with
 labels <- c("Acetamiprid", "Dinotefuron", "Sulfoxaflor", "Flupyradifurone", "No Treatment" )
 tmeans_mean$Treatment <- factor(tmeans_mean$Treatment, levels=c("2","1","3","5","4"))
@@ -167,7 +169,6 @@ livescale_plots_sum <- ggplot(data=tmeans_sum,
   scale_fill_manual(values = c("#CC6600","red","#9999FF","#0072B2","green4")) 
 livescale_plots_sum
 
-
 # Get histograms
 scalecountall$Treatment <- factor(scalecountall$Treatment,
                                   levels=c("2","1","3","5","4"))
@@ -187,43 +188,22 @@ get_hist_all_trt(scalecountall, x_str="Meanlivescale", x_lab="Mean Live Scale",
                  title="Study 3 - Mean Live Scale, All Treatments",
                  labels=labels)
 
+#### (3) Shapiro-Wilk tests (code by Rachel) ####
 
-#### Shapiro-Wilk tests (code by Rachel) ####
 shapiro.test(scalecountall$Meanlivescale)
 shapiro.test(scalecountall$Sumlivescale)
 
-#### Kruskal-Wallis tests (code by Rachel) ####
+#### (4) Kruskal-Wallis tests (code by Rachel) ####
+
 kruskal.test(Meanlivescale ~ Treatment, data = scalecountall)
 kruskal.test(Sumlivescale ~ Treatment, data = scalecountall)
 
-# THIS DOESN'T WORK -- gives error message about ties
-#letters < -pairwise.wilcox.test(scalecountall$Meanlivescale, scalecountall$Treatment,
- #                               p.adjust.method = "BH")
-#letters
+#### (5) Dunn's Test (code by Rachel) ####
 
-#comparison_letters <- multcompLetters(letters$p.value)
-#comparison_letters
+dunnTest(Meanlivescale ~ Treatment, data = scalecountall, method = "bh")
+dunnTest(Sumlivescale ~ Treatment, data = scalecountall, method = "bh")
 
-#1 Dinotefuran   
-#2 Acetampirid  
-#3 Sulfoxaflor
-#4 No Treatment
-#5 Flupyradifurone
 
-#1     1      2       3       4   
-#2 0.47865 -       -       -      
-#3 0.25351 0.05070 -       -      
-#4 1.4e-06 1.9e-07 2.6e-05 -      
-#5 0.00231 0.00015 0.03909 0.05070
-
-#multcompLetters2(letters)
-
-# Error due to ties, ties are thrown out ??
-
-# Looking at poisson as well
-#poisson.model <- glm(Sumlivescale ~ Treatment,
-#                     family = 'poisson', data = scalecountall)
-#summary(poisson.model)
 
 # Making Prespara and Presfungus variables numeric
 scalecountall <- scalecountall %>% 

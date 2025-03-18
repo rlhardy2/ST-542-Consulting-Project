@@ -89,7 +89,7 @@ scalecount_nov <- subset(scalecount, grepl('November', Date)) #November data
 
 #### End of data cleaning
 
-#### (2) Graphs and Table Summaries ####
+#### (2) Graphical and Table Summaries ####
 
 # Treatment survival means
 tmeans_all <- scalecount_july %>% 
@@ -291,7 +291,7 @@ dunnTest(Meanlivescale ~ Treatment, data = scalecount_nov, method = "bh")
 dunnTest(Sumlivescale ~ Treatment, data = scalecount_nov, method = "bh")
 dunnTest(encarsia ~ Treatment, data = scalecount_nov, method = "bh") # Warning about missing data
 
-
+#### Need to organize the rest of the file below!!
 
 
 
