@@ -49,10 +49,9 @@ scalecount1 <- scalecount1 %>%
   mutate(across(c(Livescale1, Deadscale1, Livescale2, Deadscale2, Livescale3, Deadscale3), as.numeric))
 str(scalecount1)
 
-# Making a new table that adds the EHS and cryptomeria 
-# Added - Prespara - same # of observations with and without, so safe to add
+# Making a new table that adds the EHS and cryptomeria
 scalecountboth <- scalecount1 %>% 
-  group_by(Label,Twigab, Date, Treatment, Prespara) %>% 
+  group_by(Label,Twigab, Date, Treatment) %>% 
   dplyr::summarize(across(where(is.numeric), sum))
 scalecountboth
 
@@ -242,6 +241,7 @@ get_hist(data=scalecount_Nov,
 
 #### (8) Encarsia Analysis ####
 
+# Note - this should already be 1 per tree
 scalecountencar_nov <- scalecount_Nov
 scalecountencar_july <- scalecount_July
 
@@ -336,45 +336,48 @@ get_hist_all_trt(scalecountencar_nov, x_str="Meanlivescale",
 
 #### Fungus (November) (This is actually parasitism!!!)
 
-scalecountfung_july <- scalecount_July
-scalecountfung_nov <- scalecount_Nov
+# Note - this won't work. I realized the count with Prespara isn't quite correct.
+# Commented this out so it doesn't affect running the file...
+# Must use data set without summed scale counts here instead!
 
-# Remove twigs with no scale
-# Some samples only have one twig, dropping those
-scalecountfung_july <- scalecountfung_july[rowSums(scalecountfung_july[, 6:11] == 0) < 2,]
-scalecountfung_july <- scalecountfung_july %>% drop_na(Label)
-scalecountfung_nov <- scalecountfung_nov[rowSums(scalecountfung_nov[, 6:11] == 0) < 2,]
-scalecountfung_nov <- scalecountfung_nov %>% drop_na(Label)
-
-scalecountfung_july$Prespara <- as.numeric(scalecountfung_july$Prespara)
-scalecountfung_nov$Prespara <- as.numeric(scalecountfung_nov$Prespara)
-
-# Percentage of presence in a group
-# Fixed code after adding Prespara to scalecount processing
-# Wait this is actually parasitism, not fungus?
-tmeans_fung_nov <- scalecountfung_nov %>% 
-  group_by(Treatment) %>% 
-  summarise(
-    percent_yes = mean(Prespara == 1),
-    percent_yes100 = round(percent_yes*100),
-  )
-tmeans_fung_nov$Collection <- "Nov"
-
-tmeans_fung_july <- scalecountfung_july %>% 
-  group_by(Treatment) %>% 
-  summarise(
-    percent_yes = mean(Prespara == 1),
-    percent_yes100 = round(percent_yes*100),
-  )
-tmeans_fung_july$Collection <- "July"
-
-fungus_table_trt <- dplyr::bind_rows(tmeans_fung_july, 
-                                     tmeans_fung_nov)
-
-plot_means_by_collection(data=fungus_table_trt, 
-                         title="Study 2 - Mean Presence Percentage of Parasitism",
-                         x_str="Treatment",
-                         y_str="percent_yes100",
-                         y_lab="Percent",
-                         labels=labels)
-
+# scalecountfung_july <- scalecount_July
+# scalecountfung_nov <- scalecount_Nov
+# 
+# # Remove twigs with no scale
+# # Some samples only have one twig, dropping those
+# scalecountfung_july <- scalecountfung_july[rowSums(scalecountfung_july[, 6:11] == 0) < 2,]
+# scalecountfung_july <- scalecountfung_july %>% drop_na(Label)
+# scalecountfung_nov <- scalecountfung_nov[rowSums(scalecountfung_nov[, 6:11] == 0) < 2,]
+# scalecountfung_nov <- scalecountfung_nov %>% drop_na(Label)
+# 
+# scalecountfung_july$Prespara <- as.numeric(scalecountfung_july$Prespara)
+# scalecountfung_nov$Prespara <- as.numeric(scalecountfung_nov$Prespara)
+# 
+# # Percentage of presence in a group
+# # Fixed code after adding Prespara to scalecount processing
+# # Wait this is actually parasitism, not fungus?
+# tmeans_fung_nov <- scalecountfung_nov %>% 
+#   group_by(Treatment) %>% 
+#   summarise(
+#     percent_yes = mean(Prespara == 1),
+#     percent_yes100 = round(percent_yes*100),
+#   )
+# tmeans_fung_nov$Collection <- "Nov"
+# 
+# tmeans_fung_july <- scalecountfung_july %>% 
+#   group_by(Treatment) %>% 
+#   summarise(
+#     percent_yes = mean(Prespara == 1),
+#     percent_yes100 = round(percent_yes*100),
+#   )
+# tmeans_fung_july$Collection <- "July"
+# 
+# fungus_table_trt <- dplyr::bind_rows(tmeans_fung_july, 
+#                                      tmeans_fung_nov)
+# 
+# plot_means_by_collection(data=fungus_table_trt, 
+#                          title="Study 2 - Mean Presence Percentage of Parasitism",
+#                          x_str="Treatment",
+#                          y_str="percent_yes100",
+#                          y_lab="Percent",
+#                          labels=labels)

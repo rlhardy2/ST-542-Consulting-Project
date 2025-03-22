@@ -131,6 +131,14 @@ get_hist(data=scalecount_nov,
          title="Study 1 - Sum of Live EHS, Nov",
          labels=trt_labels)
 
+get_hist_all_trt(scalecount_july, x_str="Sumlivescale", x_lab="Sum Live Scale",
+                 title="Study 1 - Sum Live Scale, All Treatments, July",
+                 labels=trt_labels, binwidth=1)
+
+get_hist_all_trt(scalecount_nov, x_str="Sumlivescale", x_lab="Sum Live Scale",
+                 title="Study 1 - Sum Live Scale, All Treatments, Nov",
+                 labels=trt_labels, binwidth=1)
+
 # Treatment means as bar plots
 Meanlivescale_plot_all <- ggplot(data=tmeans_all, 
                                    aes(x=Treatment, y=Mean
