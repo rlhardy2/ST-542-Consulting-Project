@@ -27,13 +27,14 @@ scalecount <- read.csv(file="EHS count 2024 v7 (study 1).csv", strip.white=TRUE)
 colnames(scalecount) <- c("Label", "County","Twigab","Date","Counter","Livescale1","Deadscale1",
                           "Livescale2","Deadscale2","Livescale3","Deadscale3","Prespara","Presfungus",
                           "Presscalenewgr","encarsia")
+
 scalecount <- process_scalecount(scalecount)
 
 # also change county to factor
 scalecount$County <- as.factor(scalecount$County)
 
 # Getting first count - July
-scalecount_july <- subset(scalecount, grepl('July',Date)) # July data
+scalecount_july <- subset(scalecount, grepl('July', Date)) # July data
 scalecount_nov <- subset(scalecount, grepl('November', Date)) # November data
 
 # Treatment survival means

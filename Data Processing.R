@@ -65,8 +65,7 @@ extract_block <- function(scalecount) {
 
 # Common processing across all 3 experiments
 process_scalecount <- function(scalecount_raw) {
-  # Delete columns with no info
-  scalecount <- scalecount_raw[ -c(16:19) ]
+  scalecount <- scalecount_raw
   
   # Extract and create new column with treatment
   scalecount$Treatment<-

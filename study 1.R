@@ -24,6 +24,7 @@ colnames(scalecount) <- c("Label", "County","Twigab","Date","Counter","Livescale
                           "Presscalenewgr","encarsia")
 
 # Delete columns with no info
+# (already only 15 cols - not needed)
 scalecount <- scalecount[ -c(16:19) ]
 
 # Extract and create new column with treatment
