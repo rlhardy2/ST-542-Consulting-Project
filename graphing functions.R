@@ -31,10 +31,10 @@ plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_label
 }
 
 # Histograms - one plot for each treatment
-get_hist <- function(data, x_str, x_lab, title, labels) {
+get_hist <- function(data, x_str, x_lab, title, labels, binwidth=1) {
   x_sym <- ensym(x_str)
   hist <- ggplot(data=data, aes(x={{x_sym}}, fill=Treatment)) + 
-    geom_histogram(binwidth=1) + 
+    geom_histogram(binwidth=binwidth) + 
     labs(x=x_lab) + 
     facet_wrap(~Treatment) + 
     scale_fill_discrete(labels=labels) + 
@@ -57,10 +57,11 @@ get_hist_encarsia <- function(data, collection_date, study, labels) {
 }
 
 # Histogram, all treatments merged
-get_hist_all_trt <- function(data, x_str, x_lab, title, labels) {
+# Change bin width as needed...
+get_hist_all_trt <- function(data, x_str, x_lab, title, labels, binwidth=1) {
   x_sym <- ensym(x_str)
   hist <- ggplot(data=data, aes(x={{x_sym}})) + 
-    geom_histogram(binwidth=1) + 
+    geom_histogram(binwidth=binwidth) + 
     labs(x=x_lab) + 
     scale_fill_discrete(labels=labels) + 
     labs(title=title)
