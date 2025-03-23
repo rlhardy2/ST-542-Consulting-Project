@@ -24,7 +24,7 @@ check_counts <- function(scalecount) {
 average_counts_across_twigs <- function(scalecount) {
   scalecount_tree_mean <-
     scalecount %>%
-    group_by(Label, Date, Treatment) %>% 
+    group_by(Label, Date, Treatment, Block) %>% 
     summarize(across(where(is.numeric), mean)) %>%
     # drop rows that shouldn't use means
     dplyr::select(-one_of(c('Sumlivescale', 'Sumdeadscale')))
@@ -32,15 +32,30 @@ average_counts_across_twigs <- function(scalecount) {
   return (scalecount_tree_mean)
 }
 
+# Label denotes the same tree
+# Average count data (live scale, dead scale, encarsia) 
+# across both twigs to get by tree
 sum_counts_across_twigs <- function(scalecount) {
   scalecount_tree_sum <-
     scalecount %>%
-    group_by(Label, Date, Treatment) %>% 
+    group_by(Label, Date, Treatment, Block) %>% 
     summarize(across(where(is.numeric), sum)) %>%
     # drop rows that shouldn't use sums
     dplyr::select(-one_of(c('encarsia', 'Meanlivescale', 'Meandeadscale')))
   
   return (scalecount_tree_sum)
+}
+
+# Average counts across block-treatment combo
+# Should have already averaged across twigs first...
+average_counts_across_block_trt <- function(scalecount) {
+  scalecount_block_trt_mean <-
+    scalecount %>%
+    group_by(Date, Treatment, Block) %>% 
+    summarize(across(where(is.numeric), mean)) %>%
+    arrange(Block, Treatment)
+  
+  return (scalecount_block_trt_mean)
 }
 
 # replace binary strings with 0s and 1s
@@ -49,7 +64,7 @@ replace_strings_with_binary <- function(vars) {
   
   # This is the criteria for both study 1 and study 3
   # study 2 doesn't include "", but there's no data with a blank anyway
-  # that isn't also missing Livescale1
+  # that isn't also missing Livescale1 (gets filtered out)
   vars_with_nums <- replace(vars_with_nums, 
                             vars_with_nums %in% c("", "n", "N", "no"), 0)
   return (vars_with_nums)
@@ -57,13 +72,14 @@ replace_strings_with_binary <- function(vars) {
 
 # Extracts block from treatment label string - first letter, hyphen 2nd letter
 # First letter denotes county, 2nd block within the county
+# May not be needed - can use label (tree) as block?
 extract_block <- function(scalecount) {
   scalecount_block <- str_match(scalecount$Label, "[A-Z]-[A-Z]")
   scalecount_block <- as.factor(scalecount_block)
   return (scalecount_block)
 }
 
-# Common processing across all 3 experiments
+# Common processing across all experiments
 process_scalecount <- function(scalecount_raw) {
   scalecount <- scalecount_raw
   
@@ -84,6 +100,9 @@ process_scalecount <- function(scalecount_raw) {
   # Convert twig to factor
   scalecount$Twigab <- as.factor(scalecount$Twigab)
   
+  # Convert label to factor
+  scalecount$Label <- as.factor(scalecount$Label)
+  
   # Change counts to numeric
   scalecount <- scalecount %>% 
     mutate(across(c(Livescale1, Deadscale1, Livescale2, 
@@ -91,6 +110,7 @@ process_scalecount <- function(scalecount_raw) {
                   as.numeric))
   
   # Add mean live scale and Mean dead scale columns
+  # This will technically retain labels with 2 shoots?
   scalecount<-scalecount %>% 
     mutate(Meanlivescale = rowMeans(dplyr::select(., Livescale1, Livescale2, Livescale3), na.rm = TRUE))
   scalecount<-scalecount %>% 
