@@ -13,6 +13,7 @@ library(multcompView)
 library(FSA)
 library(stats)
 library(PMCMRplus)
+library(PMCMR)
 
 source("graphing functions.r")
 source("Data Processing.r")
@@ -58,7 +59,8 @@ scalecount_avg_block_trt_matrix <- as.matrix(scalecount_avg_across_block_trt)
 # Friedman test for July
 # For some reason this only works if you use as.matrix lol
 friedman <- friedman.test(Meanlivescale ~ Treatment | Block,
-              data=scalecount_avg_block_trt_matrix)
+              data = scalecount_avg_block_trt_matrix)
+friedman
 
 # Trying Nemenyi test because it doesn't require restructing the data
 # Lower power than Conover
@@ -66,7 +68,16 @@ nemenyi <- frdAllPairsNemenyiTest(Meanlivescale ~ Treatment | Block,
                        data = scalecount_avg_block_trt_matrix)
 PMCMRTable(nemenyi)
 
-#### (3) Binomial model test ####
+# Extract p-values from the Nemenyi test
+p_values <- as.data.frame(nemenyi$p.value)
+p_values_matrix <- as.matrix(p_values)
+
+# Graphing the p-values using a heat map... weird but I found this online lol
+heatmap(p_values_matrix, main = "Nemenyi Test P-Values",
+        col = heat.colors(10),
+        scale = "none")
+
+#### (3) Binomial Model ####
 
 # This doesn't converge if we include Label:Twigab (tree+twig) lol...
 # Hopefully we can say for the purposes of parasitism
@@ -78,3 +89,8 @@ parasitism_mod <- glm(formula = Prespara ~ Treatment + Block,
 
 emm <- emmeans(parasitism_mod, "Treatment")
 pairs(emm)
+
+#### (4) Zero-Inflated Models ####
+
+
+
