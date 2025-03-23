@@ -71,6 +71,7 @@ PMCMRTable(nemenyi)
 # This doesn't converge if we include Label:Twigab (tree+twig) lol...
 # Hopefully we can say for the purposes of parasitism
 # it's okay to just treat each twig separately
+# Alternatively, we could process this to be per-tree - 1 if either twig has a 1
 parasitism_mod <- glm(formula = Prespara ~ Treatment + Block,
                    data = scalecount_july,
                    family = binomial)
