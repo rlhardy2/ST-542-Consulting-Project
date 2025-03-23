@@ -91,7 +91,7 @@ friedman <- friedman.test(Meanlivescale ~ Treatment | Block,
                           data = scalecount_avg_block_trt_matrix)
 friedman
 
-# Trying Nemenyi test because it doesn't require restructing the data
+# Trying Nemenyi test because it doesn't require restructuring the data
 # Lower power than Conover
 nemenyi <- frdAllPairsNemenyiTest(Meanlivescale ~ Treatment | Block, 
                                   data = scalecount_avg_block_trt_matrix)
@@ -107,12 +107,22 @@ heatmap(p_values_matrix, main = "Nemenyi Test P-Values",
 
 #### (3) Binomial Model ####
 
-# This doesn't converge if we include Label:Twigab (tree+twig) lol...
+# Client dropped twigs with 0 scale
+scalecount_para_july <- scalecount_july[rowSums(scalecount_july[, 6:11] == 0) < 2,]
+scalecount_para_july <- 
+  scalecount_para_july %>% 
+  drop_na(Label) #some samples only have one twig,
+
+# compress to presence per tree
+scalecount_para_july_tree <- get_presence_across_twigs(scalecount_para_july)
+
+# This doesn't converge if we include Label:Twigab (tree+twig) with the per-twig observations
 # Hopefully we can say for the purposes of parasitism
 # it's okay to just treat each twig separately
-# Alternatively, we could process this to be per-tree - 1 if either twig has a 1
+
+# Per tree model
 parasitism_mod <- glm(formula = Prespara ~ Treatment + Block,
-                   data = scalecount_july,
+                   data = scalecount_para_july_tree,
                    family = binomial)
 
 emm <- emmeans(parasitism_mod, "Treatment")

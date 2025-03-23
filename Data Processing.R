@@ -33,7 +33,7 @@ average_counts_across_twigs <- function(scalecount) {
 }
 
 # Label denotes the same tree
-# Average count data (live scale, dead scale, encarsia) 
+# Sum count data (live scale, dead scale, encarsia) 
 # across both twigs to get by tree
 sum_counts_across_twigs <- function(scalecount) {
   scalecount_tree_sum <-
@@ -47,7 +47,7 @@ sum_counts_across_twigs <- function(scalecount) {
 }
 
 # Average counts across block-treatment combo
-# Should have already averaged across twigs first...
+# Must have already averaged across twigs first...
 average_counts_across_block_trt <- function(scalecount) {
   scalecount_block_trt_mean <-
     scalecount %>%
@@ -56,6 +56,23 @@ average_counts_across_block_trt <- function(scalecount) {
     arrange(Block, Treatment)
   
   return (scalecount_block_trt_mean)
+}
+
+# Checks if there is any presence of parasitism/fungus on twigs
+# Returns 1 if present on either twig, 0 if on neither
+# Could probably be expanded to a multinomial model? 
+# (where there's the option of fungus/parasitism on one twig, two twigs, or neither)
+is_present <- function(presence_vec) {
+  return (ifelse(sum(presence_vec > 0), 1, 0))
+}
+
+# Get the presence of parasitism and fungus across both twigs
+# Merges into one entry per label/tree
+get_presence_across_twigs <- function(scalecount) {
+  scalecount_presence <- 
+    scalecount %>%
+    group_by(Label, Date, Treatment, Block) %>%
+    summarize(across(c(Prespara, Presfungus), is_present)) 
 }
 
 # replace binary strings with 0s and 1s
@@ -90,6 +107,8 @@ process_scalecount <- function(scalecount_raw) {
   # Encode presence and absence as 0s and 1s
   scalecount$Prespara <- replace_strings_with_binary(scalecount$Prespara)
   scalecount$Presfungus <- replace_strings_with_binary(scalecount$Presfungus)
+  scalecount$Prespara <- as.numeric(scalecount$Prespara)
+  scalecount$Presfungus <- as.numeric(scalecount$Presfungus)
   
   # Extract block
   scalecount$Block <- extract_block(scalecount)
