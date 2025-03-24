@@ -57,7 +57,7 @@ scalecount_avg_across_block_trt <-
 # For some reason, this won't work without converting to a matrix
 scalecount_avg_block_trt_matrix <- as.matrix(scalecount_avg_across_block_trt)
 
-#### Friedman test for July
+#### Friedman test for July -- mean live scale
 # For some reason this only works if you use as.matrix lol
 friedman <- friedman.test(Meanlivescale ~ Treatment | Block,
               data = scalecount_avg_block_trt_matrix)
@@ -77,7 +77,7 @@ heatmap(p_values_matrix, main = "Nemenyi Test P-Values",
         col = heat.colors(10),
         scale = "none")
 
-#### Again, but for November!
+#### Again, but for November (doesn't work!)
 scalecount_avg_nov <- average_counts_across_twigs(scalecount_nov)
 scalecount_avg_across_block_trt <- 
   average_counts_across_block_trt(scalecount_avg_nov)
@@ -85,25 +85,9 @@ scalecount_avg_across_block_trt <-
 # For some reason, this won't work without converting to a matrix
 scalecount_avg_block_trt_matrix <- as.matrix(scalecount_avg_across_block_trt)
 
-#### Friedman test for November
-# For some reason this only works if you use as.matrix lol
+#### Friedman test for November -- doesn't work!
 friedman <- friedman.test(Meanlivescale ~ Treatment | Block,
                           data = scalecount_avg_block_trt_matrix)
-friedman
-
-# Trying Nemenyi test because it doesn't require restructuring the data
-# Lower power than Conover
-nemenyi <- frdAllPairsNemenyiTest(Meanlivescale ~ Treatment | Block, 
-                                  data = scalecount_avg_block_trt_matrix)
-PMCMRTable(nemenyi)
-
-# Extract p-values from the Nemenyi test
-p_values_nov <- nemenyi$p.value
-
-# Graphing the p-values using a heat map... weird but I found this online lol
-heatmap(p_values_matrix, main = "Nemenyi Test P-Values",
-        col = heat.colors(10),
-        scale = "none")
 
 #### (3) Binomial Model ####
 
