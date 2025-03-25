@@ -20,8 +20,8 @@ source("graphing functions.r")
 # Read in file
 scalecount <- read.csv(file="EHS count 2024 v7 (study 1).csv", strip.white=TRUE)
 colnames(scalecount) <- c("Label", "County","Twigab","Date","Counter","Livescale1","Deadscale1",
-                          "Livescale2","Deadscale2","Livescale3","Deadscale3","Prespara","Presfungus",
-                          "Presscalenewgr","encarsia")
+                          "Livescale2","Deadscale2","Livescale3","Deadscale3","Prespara",
+                          "Presfungus","Presscalenewgr","encarsia")
 
 # Delete columns with no info
 # (already only 15 cols - not needed)
