@@ -137,16 +137,6 @@ emmip(ref_grid(nb_july), Block ~ Treatment, style="factor")
 
 #### (5) Zero-Inflated & Hurdle Models ####
 
-# PSCL models
-# m1 <- zeroinfl(Sumlivescale_from_mean ~ Treatment + Block | Sumdeadscale_from_mean,
-#                data = scalecount_tree_sum_july, dist = "negbin")
-# 
-# m2 <- zeroinfl(Sumlivescale_from_mean ~ Treatment + Block,
-#                data = scalecount_tree_sum_july, dist = "negbin")
-# 
-# m3 <- zeroinfl(Sumlivescale_from_mean ~ Treatment + Block | Sumdeadscale_from_mean,
-#                data = scalecount_tree_sum_nov, dist = "negbin")
-
 # Diagnostics easier with glmmTMB than PSCL due to DHARMa compatibility
 
 # Zero-inflated NB over each tree
@@ -157,13 +147,20 @@ zinb_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + Block,
 simr_zinb_nov <- simulateResiduals(zinb_nov)
 
 # Mixed NB model
-# over each twig, mixed effect for tree, includes block, zero inflation
+# over each twig, mixed effect for tree, includes fixed block, zero inflation
 zinb_nov_mm <- glmmTMB(Sumlivescale_from_mean ~ Treatment + Block + (1|Label),
                        data=scalecount_nov, ziformula = ~1,
                        family = nbinom2)
 # Several minor outliers, good residuals, dispersion fails test but 
 # dispersion is pretty low overall for the model so probably okay
 simr_zinb_nov_mm <- simulateResiduals(zinb_nov_mm)
+
+# Random block, zero inflation, over each twig
+zinb_nov_mm_rand_block <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1|Block) + (1|Label),
+                       data=scalecount_nov, ziformula = ~1,
+                       family = nbinom2)
+# This looks quite good
+simr_zinb_nov_mm_rand_block <- simulateResiduals(zinb_nov_mm_rand_block)
 
 # Mixed NB model, mixed eff for tree with no block, zero inflation
 # May be okay because block indicates location too?
@@ -189,7 +186,26 @@ hnbinom_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + Block,
 est <- cbind(Estimate = coef(zinb_nov_mm), confint(m1))
 
 
-#### Testing ####
+#### Estimates, CIs, Treatment Means ####
 
-# https://rdrr.io/cran/DHARMa/man/testZeroInflation.html
-emmeans(zinb_nov)
+# Use zero-inflated NB mixed model with random effect blocks for testing...
+
+# Estimated marginal means
+emm_zinb_nov_mm_rb <- emmeans(zinb_nov_mm_rand_block, "Treatment")
+emm_zinb_nov_mm_rb_orig_scale <- emmeans(zinb_nov_mm_rand_block, 
+                                      "Treatment", type="response")
+
+# EMMs differ if arrows don't overlap
+# https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
+plot(emm_zinb_nov_mm_rb_orig_scale, comparison=TRUE)
+
+# Pairwise comparisons for ratios 
+# (happens if you take the pairs from emm on the original scale
+# due to needing to perform tests on log)
+confint(pairs(emm_zinb_nov_mm_rb_orig_scale))
+
+# CI for pairwise comparison on log scale
+confint(pairs(emm_zinb_nov_mm_rb))
+
+# CI for pairwise comparison on original scale
+confint(pairs(regrid(emm_zinb_nov_mm_rb)))
