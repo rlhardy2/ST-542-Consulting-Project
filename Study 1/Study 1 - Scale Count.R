@@ -128,7 +128,11 @@ nb_nov_mm <- glmmTMB(Sumlivescale_from_mean ~ Treatment + Block + (1|Label),
 # Lots of zero dispersion, probably better to just use zero inflation model
 simr_nb_nov_mm <- simulateResiduals(nb_nov_mm)
 
-# Compare AIC/BIC?
+# Compare AIC/BIC of pois and nb (don't compare mixed model here,
+# not the same response set bc mixed model uses uncompressed per-twig set)
+BIC(pois_nov, nb_nov)
+
+# Get emmeans graph
 emmip(ref_grid(nb_july), Block ~ Treatment, style="factor")
 
 #### (5) Zero-Inflated & Hurdle Models ####
