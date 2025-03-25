@@ -95,6 +95,52 @@ friedman
 
 #### July analysis -- parasitism
 
+# Client dropped twigs with 0 scale
+scalecount2_para_july <- scalecount2_july[rowSums(scalecount_july[, 5:10] == 0) < 2,]
+scalecount2_para_july <- 
+  scalecount2_para_july %>% 
+  drop_na(Label) # Some samples only have one twig
+
+# Compress to presence per tree
+scalecount2_para_july_tree <- get_presence_across_twigs(scalecount2_para_july)
+
+# Per tree model
+parasitism_mod2_july <- glm(formula = Prespara ~ Treatment + Block,
+                           data = scalecount2_para_july_tree,
+                           family = binomial)
+
+emm <- emmeans(parasitism_mod2_july, "Treatment")
+pairs(emm)
+
+#### November analysis -- parasitism
+
+# Umm, I'm not sure if we should be dropping twigs with 0 scale?
+# Wouldn't 0 scale mean the pesticide worked (95% of the time like the client estimated)?
+# We have A LOT of observations with 0 scale here, most likely because the pesticide worked
+# If we remove all of these observations, we are left with almost nothing to use in the
+# binomial model below...
+# That's why the code below only shows one pairwise comparison...
+
+# Client dropped twigs with 0 scale
+scalecount2_para_nov <- scalecount2_nov[rowSums(scalecount2_nov[, 5:10] == 0) < 2,]
+scalecount2_para_nov <- 
+  scalecount2_para_nov %>% 
+  drop_na(Label) # Some samples only have one twig
+
+# Compress to presence per tree
+scalecount2_para_nov_tree <- get_presence_across_twigs(scalecount2_para_nov)
+
+# Per tree model
+parasitism_mod2_nov <- glm(formula = Prespara ~ Treatment + Block,
+                           data = scalecount2_para_nov_tree,
+                           family = binomial)
+
+emm <- emmeans(parasitism_mod2_nov, "Treatment")
+pairs(emm)
+
+
+
+
 
 
 

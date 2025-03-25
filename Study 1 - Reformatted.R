@@ -105,7 +105,7 @@ friedman <- friedman.test(Meanlivescale ~ Treatment | Block,
 scalecount_para_july <- scalecount_july[rowSums(scalecount_july[, 6:11] == 0) < 2,]
 scalecount_para_july <- 
   scalecount_para_july %>% 
-  drop_na(Label) #some samples only have one twig,
+  drop_na(Label) # Some samples only have one twig
 
 # Compress to presence per tree
 scalecount_para_july_tree <- get_presence_across_twigs(scalecount_para_july)
@@ -123,6 +123,8 @@ emm <- emmeans(parasitism_mod_july, "Treatment")
 pairs(emm)
 
 #### November analysis -- parasitism
+
+
 
 
 
