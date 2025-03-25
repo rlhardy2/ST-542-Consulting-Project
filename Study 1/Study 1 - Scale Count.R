@@ -183,8 +183,6 @@ hnbinom_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + Block,
                         ziformula = ~1,
                         family=truncated_nbinom1)
 
-est <- cbind(Estimate = coef(zinb_nov_mm), confint(m1))
-
 
 #### Estimates, CIs, Treatment Means ####
 
