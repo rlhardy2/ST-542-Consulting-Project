@@ -27,7 +27,8 @@ average_counts_across_twigs <- function(scalecount) {
     group_by(Label, Date, Treatment, Block) %>% 
     summarize(across(where(is.numeric), mean)) %>%
     # drop rows that shouldn't use means
-    dplyr::select(-one_of(c('Sumlivescale', 'Sumdeadscale')))
+    dplyr::select(-one_of(c('Sumlivescale', 'Sumdeadscale', 
+                            'Sumlivescale_from_mean')))
   
   return (scalecount_tree_mean)
 }
@@ -96,6 +97,14 @@ extract_block <- function(scalecount) {
   return (scalecount_block)
 }
 
+# mean live and dead scale are not integers for count data
+# Because we have missing shoots
+# need to multiply all means by 3 instead of summing for accuracy...
+get_sum_scale_from_mean <- function(mean_scale) {
+  sum_scale_from_mean <- round(mean_scale *3)
+  return (sum_scale_from_mean)
+}
+
 # Common processing across all experiments
 process_scalecount <- function(scalecount_raw) {
   scalecount <- scalecount_raw
@@ -140,6 +149,11 @@ process_scalecount <- function(scalecount_raw) {
     mutate(Sumlivescale = rowSums(dplyr::select(., Livescale1, Livescale2, Livescale3), na.rm = TRUE))
   scalecount<-scalecount %>% 
     mutate(Sumdeadscale = rowSums(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
+  
+  scalecount$Sumlivescale_from_mean <- 
+    get_sum_scale_from_mean(scalecount$Meanlivescale)
+  scalecount$Sumdeadscale_from_mean <- 
+    get_sum_scale_from_mean(scalecount$Meandeadscale)
   
   # Removing labels that were not collected
   scalecount<-scalecount %>% drop_na(Livescale1)
