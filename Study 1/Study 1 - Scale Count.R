@@ -19,6 +19,8 @@ library(emmeans)
 library(DHARMa)
 library(glmmTMB)
 
+library(performance)
+
 source("../graphing functions.r")
 source("../Data Processing.r")
 
@@ -102,108 +104,98 @@ dunn_nov <- dunnTest(Meanlivescale ~ Treatment,
 print(dunn_nov, dunn.test.results=TRUE)
 
 #### (4) Poisson/Negative binomial ####
-scalecount_tree_sum_july <- sum_counts_across_twigs(scalecount_july)
-scalecount_tree_sum_nov <- sum_counts_across_twigs(scalecount_nov)
 
-# Funnel pattern in residuals - suggests NB
-pois_july <- glm(Sumlivescale_from_mean ~ Treatment + Block, 
-                 family = "poisson", data = scalecount_tree_sum_july)
-
-# Negative binomial, July
-nb_july <- glm.nb(formula = Sumlivescale_from_mean ~ Treatment + Block,
-               data = scalecount_tree_sum_july)
-
-# Poisson, Nov
-pois_nov <- glm(Sumlivescale_from_mean ~ Treatment + Block, 
-                family = "poisson", data = scalecount_tree_sum_nov)
-
-# Negative binomial, November
-nb_nov <- glm.nb(formula = Sumlivescale_from_mean ~ Treatment + Block,
-                  data = scalecount_tree_sum_nov)
+# Mixed Poisson, no zero inflation
+pois_nov_mm <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
+                     data=scalecount_nov, ziformula = ~0,
+                     family = compois)
+# Doesn't look very good...
+simr_pois_nov <- simulateResiduals(pois_nov_mm)
 
 # Mixed NB model, no zero inflation
-nb_nov_mm <- glmmTMB(Sumlivescale_from_mean ~ Treatment + Block + (1|Label),
+nb_nov_mm <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_nov, ziformula = ~0,
                      family = nbinom2)
-# Lots of zero dispersion, probably better to just use zero inflation model
-simr_nb_nov_mm <- simulateResiduals(nb_nov_mm)
-
-# Compare AIC/BIC of pois and nb (don't compare mixed model here,
-# not the same response set bc mixed model uses uncompressed per-twig set)
-BIC(pois_nov, nb_nov)
-
-# Get emmeans graph
-emmip(ref_grid(nb_july), Block ~ Treatment, style="factor")
+# Lots of zero dispersion, deviation, etc - 
+# probably better to just use zero inflation model
+simr_nb_nov <- simulateResiduals(nb_nov_mm)
 
 #### (5) Zero-Inflated & Hurdle Models ####
 
 # Diagnostics easier with glmmTMB than PSCL due to DHARMa compatibility
 
-# Zero-inflated NB over each tree
-zinb_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + Block,
-                    data=scalecount_tree_sum_nov, ziformula = ~1,
-                    family = nbinom2)
-# Has minor dispersion, residual issues
+# Random block, zero inflation, over each twig
+# Random block seems to make the most sense in that we don't
+# exactly know the effect of each block and it would vary across time, etc
+# (soil quality changes?)
+# Actually, since the tree is within the block, I guess this needs to be nested?
+# Tree within block
+zinb_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+                                  data=scalecount_nov, ziformula = ~1,
+                                  family = nbinom2)
+# looks quite nice
 simr_zinb_nov <- simulateResiduals(zinb_nov)
 
-# Mixed NB model
-# over each twig, mixed effect for tree, includes fixed block, zero inflation
-zinb_nov_mm <- glmmTMB(Sumlivescale_from_mean ~ Treatment + Block + (1|Label),
-                       data=scalecount_nov, ziformula = ~1,
-                       family = nbinom2)
-# Several minor outliers, good residuals, dispersion fails test but 
-# dispersion is pretty low overall for the model so probably okay
-simr_zinb_nov_mm <- simulateResiduals(zinb_nov_mm)
-
-# Random block, zero inflation, over each twig
-zinb_nov_mm_rand_block <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1|Block) + (1|Label),
-                       data=scalecount_nov, ziformula = ~1,
-                       family = nbinom2)
-# This looks quite good
-simr_zinb_nov_mm_rand_block <- simulateResiduals(zinb_nov_mm_rand_block)
 
 # Mixed NB model, mixed eff for tree with no block, zero inflation
 # May be okay because block indicates location too?
 # Maybe ask Dr. Harris
-zinb_nov_mm_noblock <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1|Label),
+zinb_nov_noblock <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1|Label),
                                data=scalecount_nov, ziformula = ~1,
                                family = nbinom2)
 # No issues
-simr_nov_mm_noblock <- simulateResiduals(zinb_nov_mm_noblock)
+simr_nov_noblock <- simulateResiduals(zinb_nov_noblock)
 
 
 # Zero-inflated Poisson
-zip_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + Block,
-                   data=scalecount_tree_sum_nov, ziformula = ~1,
+zip_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+                   data=scalecount_nov, ziformula = ~1,
                    family = poisson)
+# some residual variance issues
+simr_zip_nov <- simulateResiduals(zip_nov)
 
 # Hurdle negative binomial
-hnbinom_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + Block,
-                        data=scalecount_tree_sum_nov,
+hnbinom_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+                        data=scalecount_nov,
                         ziformula = ~1,
                         family=truncated_nbinom1)
+# residual variance issues
+simr_hnb_nov <- simulateResiduals(hnbinom_nov)
+
+# Hurdle Poisson
+hpois_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+                        data=scalecount_nov,
+                        ziformula = ~1,
+                        family=truncated_poisson)
+# Homogeneity of variance issues
+simr_hpois_nov <- simulateResiduals(hpois_nov)
+
+# Check performance
+check_model(zinb_nov)
+performance(zinb_nov)
+plot(simr_zinb_nov)
 
 
 #### Estimates, CIs, Treatment Means ####
 
-# Use zero-inflated NB mixed model with random effect blocks for testing...
+# Use zero-inflated NB mixed model with nested tree within block for testing
 
 # Estimated marginal means
-emm_zinb_nov_mm_rb <- emmeans(zinb_nov_mm_rand_block, "Treatment")
-emm_zinb_nov_mm_rb_orig_scale <- emmeans(zinb_nov_mm_rand_block, 
+emm_zinb_nov <- emmeans(zinb_nov, "Treatment")
+emm_zinb_nov_orig_scale <- emmeans(zinb_nov, 
                                       "Treatment", type="response")
 
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
-plot(emm_zinb_nov_mm_rb_orig_scale, comparison=TRUE)
+plot(emm_zinb_nov_orig_scale, comparison=TRUE)
 
 # Pairwise comparisons for ratios 
 # (happens if you take the pairs from emm on the original scale
 # due to needing to perform tests on log)
-confint(pairs(emm_zinb_nov_mm_rb_orig_scale))
+confint(pairs(emm_zinb_nov_orig_scale, adjust="BH"))
 
 # CI for pairwise comparison on log scale
-confint(pairs(emm_zinb_nov_mm_rb))
+confint(pairs(emm_zinb_nov, adjust="BH"))
 
 # CI for pairwise comparison on original scale
-confint(pairs(regrid(emm_zinb_nov_mm_rb)))
+confint(pairs(regrid(emm_zinb_nov), adjust="BH"))
