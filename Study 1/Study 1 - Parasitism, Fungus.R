@@ -17,6 +17,11 @@ library(PMCMR)
 library(pscl)
 library(emmeans)
 
+library(DHARMa)
+library(glmmTMB)
+
+library(performance)
+
 source("../graphing functions.r")
 source("../Data Processing.r")
 
@@ -49,30 +54,55 @@ tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 
 #### (2) Binomial Model - Parasitism ####
 
-# Client dropped twigs with 0 scale
+# Drop twigs with 0 scale
 scalecount_para_july <- scalecount_july[rowSums(scalecount_july[, 6:11] == 0) < 2,]
 scalecount_para_july <- 
   scalecount_para_july %>% 
   drop_na(Label) #some samples only have one twig,
 
-# compress to presence per tree
-scalecount_para_july_tree <- get_presence_across_twigs(scalecount_para_july)
+scalecount_para_nov <- scalecount_july[rowSums(scalecount_nov[, 6:11] == 0) < 2,]
+scalecount_para_nov<- 
+  scalecount_para_nov %>% 
+  drop_na(Label) #some samples only have one twig,
 
-# This doesn't converge if we include Label:Twigab (tree+twig) with the per-twig observations
-# Hopefully we can say for the purposes of parasitism
-# it's okay to just treat each twig separately
-
-# Per-tree model
-parasitism_mod <- glm(formula = Prespara ~ Treatment + Block,
-                      data = scalecount_para_july,
-                      family = binomial)
-
-emm <- emmeans(parasitism_mod, "Treatment")
-pairs(emm)
-
-#### (3) Binomial Mixed Model - Parasitism ####
+# Use mixed models to account for random block and tree effects
 
 # Testing a generalized linear mixed model where we remove the block
 # but instead include the tree as a mixed effect
-test_glmer <- glmer(Prespara ~ Treatment + (1|Label),
+test_glmer <- glmer(Prespara ~ Treatment + (1| Label),
                     data=scalecount_para_july, family = binomial(link = "logit"))
+
+para_mod_july <- glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
+                         data=scalecount_para_july,
+                         family=binomial)
+simr_para_mod_july <- simulateResiduals(para_mod_july)
+
+para_mod_nov <-  glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
+                        data=scalecount_para_nov,
+                        family=binomial)
+simr_para_mod_nov <- simulateResiduals(para_mod_nov)
+
+#### (3) Means Analysis - Parasitism ####
+
+# July
+emm_para_july <- emmeans(para_mod_july, "Treatment")
+pairs(emm_para_july, type="response", adjust="BH")
+july_para_means_comp <- pairs(regrid(emm_para_july), adjust="BH")
+# CI for pairwise comp
+confint(july_para_means_comp)
+# CI for means
+confint(emm_para_july, type="response")
+
+# November
+emm_para_nov <- emmeans(para_mod_nov, "Treatment")
+pairs(emm_para_nov, type="response", adjust="BH")
+nov_para_means_comp <- pairs(regrid(emm_para_nov), adjust="BH")
+# Confint for pairwise comparison
+confint(nov_para_means_comp)
+# Confint for means
+confint(emm_para_nov, type="response")
+
+#### (4) Binomial Model - Fungus ####
+
+#### (5) Means Analysis - Fungus ####
+

@@ -108,7 +108,7 @@ print(dunn_nov, dunn.test.results=TRUE)
 # Mixed Poisson, no zero inflation
 pois_nov_mm <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_nov, ziformula = ~0,
-                     family = compois)
+                     family = poisson)
 # Doesn't look very good...
 simr_pois_nov <- simulateResiduals(pois_nov_mm)
 
@@ -176,7 +176,7 @@ performance(zinb_nov)
 plot(simr_zinb_nov)
 
 
-#### Estimates, CIs, Treatment Means ####
+#### (6) Estimates, CIs, Treatment Means ####
 
 # Use zero-inflated NB mixed model with nested tree within block for testing
 
