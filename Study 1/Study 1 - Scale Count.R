@@ -128,8 +128,9 @@ simr_nb_nov <- simulateResiduals(nb_nov_mm)
 # Random block seems to make the most sense in that we don't
 # exactly know the effect of each block and it would vary across time, etc
 # (soil quality changes?)
-# Actually, since the tree is within the block, I guess this needs to be nested?
-# Tree within block
+# Actually, since the tree is within the block, I guess this theoretically should be nested?
+# Tree within block - doesn't matter in this case since each block has a different name
+# Will be the same if you do (1 | Block) + (1 | Label) ("crossed factors")
 zinb_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                                   data=scalecount_nov, ziformula = ~1,
                                   family = nbinom2)
