@@ -186,6 +186,11 @@ emm_zinb_nov <- emmeans(zinb_nov, "Treatment")
 emm_zinb_nov_orig_scale <- emmeans(zinb_nov, 
                                       "Treatment", type="response")
 
+# effect size - Cohen's d
+eff_size(emm_zinb_nov, 
+         sigma=sigma(zinb_nov), edf=df.residual(zinb_nov))
+
+
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
 plot(emm_zinb_nov_orig_scale, comparison=TRUE)
