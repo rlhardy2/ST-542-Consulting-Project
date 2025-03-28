@@ -135,9 +135,10 @@ nb1_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                    data=scalecount_july, ziformula = ~0,
                    family = nbinom1)
 # Doesn't strictly have zero inflation
+# Actually looks quite good?
+# Should probably have similar assumptions as November though??
 simr_nb1_july <- simulateResiduals(nb1_july)
-# Technically passes levene homogeneity of variance by .05,
-# but wouldn't by alpha .1
+# Homogeneity of variance looks okay...
 testCategorical(simr_nb1_july, scalecount_july$Treatment)
 
 ##### November #####
