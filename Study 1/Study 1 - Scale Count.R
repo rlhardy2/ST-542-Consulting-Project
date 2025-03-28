@@ -121,13 +121,13 @@ simr_pois_july <- simulateResiduals(pois_july)
 
 # Mixed NB model, no zero inflation
 # Negative Binomial 2 (typical)
-nb_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
+nb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_july, ziformula = ~0,
                      family = nbinom2)
 # Doesn't strictly have zero inflation
 # But deviation issues
-simr_nb_july <- simulateResiduals(nb_july)
-testCategorical(simr_nb_nov, scalecount_nov$Treatment)
+simr_nb2_july <- simulateResiduals(nb2_july)
+testCategorical(simr_nb2_july, scalecount_july$Treatment)
 
 # Mixed NB model, no zero inflation
 # Negative Binomial 1 (linear dispersion)
@@ -150,12 +150,13 @@ simr_pois_nov <- simulateResiduals(pois_nov)
 
 # Mixed NB model, no zero inflation
 # Using type 2 nbinom as is typical
-nb_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
+nb2_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_nov, ziformula = ~0,
                      family = nbinom2)
 # Doesn't technically fail zero inflation test
 # But lots of issues
-simr_nb_nov <- simulateResiduals(nb_nov)
+simr_nb2_nov <- simulateResiduals(nb2_nov)
+testCategorical(simr_nb2_nov, scalecount_nov$Treatment)
 
 # Mixed NB1 model, no zero inflation
 nb1_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
@@ -170,12 +171,12 @@ testCategorical(simr_nb1_nov, scalecount_nov$Treatment)
 #### (5) Zero-Inflated & Hurdle Models ####
 
 ##### July #####
-zinb_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+zinb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                     data=scalecount_july, ziformula = ~1,
                     family = nbinom2)
 # looks quite nice
-simr_zinb_july <- simulateResiduals(zinb_july)
-plot(simr_zinb_july)
+simr_zinb2_july <- simulateResiduals(zinb2_july)
+plot(simr_zinb2_july)
 
 ##### November #####
 # Diagnostics easier with glmmTMB than PSCL due to DHARMa compatibility
@@ -188,11 +189,11 @@ plot(simr_zinb_july)
 # Tree within block - doesn't matter in this case since each block has a different name
 # Will be the same if you do (1 | Block) + (1 | Label) ("crossed factors")
 # Using negative binomial 2 - quadratic overdispersion
-zinb_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+zinb2_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                                   data=scalecount_nov, ziformula = ~1,
                                   family = nbinom2)
 # looks quite nice
-simr_zinb_nov <- simulateResiduals(zinb_nov)
+simr_zinb2_nov <- simulateResiduals(zinb2_nov)
 
 # Zero-inflated Poisson
 zip_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
@@ -207,7 +208,7 @@ hnbinom_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label)
                         ziformula = ~1,
                         family=truncated_nbinom2)
 # residual variance issues
-simr_hnb_nov <- simulateResiduals(hnbinom_nov)
+simr_hnb2_nov <- simulateResiduals(hnbinom_nov)
 
 # Hurdle Poisson
 hpois_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
@@ -218,9 +219,9 @@ hpois_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
 simr_hpois_nov <- simulateResiduals(hpois_nov)
 
 # Check performance
-check_model(zinb_nov)
-performance(zinb_nov)
-plot(simr_zinb_nov)
+check_model(zinb2_nov)
+performance(zinb2_nov)
+plot(simr_zinb2_nov)
 
 
 #### (6) Analysis ####
@@ -228,51 +229,51 @@ plot(simr_zinb_nov)
 ##### July #####
 ###### Means ######
 # Estimated marginal means
-emm_zinb_july <- emmeans(zinb_july, "Treatment")
-emm_zinb_july_orig_scale <- emmeans(zinb_july, 
+emm_zinb2_july <- emmeans(zinb2_july, "Treatment")
+emm_zinb2_july_orig_scale <- emmeans(zinb2_july, 
                                    "Treatment", type="response")
-confint(emm_zinb_july_orig_scale)
+confint(emm_zinb2_july_orig_scale)
 # effect size - Cohen's d
-eff_size(emm_zinb_july, 
-         sigma=sigma(zinb_july), edf=df.residual(zinb_july))
+eff_size(emm_zinb2_july, 
+         sigma=sigma(zinb2_july), edf=df.residual(zinb2_july))
 
 
 ###### Pairwise Comparisons ######
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
-plot(emm_zinb_july_orig_scale, comparison=TRUE)
+plot(emm_zinb2_july_orig_scale, comparison=TRUE)
 # Pairwise comparisons for ratios 
 # (happens if you take the pairs from emm on the original scale
 # due to needing to perform tests on log)
-confint(pairs(emm_zinb_july_orig_scale, adjust="BH"))
+confint(pairs(emm_zinb2_july_orig_scale, adjust="BH"))
 # CI for pairwise comparison on log scale
-confint(pairs(emm_zinb_july, adjust="BH"))
+confint(pairs(emm_zinb2_july, adjust="BH"))
 # CI for pairwise comparison on original scale
-confint(pairs(regrid(emm_zinb_july), adjust="BH"))
+confint(pairs(regrid(emm_zinb2_july), adjust="BH"))
 
 
 ##### November #####
 
 ###### Means ######
 # Estimated marginal means
-emm_zinb_nov <- emmeans(zinb_nov, "Treatment")
-emm_zinb_nov_orig_scale <- emmeans(zinb_nov, 
+emm_zinb2_nov <- emmeans(zinb2_nov, "Treatment")
+emm_zinb2_nov_orig_scale <- emmeans(zinb2_nov, 
                                       "Treatment", type="response")
-confint(emm_zinb_nov_orig_scale)
+confint(emm_zinb2_nov_orig_scale)
 # effect size - Cohen's d
-eff_size(emm_zinb_nov, 
-         sigma=sigma(zinb_nov), edf=df.residual(zinb_nov))
+eff_size(emm_zinb2_nov, 
+         sigma=sigma(zinb2_nov), edf=df.residual(zinb2_nov))
 
 
 ###### Pairwise Comparisons ######
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
-plot(emm_zinb_nov_orig_scale, comparison=TRUE)
+plot(emm_zinb2_nov_orig_scale, comparison=TRUE)
 # Pairwise comparisons for ratios 
 # (happens if you take the pairs from emm on the original scale
 # due to needing to perform tests on log)
-confint(pairs(emm_zinb_nov_orig_scale, adjust="BH"))
+confint(pairs(emm_zinb2_nov_orig_scale, adjust="BH"))
 # CI for pairwise comparison on log scale
-confint(pairs(emm_zinb_nov, adjust="BH"))
+confint(pairs(emm_zinb2_nov, adjust="BH"))
 # CI for pairwise comparison on original scale
-confint(pairs(regrid(emm_zinb_nov), adjust="BH"))
+confint(pairs(regrid(emm_zinb2_nov), adjust="BH"))

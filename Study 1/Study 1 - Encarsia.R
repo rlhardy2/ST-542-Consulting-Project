@@ -67,12 +67,12 @@ encar_pois_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
 simr_encar_pois_july <- simulateResiduals(encar_pois_july)
 
 # Negative binomial, linear overdispersion
-encar_nb_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_nb1_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
                         data=scalecountencar_july, ziformula = ~0,
                         family = nbinom1)
 # Better looking residuals than Poisson
-simr_encar_nb_july <- simulateResiduals(encar_nb_july)
-plot(simr_encar_nb_july)
+simr_encar_nb1_july <- simulateResiduals(encar_nb1_july)
+plot(simr_encar_nb1_july)
 
 ##### November #####
 get_hist_all_trt(scalecountencar_nov, 
@@ -87,12 +87,12 @@ encar_pois_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
 simr_encar_pois_nov <- simulateResiduals(encar_pois_nov)
 
 # Negative binomial - type 1 (linearly overdispersed)
-encar_nb_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_nb1_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                         data=scalecountencar_nov, ziformula = ~0,
                         family = nbinom1)
 # Fits pretty well
-simr_encar_nb_nov <- simulateResiduals(encar_nb_nov)
-testCategorical(simr_encar_nb_nov, scalecountencar_nov$Treatment)
+simr_encar_nb1_nov <- simulateResiduals(encar_nb1_nov)
+testCategorical(simr_encar_nb1_nov, scalecountencar_nov$Treatment)
 
 # Negative binomial - type 2 (quadratically overdispersed)
 encar_nb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
@@ -116,8 +116,8 @@ plot(simr_encar_zinb2_nov)
 
 ##### July #####
 # Treatment means - July
-emm_encar_july <- emmeans(encar_nb_july, "Treatment")
-emm_encar_july_orig_scale <- emmeans(encar_nb_july, "Treatment", type="response")
+emm_encar_july <- emmeans(encar_nb1_july, "Treatment")
+emm_encar_july_orig_scale <- emmeans(encar_nb1_july, "Treatment", type="response")
 confint(emm_encar_july_orig_scale)
 
 # Treatment means comparisons - july
@@ -127,8 +127,8 @@ confint(pairs_encar_july)
 
 ##### November #####
 # Treatment means - nov
-emm_encar_nov <- emmeans(encar_nb_nov, "Treatment")
-emm_encar_nov_orig_scale <- emmeans(encar_nb_nov, "Treatment", type="response")
+emm_encar_nov <- emmeans(encar_nb1_nov, "Treatment")
+emm_encar_nov_orig_scale <- emmeans(encar_nb1_nov, "Treatment", type="response")
 
 # Treatment means comparisons - nov
 pairs_encar_nov <- pairs(regrid(emm_encar_nov), adjust="BH")
