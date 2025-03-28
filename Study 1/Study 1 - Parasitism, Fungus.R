@@ -51,40 +51,36 @@ scalecount_nov <- subset(scalecount, grepl('November', Date)) # November data
 tmeans_july <- get_treatment_survival_means(scalecount_july)
 tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 
-
-#### (2) Binomial Model - Parasitism ####
-
+##### Specialized parasitism and fungus preprocessing #####
 # Drop twigs with 0 scale
 scalecount_para_july <- scalecount_july[rowSums(scalecount_july[, 6:11] == 0) < 2,]
 scalecount_para_july <- 
   scalecount_para_july %>% 
-  drop_na(Label) #some samples only have one twig,
+  drop_na(Label) #some samples only have one twig
 
 scalecount_para_nov <- scalecount_july[rowSums(scalecount_nov[, 6:11] == 0) < 2,]
 scalecount_para_nov<- 
   scalecount_para_nov %>% 
-  drop_na(Label) #some samples only have one twig,
+  drop_na(Label) #some samples only have one twig
 
+#### (2) Parasitism models ####
 # Use mixed models to account for random block and tree effects
 
-# Testing a generalized linear mixed model where we remove the block
-# but instead include the tree as a mixed effect
-test_glmer <- glmer(Prespara ~ Treatment + (1| Label),
-                    data=scalecount_para_july, family = binomial(link = "logit"))
-
+##### July #####
 para_mod_july <- glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
                          data=scalecount_para_july,
                          family=binomial)
 simr_para_mod_july <- simulateResiduals(para_mod_july)
 
+##### November #####
 para_mod_nov <-  glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
                         data=scalecount_para_nov,
                         family=binomial)
 simr_para_mod_nov <- simulateResiduals(para_mod_nov)
 
-#### (3) Means Analysis - Parasitism ####
+#### (3) Parasitism Analysis ####
 
-# July
+##### July #####
 emm_para_july <- emmeans(para_mod_july, "Treatment")
 pairs(emm_para_july, type="response", adjust="BH")
 july_para_means_comp <- pairs(regrid(emm_para_july), adjust="BH")
@@ -93,7 +89,7 @@ confint(july_para_means_comp)
 # CI for means
 confint(emm_para_july, type="response")
 
-# November
+##### November #####
 emm_para_nov <- emmeans(para_mod_nov, "Treatment")
 pairs(emm_para_nov, type="response", adjust="BH")
 nov_para_means_comp <- pairs(regrid(emm_para_nov), adjust="BH")
@@ -102,7 +98,11 @@ confint(nov_para_means_comp)
 # Confint for means
 confint(emm_para_nov, type="response")
 
-#### (4) Binomial Model - Fungus ####
+#### (4) Fungus models ####
+##### July #####
+##### November #####
 
-#### (5) Means Analysis - Fungus ####
+#### (5) Fungus Analysis ####
+##### July #####
+##### November #####
 

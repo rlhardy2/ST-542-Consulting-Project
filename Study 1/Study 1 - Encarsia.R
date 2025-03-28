@@ -42,9 +42,8 @@ scalecount$County <- as.factor(scalecount$County)
 scalecount_july <- subset(scalecount, grepl('July', Date)) # July data
 scalecount_nov <- subset(scalecount, grepl('julyember', Date)) # November data
 
-#### (2) Encarsia models ####
-
-# drop counts where NA
+##### Specialized Encarsia preprocessing #####
+# drop counts where encarsia is NA
 scalecountencar_july <-scalecount_july %>% drop_na(encarsia)
 scalecountencar_nov <-scalecount_nov %>% drop_na(encarsia)
 
@@ -52,6 +51,8 @@ scalecountencar_nov <-scalecount_nov %>% drop_na(encarsia)
 # Combine by tree, as encarsia is by tree
 scalecountencar_july <- average_counts_across_twigs(scalecountencar_july)
 scalecountencar_nov <- average_counts_across_twigs(scalecountencar_nov)
+
+#### (2) Encarsia models ####
 
 ##### July #####
 # Graph histogram of encarsia
