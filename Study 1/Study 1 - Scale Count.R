@@ -141,6 +141,7 @@ simr_zinb_nov <- simulateResiduals(zinb_nov)
 # Mixed NB model, mixed eff for tree with no block, zero inflation
 # May be okay because block indicates location too?
 # Maybe ask Dr. Harris
+# Using negative binomial 2 - quadratic overdispersion
 zinb_nov_noblock <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1|Label),
                                data=scalecount_nov, ziformula = ~1,
                                family = nbinom2)
@@ -179,18 +180,20 @@ plot(simr_zinb_nov)
 
 #### (6) Estimates, CIs, Treatment Means ####
 
-# Use zero-inflated NB mixed model with nested tree within block for testing
+#### November ####
 
+##### Means #####
 # Estimated marginal means
 emm_zinb_nov <- emmeans(zinb_nov, "Treatment")
 emm_zinb_nov_orig_scale <- emmeans(zinb_nov, 
                                       "Treatment", type="response")
-
+confint(emm_zinb_nov_orig_scale)
 # effect size - Cohen's d
 eff_size(emm_zinb_nov, 
          sigma=sigma(zinb_nov), edf=df.residual(zinb_nov))
 
 
+##### Pairwise Comparisons #####
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
 plot(emm_zinb_nov_orig_scale, comparison=TRUE)
