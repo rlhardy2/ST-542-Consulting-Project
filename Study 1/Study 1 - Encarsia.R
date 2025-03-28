@@ -40,7 +40,7 @@ scalecount$County <- as.factor(scalecount$County)
 
 # Getting first count - July
 scalecount_july <- subset(scalecount, grepl('July', Date)) # July data
-scalecount_nov <- subset(scalecount, grepl('julyember', Date)) # November data
+scalecount_nov <- subset(scalecount, grepl('November', Date)) # November data
 
 ##### Specialized Encarsia preprocessing #####
 # drop counts where encarsia is NA
@@ -92,13 +92,23 @@ encar_nb_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                         family = nbinom1)
 # Fits pretty well
 simr_encar_nb_nov <- simulateResiduals(encar_nb_nov)
+testCategorical(simr_encar_nb_nov, scalecountencar_nov$Treatment)
 
 # Negative binomial - type 2 (quadratically overdispersed)
 encar_nb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          data=scalecountencar_nov, ziformula = ~0,
                          family = nbinom2)
-# Not as good as nb type 1
+# doesn't fit quite as well as nb type 1
 simr_encar_nb2_nov <- simulateResiduals(encar_nb2_nov)
+testCategorical(simr_encar_nb2_nov, scalecountencar_nov$Treatment)
+
+# Check zero inflated just in case...
+# No evidence of zero inflation
+encar_zinb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+                         data=scalecountencar_nov, ziformula = ~1,
+                         family = nbinom2)
+simr_encar_zinb2_nov <- simulateResiduals(encar_zinb2_nov)
+plot(simr_encar_zinb2_nov)
 
 # Best one looks to be type 1 NB
 
