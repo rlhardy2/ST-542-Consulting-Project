@@ -58,7 +58,7 @@ scalecount_para_july <-
   scalecount_para_july %>% 
   drop_na(Label) #some samples only have one twig
 
-scalecount_para_nov <- scalecount_july[rowSums(scalecount_nov[, 6:11] == 0) < 2,]
+scalecount_para_nov <- scalecount_nov[rowSums(scalecount_nov[, 6:11] == 0) < 2,]
 scalecount_para_nov<- 
   scalecount_para_nov %>% 
   drop_na(Label) #some samples only have one twig
@@ -100,9 +100,33 @@ confint(emm_para_nov, type="response")
 
 #### (4) Fungus models ####
 ##### July #####
+fung_mod_july <- glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
+                         data=scalecount_para_july,
+                         family=binomial)
+simr_fung_mod_july <- simulateResiduals(para_mod_july)
+
 ##### November #####
+fung_mod_nov <-  glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
+                         data=scalecount_para_nov,
+                         family=binomial)
+simr_fung_mod_nov <- simulateResiduals(fung_mod_nov)
 
 #### (5) Fungus Analysis ####
 ##### July #####
+emm_fung_july <- emmeans(fung_mod_july, "Treatment")
+pairs(emm_fung_july, type="response", adjust="BH")
+july_fung_means_comp <- pairs(regrid(emm_fung_july), adjust="BH")
+# CI for pairwise comp
+confint(july_fung_means_comp)
+# CI for means
+confint(emm_fung_july, type="response")
+
 ##### November #####
+emm_fung_nov <- emmeans(fung_mod_nov, "Treatment")
+pairs(emm_fung_nov, type="response", adjust="BH")
+nov_fung_means_comp <- pairs(regrid(emm_fung_nov), adjust="BH")
+# Confint for pairwise comparison
+confint(nov_fung_means_comp)
+# Confint for means
+confint(emm_fung_nov, type="response")
 
