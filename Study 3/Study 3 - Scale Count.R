@@ -33,8 +33,10 @@ colnames(scalecount3) <- c("Label", "Twigab","EHSLivescale1","EHSDeadscale1","EH
                           "CryptoLivescale2","CryptoDeadscale2","CryptoLivescale3","CryptoDeadscale3",
                           "Presfungus")
 
+##### Special - study 3 only #####
 # Create Livescale{x}, Deadscale{x} variables
 scalecount3 <- create_live_deadscale_vars(scalecount3)
+## End study 3 only processing
 
 # Remove unused variables (crypto, ehs scale)
 scalecount3 <-subset(scalecount3, select = -c(EHSLivescale1,EHSLivescale2,EHSLivescale3,EHSDeadscale1,
