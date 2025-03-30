@@ -124,8 +124,8 @@ simr_pois_july <- simulateResiduals(pois_july)
 nb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_july, ziformula = ~0,
                      family = nbinom2)
-# Doesn't strictly have zero inflation
-# But deviation issues
+# Has some zero inflation issues
+# Also deviation issues
 simr_nb2_july <- simulateResiduals(nb2_july)
 testCategorical(simr_nb2_july, scalecount_july$Treatment)
 
@@ -148,6 +148,7 @@ pois_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      family = poisson)
 # Doesn't look very good...
 simr_pois_nov <- simulateResiduals(pois_nov)
+check_overdispersion(pois_nov)
 
 # Mixed NB model, no zero inflation
 # Using type 2 nbinom as is typical

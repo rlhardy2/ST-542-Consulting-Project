@@ -1,6 +1,20 @@
 library(dplyr)
 library(stringr)
 
+# Add EHS and Cryptomeria scale together into Livescale{x}, Deadscale{x} cols
+create_live_deadscale_vars <- function(scalecount) {
+  summed <- 
+    scalecount %>%
+    mutate(Livescale1=EHSLivescale1 + CryptoLivescale1,
+           Livescale2=scalecount$EHSLivescale2 + scalecount$CryptoLivescale2,
+           Livescale3=scalecount$EHSLivescale3 + scalecount$CryptoLivescale3,
+           Deadscale1=scalecount$EHSDeadscale1 + scalecount$CryptoDeadscale1,
+           Deadscale2=scalecount$EHSDeadscale2 + scalecount$CryptoDeadscale2,
+           Deadscale3=scalecount$EHSDeadscale3 + scalecount$CryptoDeadscale3)
+  return (summed)
+}
+
+
 # Check for na in live, dead scale counts
 check_na_scale_counts <- function(scalecount) {
   has_na <- scalecount %>% 
@@ -88,11 +102,21 @@ replace_strings_with_binary <- function(vars) {
   return (vars_with_nums)
 }
 
+# Without a county label, the block will be the first char
+extract_block_no_county_label <- function(scalecount) {
+  return (substring(scalecount$Label, 1, 1))
+}
+
 # Extracts block from treatment label string - first letter, hyphen 2nd letter
 # First letter denotes county, 2nd block within the county
-# May not be needed - can use label (tree) as block?
 extract_block <- function(scalecount) {
-  scalecount_block <- str_match(scalecount$Label, "[A-Z]-[A-Z]")
+  # Check first element - if doesn't include county, only take 1st char
+  if (str_length(scalecount[1,]$Label) == 3) {
+    scalecount_block <- extract_block_no_county_label(scalecount)
+  } else {
+    scalecount_block <- str_match(scalecount$Label, "[A-Z]-[A-Z]")
+  }
+  
   scalecount_block <- as.factor(scalecount_block)
   return (scalecount_block)
 }
@@ -105,13 +129,25 @@ get_sum_scale_from_mean <- function(mean_scale) {
   return (sum_scale_from_mean)
 }
 
+extract_treatment <- function(scalecount) {
+  # if label doesn't include county
+  if (str_length(scalecount[1,]$Label) == 3) {
+    treatment <- substring(scalecount$Label, first=2, last=2)
+  } else {
+    treatment <- substring(scalecount$Label, first=4, last=4)
+  }
+  
+  treatment <- as.factor(treatment)
+  return (treatment)
+}
+
 # Common processing across all experiments
 process_scalecount <- function(scalecount_raw) {
   scalecount <- scalecount_raw
   
   # Extract and create new column with treatment
-  scalecount$Treatment<-
-    substring(scalecount$Label, first=4, last=4)
+  # Use 2nd to last character
+  scalecount$Treatment<- extract_treatment(scalecount)
   
   # Encode presence and absence as 0s and 1s
   scalecount$Prespara <- replace_strings_with_binary(scalecount$Prespara)
@@ -121,9 +157,6 @@ process_scalecount <- function(scalecount_raw) {
   
   # Extract block
   scalecount$Block <- extract_block(scalecount)
-  
-  # Convert Treatment to factor - need to also add County for Study 1
-  scalecount$Treatment <- as.factor(scalecount$Treatment)
   
   # Convert twig to factor
   scalecount$Twigab <- as.factor(scalecount$Twigab)

@@ -92,6 +92,7 @@ encar_nb1_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                         family = nbinom1)
 # Fits pretty well
 simr_encar_nb1_nov <- simulateResiduals(encar_nb1_nov)
+plot(simr_encar_nb1_nov)
 testCategorical(simr_encar_nb1_nov, scalecountencar_nov$Treatment)
 
 # Negative binomial - type 2 (quadratically overdispersed)
@@ -100,6 +101,7 @@ encar_nb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          family = nbinom2)
 # doesn't fit quite as well as nb type 1
 simr_encar_nb2_nov <- simulateResiduals(encar_nb2_nov)
+plot(simr_encar_nb2_nov)
 testCategorical(simr_encar_nb2_nov, scalecountencar_nov$Treatment)
 
 # Check zero inflated just in case...
@@ -109,6 +111,13 @@ encar_zinb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          family = nbinom2)
 simr_encar_zinb2_nov <- simulateResiduals(encar_zinb2_nov)
 plot(simr_encar_zinb2_nov)
+
+# Test zero inflated Poisson
+encar_zip_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+                           data=scalecountencar_nov, ziformula = ~1,
+                           family = poisson)
+simr_encar_zip_nov <- simulateResiduals(encar_zip_nov)
+plot(simr_encar_zip_nov)
 
 # Best one looks to be type 1 NB
 
