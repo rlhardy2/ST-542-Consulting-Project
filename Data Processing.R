@@ -102,17 +102,12 @@ replace_strings_with_binary <- function(vars) {
   return (vars_with_nums)
 }
 
-# Without a county label, the block will be the first char
-extract_block_no_county_label <- function(scalecount) {
-  return (substring(scalecount$Label, 1, 1))
-}
-
 # Extracts block from treatment label string - first letter, hyphen 2nd letter
 # First letter denotes county, 2nd block within the county
 extract_block <- function(scalecount) {
   # Check first element - if doesn't include county, only take 1st char
   if (str_length(scalecount[1,]$Label) == 3) {
-    scalecount_block <- extract_block_no_county_label(scalecount)
+    scalecount_block <- substring(scalecount$Label, 1, 1)
   } else {
     scalecount_block <- str_match(scalecount$Label, "[A-Z]-[A-Z]")
   }
