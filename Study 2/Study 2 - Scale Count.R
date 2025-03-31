@@ -28,6 +28,8 @@ source("../Data Processing.r")
 
 #### (1) Data Pre-processing ####
 
+trt_labels2 <- c("Pyri/May", "Ace/May", "Pyri/May + Ace/June", "No Treatment")
+
 # Reading in the data
 # Not sure why but there is an extra column of missing values at the end of the data set
 # This is removed below along with the 'notes' column
@@ -281,4 +283,38 @@ confint(pairs(emm_zinb2_nov_orig_scale, adjust="BH"))
 confint(pairs(emm_zinb2_nov, adjust="BH"))
 # CI for pairwise comparison on original scale
 confint(pairs(regrid(emm_zinb2_nov), adjust="BH"))
+
+#### (7) Graphs ####
+
+##### July #####
+
+# Making the confidence intervals a data frame
+confint_july <- as.data.frame(confint(emm_zinb2_july_orig_scale))
+
+# Plot of the CIs for the estimated marginal means for each treatment
+ggplot(confint_july, aes(x = Treatment, y = response)) +
+  geom_point(size = 3, color = "blue") +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
+  labs(title = "CIs of the Estimated Marginal Means by Treatment",
+       x = "Treatment",
+       y = "Sumlivescale_from_mean")
+
+# Making the confidence intervals a data frame (for the pairs)
+confint_pairs_july <- as.data.frame(confint(pairs(regrid(emm_zinb2_nov), adjust="BH")))
+
+# Plot of the CIs for the estimated marginal means for each pair
+ggplot(confint_pairs_july, aes(x = contrast, y = estimate)) +
+  geom_point(size = 3, color = "blue") +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
+  labs(title = "CIs of the Estimated Marginal Means by Treatment",
+       x = "Treatment",
+       y = "Sumlivescale_from_mean")
+
+
+
+
+
+
+
+
 

@@ -24,6 +24,8 @@ source("../Data Processing.r")
 
 #### (1) Data Pre-processing ####
 
+trt_labels2 <- c("Pyri/May", "Ace/May", "Pyri/May + Ace/June", "No Treatment")
+
 # Reading in the data
 # Not sure why but there is an extra column of missing values at the end of the data set
 # This is removed below along with the 'notes' column
@@ -60,8 +62,6 @@ scalecountencar2_nov <- average_counts_across_twigs(scalecountencar2_nov)
 #### (2) Encarsia models ####
 
 ##### July #####
-
-trt_labels <- c("1 ?", "2 ?", "3 ?", "4 ?") # I don't think these are right lol
 
 # Graph histogram of encarsia -- this needs to be double checked...
 get_hist_all_trt(scalecountencar2_july, 

@@ -24,6 +24,8 @@ source("../Data Processing.r")
 
 #### (1) Data Pre-processing ####
 
+trt_labels2 <- c("Pyri/May", "Ace/May", "Pyri/May + Ace/June", "No Treatment")
+
 # Reading in the data
 # Not sure why but there is an extra column of missing values at the end of the data set
 # This is removed below along with the 'notes' column
