@@ -53,15 +53,27 @@ tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 
 ##### Specialized parasitism and fungus preprocessing #####
 # Drop twigs with 0 scale
-scalecount_para_july <- scalecount_july[rowSums(scalecount_july[, 6:11] == 0) < 2,]
-scalecount_para_july <- 
-  scalecount_para_july %>% 
-  drop_na(Label) #some samples only have one twig
 
-scalecount_para_nov <- scalecount_nov[rowSums(scalecount_nov[, 6:11] == 0) < 2,]
-scalecount_para_nov<- 
-  scalecount_para_nov %>% 
-  drop_na(Label) #some samples only have one twig
+# Should look at Meanlivescale and Meandeadscale
+scalecount_para_july <- 
+  scalecount_july %>%
+  filter(Meanlivescale > 0 | Meandeadscale > 0) %>%
+  drop_na(Label)
+
+scalecount_para_nov <-
+  scalecount_nov %>%
+  filter(Meanlivescale > 0 | Meandeadscale > 0) %>%
+  drop_na(Label)
+
+# scalecount_para_july <- scalecount_july[rowSums(scalecount_july[, 12:13] == 0) < 2,]
+# scalecount_para_july <- 
+#   scalecount_para_july %>% 
+#   drop_na(Label) #some samples only have one twig
+# 
+# scalecount_para_nov <- scalecount_nov[rowSums(scalecount_nov[, 12:13] == 0) < 2,]
+# scalecount_para_nov<- 
+#   scalecount_para_nov %>% 
+#   drop_na(Label) #some samples only have one twig
 
 #### (2) Parasitism models ####
 # Use mixed models to account for random block and tree effects
