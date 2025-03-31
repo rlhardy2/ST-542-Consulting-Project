@@ -18,7 +18,7 @@ library(pscl)
 library(emmeans)
 library(DHARMa)
 library(glmmTMB)
-
+library(rcompanion)
 library(performance)
 
 source("../graphing functions.r")
@@ -164,7 +164,7 @@ testCategorical(simr_nb1_nov, scalecount2_nov$Treatment) # gives error...
 
 ##### July #####
 
-# Zero-inflated negative binomial
+# Zero-inflated negative binomial 2
 zinb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                       data=scalecount2_july, ziformula = ~1,
                       family = nbinom2)
@@ -172,6 +172,15 @@ zinb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
 
 simr_zinb2_july <- simulateResiduals(zinb2_july)
 plot(simr_zinb2_july)
+
+# Zero-inflated negative binomial 1
+zinb1_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+                      data=scalecount2_july, ziformula = ~1,
+                      family = nbinom1)
+# Got a warning about "model convergence problem"
+
+simr_zinb1_july <- simulateResiduals(zinb1_july)
+plot(simr_zinb1_july)
 
 ##### November #####
 # Diagnostics easier with glmmTMB than PSCL due to DHARMa compatibility
@@ -183,6 +192,14 @@ zinb2_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
 
 simr_zinb2_nov <- simulateResiduals(zinb2_nov)
 plot(simr_zinb2_nov)
+
+# Using negative binomial 1 - linear overdispersion
+zinb1_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
+                     data=scalecount2_nov, ziformula = ~1,
+                     family = nbinom1)
+
+simr_zinb1_nov <- simulateResiduals(zinb1_nov)
+plot(simr_zinb1_nov)
 
 # Zero-inflated Poisson
 zip_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
