@@ -107,7 +107,7 @@ dunn_nov <- dunnTest(Meanlivescale ~ Treatment,
 
 print(dunn_nov, dunn.test.results=TRUE)
 
-#### (4) Poisson/Negative binomial ####
+#### (4) Poisson & Negative Binomial Models ####
 
 # Just to test fit and necessity of zero inflation
 
@@ -224,7 +224,6 @@ simr_hpois_nov <- simulateResiduals(hpois_nov)
 check_model(zinb2_nov)
 performance(zinb2_nov)
 plot(simr_zinb2_nov)
-
 
 #### (6) Analysis ####
 

@@ -112,6 +112,7 @@ fung_mod_nov <-  glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
 simr_fung_mod_nov <- simulateResiduals(fung_mod_nov)
 
 #### (5) Fungus Analysis ####
+
 ##### July #####
 emm_fung_july <- emmeans(fung_mod_july, "Treatment")
 pairs(emm_fung_july, type="response", adjust="BH")
