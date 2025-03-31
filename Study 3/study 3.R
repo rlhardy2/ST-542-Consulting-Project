@@ -15,12 +15,12 @@ library(biostat3)
 library(multcompView)
 library(FSA)
 
-source("graphing functions.r")
+source("../graphing functions.r")
 
 #### (1) Data Pre-processing ####
 
 # Reading in the data
-scalecount <- read.csv(file = "acety counting v2 (study 3).csv", strip.white=TRUE)
+scalecount <- read.csv(file = "acety counting v3 (study 3).csv", strip.white=TRUE)
 
 # Adding column names
 colnames(scalecount) <- c("Label", "Twigab","EHSLivescale1","EHSDeadscale1","EHSLivescale2","EHSDeadscale2",
@@ -211,7 +211,13 @@ scalecountall <- scalecountall %>%
 
 # Now with no zeros: taking out all samples in which no scale was found
 scalecount_nozero <- scalecountall
-scalecount_nozero <- scalecount_nozero %>% filter(Meanlivescale > 0)
+
+# Note - this is from the original code
+# This looks at Prespara, Presfungus, Meanlivescale, Meandeadscale?
+# scalecount_nozero <- scalecount_nozero[rowSums(scalecount_nozero[, 3:6] == 0) < 2,]
+scalecount_nozero <- 
+  scalecount_nozero %>%
+  filter(Meanlivescale>0 | Meandeadscale>0)
 
 # Percentage of parasitism presence in a group
 tmeans_para <- scalecount_nozero %>% 
