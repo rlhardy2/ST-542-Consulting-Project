@@ -46,54 +46,65 @@ scalecount2_nov <- subset(scalecount2, grepl('November', Date))
 tmeans2_july <- get_treatment_survival_means(scalecount2_july)
 tmeans2_nov <- get_treatment_survival_means(scalecount2_nov)
 
-#### (2) Parasitism Analysis ???? ####
-
-##### July #####
+##### Specialized parasitism and fungus preprocessing #####
 
 # Client dropped twigs with 0 scale
-scalecount2_para_july <- scalecount2_july[rowSums(scalecount_july[, 5:10] == 0) < 2,]
+#scalecount2_para_july <- scalecount2_july[rowSums(scalecount2_july[, 5:10] == 0) < 2,]
+scalecount2_para_july <- scalecount2_july %>% filter(Meanlivescale != 0 & Meandeadscale != 0)
 scalecount2_para_july <- 
   scalecount2_para_july %>% 
   drop_na(Label) # Some samples only have one twig
 
-# Compress to presence per tree
-scalecount2_para_july_tree <- get_presence_across_twigs(scalecount2_para_july)
-
-# Per tree model
-parasitism_mod2_july <- glm(formula = Prespara ~ Treatment + Block,
-                            data = scalecount2_para_july_tree,
-                            family = binomial)
-
-emm <- emmeans(parasitism_mod2_july, "Treatment")
-pairs(emm)
-
-##### November #####
-
-# Umm, I'm not sure if we should be dropping twigs with 0 scale?
-# Wouldn't 0 scale mean the pesticide worked (95% of the time like the client estimated)?
-# We have A LOT of observations with 0 scale here, most likely because the pesticide worked
-# If we remove all of these observations, we are left with almost nothing to use in the
-# binomial model below...
-# That's why the code below only shows one pairwise comparison...
-
 # Client dropped twigs with 0 scale
-scalecount2_para_nov <- scalecount2_nov[rowSums(scalecount2_nov[, 5:10] == 0) < 2,]
+#scalecount2_para_nov <- scalecount2_nov[rowSums(scalecount2_nov[, 5:10] == 0) < 2,]
+scalecount2_para_nov <- scalecount2_nov %>% filter(Meanlivescale != 0 & Meandeadscale != 0)
 scalecount2_para_nov <- 
   scalecount2_para_nov %>% 
   drop_na(Label) # Some samples only have one twig
 
-# Compress to presence per tree
-scalecount2_para_nov_tree <- get_presence_across_twigs(scalecount2_para_nov)
+#### (2) Parasitism Models ####
 
-# Per tree model
-parasitism_mod2_nov <- glm(formula = Prespara ~ Treatment + Block,
-                           data = scalecount2_para_nov_tree,
-                           family = binomial)
+##### July #####
 
-emm <- emmeans(parasitism_mod2_nov, "Treatment")
-pairs(emm)
+para_mod_july <- glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
+                         data=scalecount2_para_july,
+                         family=binomial)
 
-#### (3) Fungus Analysis ???? ####
+simr_para_mod_july <- simulateResiduals(para_mod_july)
+plot(simr_para_mod_july)
+
+##### November #####
+
+para_mod_nov <-  glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
+                         data=scalecount2_para_nov,
+                         family=binomial)
+
+simr_para_mod_nov <- simulateResiduals(para_mod_nov)
+plot(simr_para_mod_nov)
+
+#### (3) Parasitism Analysis ####
+
+##### July #####
+
+emm_para_july <- emmeans(para_mod_july, "Treatment")
+pairs(emm_para_july, type="response", adjust="BH")
+july_para_means_comp <- pairs(regrid(emm_para_july), adjust="BH")
+# CI for pairwise comp
+confint(july_para_means_comp)
+# CI for means
+confint(emm_para_july, type="response")
+
+##### November #####
+
+emm_para_nov <- emmeans(para_mod_nov, "Treatment")
+pairs(emm_para_nov, type="response", adjust="BH")
+nov_para_means_comp <- pairs(regrid(emm_para_nov), adjust="BH")
+# Confint for pairwise comparison
+confint(nov_para_means_comp)
+# Confint for means
+confint(emm_para_nov, type="response")
+
+#### (4) Fungus Models ####
 
 ##### July #####
 
