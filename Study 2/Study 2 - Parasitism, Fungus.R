@@ -48,19 +48,18 @@ tmeans2_nov <- get_treatment_survival_means(scalecount2_nov)
 
 ##### Specialized parasitism and fungus preprocessing #####
 
-# Client dropped twigs with 0 scale
-#scalecount2_para_july <- scalecount2_july[rowSums(scalecount2_july[, 5:10] == 0) < 2,]
-scalecount2_para_july <- scalecount2_july %>% filter(Meanlivescale != 0 & Meandeadscale != 0)
-scalecount2_para_july <- 
-  scalecount2_para_july %>% 
-  drop_na(Label) # Some samples only have one twig
+# Should look at Meanlivescale and Meandeadscale
+# Drop twigs with 0 scale
 
-# Client dropped twigs with 0 scale
-#scalecount2_para_nov <- scalecount2_nov[rowSums(scalecount2_nov[, 5:10] == 0) < 2,]
-scalecount2_para_nov <- scalecount2_nov %>% filter(Meanlivescale != 0 & Meandeadscale != 0)
-scalecount2_para_nov <- 
-  scalecount2_para_nov %>% 
-  drop_na(Label) # Some samples only have one twig
+scalecount2_para_july <- 
+  scalecount2_july %>%
+  filter(Meanlivescale > 0 | Meandeadscale > 0) %>%
+  drop_na(Label)
+
+scalecount2_para_nov <-
+  scalecount2_nov %>%
+  filter(Meanlivescale > 0 | Meandeadscale > 0) %>%
+  drop_na(Label)
 
 #### (2) Parasitism Models ####
 
@@ -103,17 +102,3 @@ nov_para_means_comp <- pairs(regrid(emm_para_nov), adjust="BH")
 confint(nov_para_means_comp)
 # Confint for means
 confint(emm_para_nov, type="response")
-
-#### (4) Fungus Models ####
-
-##### July #####
-
-
-
-
-##### November #####
-
-
-
-
-
