@@ -30,7 +30,8 @@ trt_labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 # Read in file
 scalecount <- read.csv(file="EHS count 2024 v7 (study 1).csv", strip.white=TRUE)
 colnames(scalecount) <- c("Label", "County","Twigab","Date","Counter","Livescale1","Deadscale1",
-                          "Livescale2","Deadscale2","Livescale3","Deadscale3","Prespara","Presfungus",
+                          "Livescale2","Deadscale2","Livescale3","Deadscale3",
+                          "Prespara","Presfungus",
                           "Presscalenewgr","encarsia")
 
 scalecount <- process_scalecount(scalecount)
@@ -42,8 +43,8 @@ scalecount$County <- as.factor(scalecount$County)
 scalecount_july <- subset(scalecount, grepl('July', Date)) # July data
 scalecount_nov <- subset(scalecount, grepl('November', Date)) # November data
 
-##### Specialized Encarsia preprocessing #####
-# drop counts where encarsia is NA
+##### Specialized Encarsia pre-processing #####
+# Drop counts where encarsia is NA
 scalecountencar_july <-scalecount_july %>% drop_na(encarsia)
 scalecountencar_nov <-scalecount_nov %>% drop_na(encarsia)
 
@@ -60,6 +61,7 @@ get_hist_all_trt(scalecountencar_july,
                  "encarsia", "Encarsia", 
                  "Study 1 Encarsia Count - July", trt_labels)
 
+# Poisson model
 encar_pois_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
                           data=scalecountencar_july, ziformula = ~0,
                           family = poisson)
@@ -79,6 +81,7 @@ get_hist_all_trt(scalecountencar_nov,
                  "encarsia", "Encarsia", 
                  "Study 1 Encarsia Count - Nov", trt_labels)
 
+# Poisson model
 # Since this is by tree, don't need label within block
 encar_pois_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                           data=scalecountencar_nov, ziformula = ~0,
@@ -129,16 +132,17 @@ emm_encar_july <- emmeans(encar_nb1_july, "Treatment")
 emm_encar_july_orig_scale <- emmeans(encar_nb1_july, "Treatment", type="response")
 confint(emm_encar_july_orig_scale)
 
-# Treatment means comparisons - july
+# Treatment means comparisons - July
 pairs_encar_july <- pairs(regrid(emm_encar_july), adjust="BH")
 confint(pairs_encar_july)
 
 
 ##### November #####
-# Treatment means - nov
+# Treatment means - Nov
 emm_encar_nov <- emmeans(encar_nb1_nov, "Treatment")
 emm_encar_nov_orig_scale <- emmeans(encar_nb1_nov, "Treatment", type="response")
+confint(emm_encar_nov_orig_scale)
 
-# Treatment means comparisons - nov
+# Treatment means comparisons - Nov
 pairs_encar_nov <- pairs(regrid(emm_encar_nov), adjust="BH")
 confint(pairs_encar_nov)
