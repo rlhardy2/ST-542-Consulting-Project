@@ -308,10 +308,10 @@ ggplot(confint_pairs_july, aes(x = contrast, y = estimate)) +
   geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
   labs(title = "CIs of the Estimated Marginal Means by Treatment",
        x = "Treatment",
-       y = "Sumlivescale_from_mean")
+       y = "Sumlivescale_from_mean") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-
-
+##### November #####
 
 
 
