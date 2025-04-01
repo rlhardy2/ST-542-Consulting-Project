@@ -15,7 +15,7 @@ library(biostat3)
 library(multcompView)
 library(FSA)
 
-source("graphing functions.r")
+source("../graphing functions.r")
 
 #### (1) Data Pre-processing ####
 

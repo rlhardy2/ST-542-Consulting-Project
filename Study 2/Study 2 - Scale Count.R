@@ -38,11 +38,34 @@ colnames(scalecount2) <- c("Label","Type", "Twigab","Date","Livescale1","Deadsca
                            "Deadscale2","Livescale3","Deadscale3","Prespara",
                            "Presscalenewgr","Presfungus","encarsia","notes","extra")
 
-# Remove notes column and random extra column
-scalecount2 <- subset(scalecount2, select = -c(notes, extra))
+# Remove notes column and random extra column and Presscalenewgr (unused)
+scalecount2 <- subset(scalecount2, select = -c(notes, extra, Presscalenewgr))
+
+# Drop uncollected labels
+scalecount2 <- scalecount2 %>% drop_na(Livescale1)
+
+# Extract treatment - needed for merging step
+# Study 2-only processing - Add EHS and cryptomeria scale together
+scalecount2$Treatment<- extract_treatment(scalecount2)
+
+scalecount2$Prespara <- replace_strings_with_binary(scalecount2$Prespara)
+scalecount2$Presfungus <- replace_strings_with_binary(scalecount2$Presfungus)
+scalecount2$Prespara <- as.numeric(scalecount2$Prespara)
+scalecount2$Presfungus <- as.numeric(scalecount2$Presfungus)
+
+# Expand scalecount2 to "wide" format, creating vars for Live/Dead scale
+# and presence to add together more easily
+scalecount2_wide  <- 
+  scalecount2 %>%
+  pivot_wider(names_from=Type, values_from=c(Livescale1, Livescale2, Livescale3,
+                                             Deadscale1, Deadscale2, Deadscale3,
+                                             Prespara, Presfungus))
+
+# Add variables together
+scalecount2_wide <- create_live_deadscale_pres_vars_wide(scalecount2_wide)
 
 # Process data set
-scalecount2 <- process_scalecount(scalecount2)
+scalecount2 <- process_scalecount(scalecount2_wide)
 
 # July and November data
 scalecount2_july <- subset(scalecount2, grepl('July', Date))
@@ -118,7 +141,7 @@ nb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 simr_nb2_july <- simulateResiduals(nb2_july)
 plot(simr_nb2_july)
 
-testCategorical(simr_nb2_july, scalecount2_july$Treatment) # gives error...
+#testCategorical(simr_nb2_july, scalecount2_july$Treatment) # gives error...
 
 # Mixed NB model, no zero inflation
 # Negative Binomial 1 (linear dispersion)
@@ -129,7 +152,7 @@ nb1_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 simr_nb1_july <- simulateResiduals(nb1_july)
 plot(simr_nb1_july)
 
-testCategorical(simr_nb1_july, scalecount2_july$Treatment) # gives error...
+#testCategorical(simr_nb1_july, scalecount2_july$Treatment) # gives error...
 
 ##### November #####
 
@@ -151,7 +174,7 @@ nb2_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 simr_nb2_nov <- simulateResiduals(nb2_nov)
 plot(simr_nb2_nov)
 
-testCategorical(simr_nb2_nov, scalecount2_nov$Treatment) # gives error...
+#testCategorical(simr_nb2_nov, scalecount2_nov$Treatment) # gives error...
 
 # Mixed NB1 model, no zero inflation
 nb1_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
@@ -160,7 +183,7 @@ nb1_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 
 simr_nb1_nov <- simulateResiduals(nb1_nov)
 plot(simr_nb1_nov)
-testCategorical(simr_nb1_nov, scalecount2_nov$Treatment) # gives error...
+#testCategorical(simr_nb1_nov, scalecount2_nov$Treatment) # gives error...
 
 #### (5) Zero-Inflated & Hurdle Models ####
 
@@ -291,16 +314,33 @@ confint(pairs(regrid(emm_zinb2_nov), adjust="BH"))
 # Making the confidence intervals a data frame
 confint_july <- as.data.frame(confint(emm_zinb2_july_orig_scale))
 
+pairs_july_df<- as.data.frame(pairs(regrid(emm_zinb2_july), adjust="BH"))
+
+# Extracts treatments from pairs for graphing
+# Must be called group1 and group2 for stat_pvalue_manual
+pairs_july_df$group1 <- substring(pairs_july_df$contrast, first=10, last=10)
+pairs_july_df$group2 <- substring(pairs_july_df$contrast, first=23, last=23)
+pairs_july_df$p.value_round <- round(pairs_july_df$p.value, digits=3)
+# y position of each pairwise comparison bar
+pairs_july_df$y.position <- seq(1.5, 2.5, by=.2)
+
 # Plot of the CIs for the estimated marginal means for each treatment
 ggplot(confint_july, aes(x = Treatment, y = response)) +
   geom_point(size = 3, color = "blue") +
   geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
   labs(title = "CIs of the Estimated Marginal Means by Treatment",
        x = "Treatment",
-       y = "Sumlivescale_from_mean")
+       y = "Sumlivescale_from_mean") +
+  stat_pvalue_manual(
+    data = pairs_july_df, label = "p.value_round",
+    xmin = "group1", xmax = "group2",
+    y.position = "y.position"
+  )
+
 
 # Making the confidence intervals a data frame (for the pairs)
 confint_pairs_july <- as.data.frame(confint(pairs(regrid(emm_zinb2_nov), adjust="BH")))
+
 
 # Plot of the CIs for the estimated marginal means for each pair
 ggplot(confint_pairs_july, aes(x = contrast, y = estimate)) +
@@ -308,6 +348,7 @@ ggplot(confint_pairs_july, aes(x = contrast, y = estimate)) +
   geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
   labs(title = "CIs of the Estimated Marginal Means by Treatment",
        x = "Treatment",
+<<<<<<< HEAD
        y = "Sumlivescale_from_mean") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -318,3 +359,6 @@ ggplot(confint_pairs_july, aes(x = contrast, y = estimate)) +
 
 
 
+=======
+       y = "Sumlivescale_from_mean")
+>>>>>>> 8567ee42d78386802c0c743a12d7f293c9ae6f45

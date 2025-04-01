@@ -48,9 +48,7 @@ scalecount3 <-subset(scalecount3, select = -c(EHSLivescale1,EHSLivescale2,EHSLiv
 
 scalecount3 <- process_scalecount(scalecount3)
 
-# Taking out all samples in which no scale was found
-# This includes live and dead!
-# Original included Prespara and Presfungus in this calculation, which doesn't seem quite right?
+# Only keep samples where scale (either live or dead) was found
 scalecount3_para <- scalecount3 %>% filter(Meanlivescale > 0 | Meandeadscale > 0)
 
 #### (2) Parasitism models ####
