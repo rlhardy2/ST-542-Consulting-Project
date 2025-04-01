@@ -14,6 +14,62 @@ create_live_deadscale_vars <- function(scalecount) {
   return (summed)
 }
 
+# Create live and deadscale variables out of pivot wide table
+create_live_deadscale_pres_vars_wide <- function(scalecount_wide) {
+  summed <- 
+    scalecount_wide %>%
+    mutate(Livescale1=rowSums(across(c(Livescale1_both, Livescale1_EHS, Livescale1_Crypto)), na.rm=TRUE),
+           Livescale2=rowSums(across(c(Livescale2_both, Livescale2_EHS, Livescale2_Crypto)), na.rm=TRUE),
+           Livescale3=rowSums(across(c(Livescale3_both, Livescale3_EHS, Livescale3_Crypto)), na.rm=TRUE),
+           Deadscale1=rowSums(across(c(Deadscale1_both, Deadscale1_EHS, Deadscale1_Crypto)), na.rm=TRUE),
+           Deadscale2=rowSums(across(c(Deadscale2_both, Deadscale2_EHS, Deadscale2_Crypto)), na.rm=TRUE),
+           Deadscale3=rowSums(across(c(Deadscale3_both, Deadscale3_EHS, Deadscale3_Crypto)), na.rm=TRUE),
+           
+           # add prespara and presfungus together - will replace all >= 1 with 1 after
+           Prespara=rowSums(across(c(Prespara_both, Prespara_EHS, Prespara_Crypto)), na.rm=TRUE),
+           Presfungus=rowSums(across(c(Presfungus_both, Presfungus_EHS, Presfungus_Crypto)), na.rm=TRUE),
+           ) %>%
+    # Replace Prespara and Presfungus >=1 with 1 as it's a binary variable
+    # Sometimes there's data across crypto/ehs/both observations where several had presence marked as 1
+    # So rowSums adds this to 1
+    # There is probably a better way to do this
+    mutate(across(.cols = c(Prespara, Presfungus), .fns = function(x) ifelse(x >= 1, 1, 0)))
+  
+  # If all entries are NA, then rowSums will calculate a 0...
+  # Check if all are NA, and change to NA
+  # There's probably a better way to do this
+  summed[is.na(summed$Livescale1_both) & is.na(summed$Livescale1_Crypto) 
+         & is.na(summed$Livescale1_EHS), "Livescale1"] <- NA
+  summed[is.na(summed$Livescale2_both) & is.na(summed$Livescale2_Crypto) 
+         & is.na(summed$Livescale2_EHS), "Livescale2"] <- NA
+  summed[is.na(summed$Livescale3_both) & is.na(summed$Livescale3_Crypto) 
+         & is.na(summed$Livescale3_EHS), "Livescale3"] <- NA
+  summed[is.na(summed$Deadscale1_both) & is.na(summed$Deadscale1_Crypto) 
+         & is.na(summed$Deadscale1_EHS), "Deadscale1"] <- NA
+  summed[is.na(summed$Deadscale2_both) & is.na(summed$Deadscale2_Crypto) 
+         & is.na(summed$Deadscale2_EHS), "Deadscale2"] <- NA
+  summed[is.na(summed$Deadscale3_both) & is.na(summed$Deadscale3_Crypto) 
+         & is.na(summed$Deadscale3_EHS), "Deadscale3"] <- NA
+  summed[is.na(summed$Prespara_both) & is.na(summed$Prespara_Crypto) 
+         & is.na(summed$Prespara_EHS), "Prespara"] <- NA
+  summed[is.na(summed$Presfungus_both) & is.na(summed$Presfungus_Crypto) 
+         & is.na(summed$Presfungus_EHS), "Presfungus"] <- NA
+  
+  # Remove temp variables
+  summed <- 
+    summed %>% 
+    dplyr::select(-one_of(c('Livescale1_both', 'Livescale1_EHS', 'Livescale1_Crypto',
+                          'Livescale2_both', 'Livescale2_EHS', 'Livescale2_Crypto',
+                          'Livescale3_both', 'Livescale3_EHS', 'Livescale3_Crypto',
+                          'Deadscale1_both', 'Deadscale1_EHS', 'Deadscale1_Crypto',
+                          'Deadscale2_both', 'Deadscale2_EHS', 'Deadscale2_Crypto',
+                          'Deadscale3_both', 'Deadscale3_EHS', 'Deadscale3_Crypto',
+                          'Prespara_both', 'Prespara_EHS', 'Prespara_Crypto',
+                          'Presfungus_both', 'Presfungus_EHS', 'Presfungus_Crypto'
+  ))) 
+  return (summed)
+}
+
 
 # Check for na in live, dead scale counts
 check_na_scale_counts <- function(scalecount) {
@@ -26,7 +82,7 @@ check_na_scale_counts <- function(scalecount) {
 # check counts by label and twig 
 # Should be unique if all vals from dataset within same timeframe (July, Nov)
 check_counts <- function(scalecount) {
-  count <- scalecount %>% group_by(Label, Twigab) %>%
+  count <- scalecount %>% group_by(Label, Twigab, Date) %>%
     summarize(Count = n()) %>%
     arrange(desc(Count))
   return (count)
@@ -71,23 +127,6 @@ average_counts_across_block_trt <- function(scalecount) {
     arrange(Block, Treatment)
   
   return (scalecount_block_trt_mean)
-}
-
-# Checks if there is any presence of parasitism/fungus on twigs
-# Returns 1 if present on either twig, 0 if on neither
-# Could probably be expanded to a multinomial model? 
-# (where there's the option of fungus/parasitism on one twig, two twigs, or neither)
-is_present <- function(presence_vec) {
-  return (ifelse(sum(presence_vec > 0), 1, 0))
-}
-
-# Get the presence of parasitism and fungus across both twigs
-# Merges into one entry per label/tree
-get_presence_across_twigs <- function(scalecount) {
-  scalecount_presence <- 
-    scalecount %>%
-    group_by(Label, Date, Treatment, Block) %>%
-    summarize(across(c(Prespara, Presfungus), is_present)) 
 }
 
 # replace binary strings with 0s and 1s
@@ -137,7 +176,7 @@ extract_treatment <- function(scalecount) {
 }
 
 # Common processing across all experiments
-process_scalecount <- function(scalecount_raw) {
+process_scalecount <- function(scalecount_raw, in_group=FALSE) {
   scalecount <- scalecount_raw
   
   # Extract and create new column with treatment
@@ -167,17 +206,12 @@ process_scalecount <- function(scalecount_raw) {
   
   # Add mean live scale and Mean dead scale columns
   # This will technically retain labels with 2 shoots?
-  scalecount<-scalecount %>% 
+  scalecount<-scalecount %>%
     mutate(Meanlivescale = rowMeans(dplyr::select(., Livescale1, Livescale2, Livescale3), na.rm = TRUE))
-  scalecount<-scalecount %>% 
+  scalecount<-scalecount %>%
     mutate(Meandeadscale = rowMeans(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
-  
-  # Add sum live scale and sum dead scale
-  scalecount<-scalecount %>% 
-    mutate(Sumlivescale = rowSums(dplyr::select(., Livescale1, Livescale2, Livescale3), na.rm = TRUE))
-  scalecount<-scalecount %>% 
-    mutate(Sumdeadscale = rowSums(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
-  
+
+  # Get the scaled "sum: of the mean live scale for use with count models
   scalecount$Sumlivescale_from_mean <- 
     get_sum_scale_from_mean(scalecount$Meanlivescale)
   scalecount$Sumdeadscale_from_mean <- 
