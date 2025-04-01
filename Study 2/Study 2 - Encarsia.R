@@ -34,11 +34,34 @@ colnames(scalecount2) <- c("Label","Type", "Twigab","Date","Livescale1","Deadsca
                            "Deadscale2","Livescale3","Deadscale3","Prespara",
                            "Presscalenewgr","Presfungus","encarsia","notes","extra")
 
-# Remove notes column and random extra column
-scalecount2 <- subset(scalecount2, select = -c(notes, extra))
+# Remove notes column and random extra column and Presscalenewgr (unused)
+scalecount2 <- subset(scalecount2, select = -c(notes, extra, Presscalenewgr))
+
+# Drop uncollected labels
+scalecount2 <- scalecount2 %>% drop_na(Livescale1)
+
+# Extract treatment - needed for merging step
+# Study 2-only processing - Add EHS and cryptomeria scale together
+scalecount2$Treatment<- extract_treatment(scalecount2)
+
+scalecount2$Prespara <- replace_strings_with_binary(scalecount2$Prespara)
+scalecount2$Presfungus <- replace_strings_with_binary(scalecount2$Presfungus)
+scalecount2$Prespara <- as.numeric(scalecount2$Prespara)
+scalecount2$Presfungus <- as.numeric(scalecount2$Presfungus)
+
+# Expand scalecount2 to "wide" format, creating vars for Live/Dead scale
+# and presence to add together more easily
+scalecount2_wide  <- 
+  scalecount2 %>%
+  pivot_wider(names_from=Type, values_from=c(Livescale1, Livescale2, Livescale3,
+                                             Deadscale1, Deadscale2, Deadscale3,
+                                             Prespara, Presfungus))
+
+# Add variables together
+scalecount2_wide <- create_live_deadscale_pres_vars_wide(scalecount2_wide)
 
 # Process data set
-scalecount2 <- process_scalecount(scalecount2)
+scalecount2 <- process_scalecount(scalecount2_wide)
 
 # July and November data
 scalecount2_july <- subset(scalecount2, grepl('July', Date))
@@ -64,10 +87,11 @@ scalecountencar2_nov <- average_counts_across_twigs(scalecountencar2_nov)
 ##### July #####
 
 # Graph histogram of encarsia -- this needs to be double checked...
+# It's kinda ugly and the labels don't appear lmao...
 get_hist_all_trt(scalecountencar2_july, 
                  "encarsia", "Encarsia", 
                  "Study 2 Encarsia Count - July",
-                 trt_labels)
+                 trt_labels2)
 
 # Poisson model
 encar_pois_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
@@ -88,9 +112,11 @@ plot(simr_encar_nb1_july)
 ##### November #####
 
 # Graph histogram of encarsia -- this needs to be double checked...
+# It's kinda ugly and the labels don't appear lmao...
 get_hist_all_trt(scalecountencar2_nov, 
                  "encarsia", "Encarsia", 
-                 "Study 2 Encarsia Count - Nov", trt_labels)
+                 "Study 2 Encarsia Count - Nov",
+                 trt_labels2)
 
 # Poisson model
 # Since this is by tree, don't need label within block
@@ -108,7 +134,7 @@ encar_nb1_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
 
 simr_encar_nb1_nov <- simulateResiduals(encar_nb1_nov)
 plot(simr_encar_nb1_nov)
-testCategorical(simr_encar_nb1_nov, scalecountencar2_nov$Treatment) # gives error...
+testCategorical(simr_encar_nb1_nov, scalecountencar2_nov$Treatment)
 
 # Negative binomial - type 2 (quadratically overdispersed)
 encar_nb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
@@ -148,6 +174,7 @@ confint(emm_encar_july_orig_scale)
 
 # Treatment means comparisons - July
 pairs_encar_july <- pairs(regrid(emm_encar_july), adjust="BH")
+pairs_encar_july
 confint(pairs_encar_july)
 
 ##### November #####
@@ -159,4 +186,5 @@ confint(emm_encar_nov_orig_scale)
 
 # Treatment means comparisons - Nov
 pairs_encar_nov <- pairs(regrid(emm_encar_nov), adjust="BH")
+pairs_encar_nov
 confint(pairs_encar_nov)
