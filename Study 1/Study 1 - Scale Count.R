@@ -285,5 +285,28 @@ regrid_pairs <- as.data.frame(pairs(regrid(emm_nb1_nov), adjust="BH"))
 #### (7) Graphs ####
 
 # Graph of sum of live scale per twig
+# Just testing, prefer plot from Study 2!! Commented below
 ggboxplot(scalecount_nov, x="Treatment", y="Sumlivescale_from_mean", 
           ylab="Sum of Live Scale", title="Study 1 - Sum of Live Scale Per Twig", ggtheme=theme_gray(base_size=12))
+
+
+# Extracts treatments from pairs for graphing
+# Must be called group1 and group2 for stat_pvalue_manual
+pairs_july_df$group1 <- substring(pairs_july_df$contrast, first=10, last=10)
+pairs_july_df$group2 <- substring(pairs_july_df$contrast, first=23, last=23)
+pairs_july_df$p.value_round <- round(pairs_july_df$p.value, digits=3)
+# y position of each pairwise comparison bar
+pairs_july_df$y.position <- seq(1.5, 2.5, by=.2)
+
+# Plot of the CIs for the estimated marginal means for each treatment
+# ggplot(confint_july, aes(x = Treatment, y = response)) +
+#   geom_point(size = 3, color = "blue") +
+#   geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
+#   labs(title = "CIs of the Estimated Marginal Means by Treatment",
+#        x = "Treatment",
+#        y = "Sumlivescale_from_mean") +
+#   stat_pvalue_manual(
+#     data = pairs_july_df, label = "p.value_round",
+#     xmin = "group1", xmax = "group2",
+#     y.position = "y.position"
+#   )

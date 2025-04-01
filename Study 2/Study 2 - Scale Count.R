@@ -349,13 +349,3 @@ ggplot(confint_pairs_july, aes(x = contrast, y = estimate)) +
   labs(title = "CIs of the Estimated Marginal Means by Treatment",
        x = "Treatment",
        y = "Sumlivescale_from_mean")
-  
-
-
-
-
-
-
-
-
-
