@@ -257,24 +257,33 @@ confint(pairs(regrid(emm_zinb2_july), adjust="BH"))
 
 ###### Means ######
 # Estimated marginal means
-emm_zinb2_nov <- emmeans(zinb2_nov, "Treatment")
-emm_zinb2_nov_orig_scale <- emmeans(zinb2_nov, 
+emm_nb1_nov <- emmeans(nb1_nov, "Treatment")
+emm_nb1_nov_orig_scale <- emmeans(nb1_nov, 
                                       "Treatment", type="response")
-confint(emm_zinb2_nov_orig_scale)
+confint(emm_nb1_nov_orig_scale)
 # effect size - Cohen's d
-eff_size(emm_zinb2_nov, 
-         sigma=sigma(zinb2_nov), edf=df.residual(zinb2_nov))
+eff_size(emm_nb1_nov, 
+         sigma=sigma(nb1_nov), edf=df.residual(nb1_nov))
 
 
 ###### Pairwise Comparisons ######
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
-plot(emm_zinb2_nov_orig_scale, comparison=TRUE)
+plot(emm_nb1_nov_orig_scale, comparison=TRUE)
 # Pairwise comparisons for ratios 
 # (happens if you take the pairs from emm on the original scale
 # due to needing to perform tests on log)
-confint(pairs(emm_zinb2_nov_orig_scale, adjust="BH"))
+confint(pairs(emm_nb1_nov_orig_scale, adjust="BH"))
 # CI for pairwise comparison on log scale
-confint(pairs(emm_zinb2_nov, adjust="BH"))
+confint(pairs(emm_nb1_nov, adjust="BH"))
 # CI for pairwise comparison on original scale
-confint(pairs(regrid(emm_zinb2_nov), adjust="BH"))
+confint(pairs(regrid(emm_nb1_nov), adjust="BH"))
+
+# Convert to data frame for graphing
+regrid_pairs <- as.data.frame(pairs(regrid(emm_nb1_nov), adjust="BH"))
+
+#### (7) Graphs ####
+
+# Graph of sum of live scale per twig
+ggboxplot(scalecount_nov, x="Treatment", y="Sumlivescale_from_mean", 
+          ylab="Sum of Live Scale", title="Study 1 - Sum of Live Scale Per Twig", ggtheme=theme_gray(base_size=12))
