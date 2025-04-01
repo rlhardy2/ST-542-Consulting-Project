@@ -34,19 +34,38 @@ colnames(scalecount2) <- c("Label","Type", "Twigab","Date","Livescale1","Deadsca
                            "Deadscale2","Livescale3","Deadscale3","Prespara",
                            "Presscalenewgr","Presfungus","encarsia","notes","extra")
 
-# Remove notes column and random extra column
-scalecount2 <- subset(scalecount2, select = -c(notes, extra))
+# Remove notes column and random extra column and Presscalenewgr (unused)
+scalecount2 <- subset(scalecount2, select = -c(notes, extra, Presscalenewgr))
+
+# Drop uncollected labels
+scalecount2 <- scalecount2 %>% drop_na(Livescale1)
+
+# Extract treatment - needed for merging step
+# Study 2-only processing - Add EHS and cryptomeria scale together
+scalecount2$Treatment<- extract_treatment(scalecount2)
+
+scalecount2$Prespara <- replace_strings_with_binary(scalecount2$Prespara)
+scalecount2$Presfungus <- replace_strings_with_binary(scalecount2$Presfungus)
+scalecount2$Prespara <- as.numeric(scalecount2$Prespara)
+scalecount2$Presfungus <- as.numeric(scalecount2$Presfungus)
+
+# Expand scalecount2 to "wide" format, creating vars for Live/Dead scale
+# and presence to add together more easily
+scalecount2_wide  <- 
+  scalecount2 %>%
+  pivot_wider(names_from=Type, values_from=c(Livescale1, Livescale2, Livescale3,
+                                             Deadscale1, Deadscale2, Deadscale3,
+                                             Prespara, Presfungus))
+
+# Add variables together
+scalecount2_wide <- create_live_deadscale_pres_vars_wide(scalecount2_wide)
 
 # Process data set
-scalecount2 <- process_scalecount(scalecount2)
+scalecount2 <- process_scalecount(scalecount2_wide)
 
 # July and November data
 scalecount2_july <- subset(scalecount2, grepl('July', Date))
 scalecount2_nov <- subset(scalecount2, grepl('November', Date))
-
-# Treatment survival means
-tmeans2_july <- get_treatment_survival_means(scalecount2_july)
-tmeans2_nov <- get_treatment_survival_means(scalecount2_nov)
 
 ##### Specialized parasitism and fungus preprocessing #####
 

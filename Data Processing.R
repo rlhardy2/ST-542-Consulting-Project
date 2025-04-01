@@ -50,6 +50,10 @@ create_live_deadscale_pres_vars_wide <- function(scalecount_wide) {
          & is.na(summed$Deadscale2_EHS), "Deadscale2"] <- NA
   summed[is.na(summed$Deadscale3_both) & is.na(summed$Deadscale3_Crypto) 
          & is.na(summed$Deadscale3_EHS), "Deadscale3"] <- NA
+  summed[is.na(summed$Prespara_both) & is.na(summed$Prespara_Crypto) 
+         & is.na(summed$Prespara_EHS), "Prespara"] <- NA
+  summed[is.na(summed$Presfungus_both) & is.na(summed$Presfungus_Crypto) 
+         & is.na(summed$Presfungus_EHS), "Presfungus"] <- NA
   
   # Remove temp variables
   summed <- 
