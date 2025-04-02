@@ -84,4 +84,18 @@ nov_fung_means_comp <- pairs(regrid(emm_fung_nov3), adjust="BH")
 # Confint for pairwise comparison
 confint(nov_fung_means_comp)
 # Confint for means
-confint(emm_fung_nov3, type="response")
+confint_emm_fung_nov3_orig_scale <- confint(emm_fung_nov3, type="response")
+
+
+#### Fungus Graphs ####
+pairs_fung_nov_df3 <- as.data.frame(pairs(regrid(emm_fung_nov3), adjust="BH"))
+confint_fung_nov_df3 <- as.data.frame(confint_emm_fung_nov3_orig_scale)
+y_positions <- seq(1, 1.9, by=.1)
+
+get_cis_marginal_means_plot(ci_df=confint_fung_nov_df3, pairs_df=pairs_fung_nov_df3, 
+                            y_positions=y_positions, trt_labels=trt_labels3,
+                            y_str="prob", 
+                            y_lab="Probability",
+                            title="CIs of Estimated Treatment Means - Entomopathogenic Fungus, Study 3")
+
+

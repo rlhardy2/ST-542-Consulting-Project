@@ -68,3 +68,33 @@ get_hist_all_trt <- function(data, x_str, x_lab, title, labels, binwidth=1) {
   return(hist)
 }
 
+get_cis_marginal_means_plot <- function(ci_df, pairs_df, y_positions, trt_labels,
+                                        y_str, y_lab, title) {
+  y_sym <- ensym(y_str)
+  pairs_df_graphing <- pairs_df
+  
+  # Extracts treatments from pairs for graphing
+  # Must be called group1 and group2 for stat_pvalue_manual
+  pairs_df_graphing$group1 <- substring(pairs_df$contrast, first=10, last=10)
+  pairs_df_graphing$group2 <- substring(pairs_df$contrast, first=23, last=23)
+  pairs_df_graphing$p.value_round <- round(pairs_df$p.value, digits=3)
+  # y position of each pairwise comparison bar
+  pairs_df_graphing$y.position <- y_positions
+  
+  emmeans_ci_plot <- 
+    ggplot(ci_df, aes(x = Treatment, y = {{y_sym}})) +
+    geom_point(size = 3, color = "blue") +
+    geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
+    labs(title = title,
+         x = "Treatment",
+         y = y_lab) +
+    # Add treatment means comparison bars
+    stat_pvalue_manual(
+      data = pairs_df_graphing, label = "p.value_round",
+      xmin = "group1", xmax = "group2",
+      y.position = "y.position"
+    ) +
+    scale_x_discrete(label = trt_labels)
+  return (emmeans_ci_plot)
+}
+  

@@ -14,12 +14,11 @@ library(FSA)
 library(stats)
 library(PMCMRplus)
 library(PMCMR)
-library(pscl)
 library(emmeans)
 library(DHARMa)
 library(glmmTMB)
-
 library(performance)
+library(ggpubr)
 
 source("../graphing functions.r")
 source("../Data Processing.r")
@@ -46,6 +45,9 @@ scalecount3 <-subset(scalecount3, select = -c(EHSLivescale1,EHSLivescale2,EHSLiv
                                            CryptoDeadscale3))
 
 scalecount3 <- process_scalecount(scalecount3)
+
+# Treatment survival means
+tmeans3_nov <- get_treatment_survival_means(scalecount3)
 
 
 #### Poisson/Negative binomial ####
@@ -142,3 +144,14 @@ confint(pairs(emm_nb1_nov3, adjust="BH"))
 confint(pairs(regrid(emm_nb1_nov3), adjust="BH"))
 
 pairs(regrid(emm_nb1_nov3), adjust="BH")
+
+#### Graphs ####
+pairs_nov_df3 <- as.data.frame(pairs(regrid(emm_nb1_nov3), adjust="BH"))
+confint_nov_df3 <- as.data.frame(confint(emm_nb1_nov3_orig_scale))
+y_positions <- seq(18, 28.8, by=1.2)
+
+get_cis_marginal_means_plot(ci_df=confint_nov_df3, pairs_df=pairs_nov_df3, 
+                            y_positions=y_positions, trt_labels=trt_labels3,
+                            y_str="response", 
+                            y_lab="Sum of Live Scale Across Twig (Estimated By Mean of Shoots)",
+                            title="CIs of Estimated Treatment Means - Live Scale Count, Study 3")

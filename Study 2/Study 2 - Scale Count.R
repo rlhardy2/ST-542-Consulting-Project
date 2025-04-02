@@ -20,6 +20,7 @@ library(DHARMa)
 library(glmmTMB)
 library(rcompanion)
 library(performance)
+library(ggpubr)
 
 source("../graphing functions.r")
 source("../Data Processing.r")

@@ -230,6 +230,7 @@ get_treatment_survival_means <- function(scalecount) {
     group_by(Treatment) %>% 
     dplyr::summarize(
       Mean=round(mean(Meanlivescale, na.rm = T),3),
+      Sum_from_mean=mean(Meanlivescale * 3),
       sd = sd(Meanlivescale),
       n = n(),
       se = sd / sqrt(n),
