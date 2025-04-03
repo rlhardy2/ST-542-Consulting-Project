@@ -159,6 +159,8 @@ confint(nov_fung_means_comp)
 confint_emm_fung_nov_orig_scale <- confint(emm_fung_nov, type="response")
 
 #### Fungus Graphs ####
+
+##### July #####
 pairs_fung_july_df <- as.data.frame(pairs(regrid(emm_fung_july), adjust="BH"))
 confint_fung_july_df <- as.data.frame(confint_emm_fung_july_orig_scale)
 y_positions <- seq(.25, .75, by=.1)
@@ -167,7 +169,7 @@ get_cis_marginal_means_plot(ci_df=confint_fung_july_df, pairs_df=pairs_fung_july
                             y_positions=y_positions, trt_labels=trt_labels,
                             y_str="prob", 
                             y_lab="Probability",
-                            title="CIs of Estimated Treatment Means - July Entomopathogenic Fungus, Study 1")
+                            title="CIs of Estimated Treatment Means - July Fungus, Study 1")
 
 ##### November #####
 pairs_fung_nov_df <- as.data.frame(pairs(regrid(emm_fung_nov), adjust="BH"))
@@ -178,4 +180,4 @@ get_cis_marginal_means_plot(ci_df=confint_fung_nov_df, pairs_df=pairs_fung_nov_d
                             y_positions=y_positions, trt_labels=trt_labels,
                             y_str="prob", 
                             y_lab="Probability",
-                            title="CIs of Estimated Treatment Means - November Entomopathogenic Fungus, Study 1")
+                            title="CIs of Estimated Treatment Means - Nov Fungus, Study 1")
