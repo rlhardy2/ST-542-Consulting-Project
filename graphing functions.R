@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(ggpubr)
 
 # plot means by collection date and an X value (treatment, county)
 # "data" should have the tmeans format illustrated in Study 1
