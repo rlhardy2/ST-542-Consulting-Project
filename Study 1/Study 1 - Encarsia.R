@@ -146,3 +146,27 @@ confint(emm_encar_nov_orig_scale)
 # Treatment means comparisons - Nov
 pairs_encar_nov <- pairs(regrid(emm_encar_nov), adjust="BH")
 confint(pairs_encar_nov)
+
+#### (4) Graphs ####
+##### July #####
+pairs_encar_july_df <- as.data.frame(pairs(regrid(emm_encar_july), adjust="BH"))
+confint_encar_july_df <- as.data.frame(confint(emm_encar_july_orig_scale))
+y_positions <- seq(19, 25, by=1.2)
+
+get_cis_marginal_means_plot(ci_df=confint_encar_july_df, pairs_df=pairs_encar_july_df, 
+                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_str="response", 
+                            y_lab="Encarsia Count (Per Tree)",
+                            title="CIs of Estimated Treatment Means - July Encarsia Count, Study 1")
+
+##### November #####
+pairs_encar_nov_df <- as.data.frame(pairs(regrid(emm_encar_nov), adjust="BH"))
+confint_encar_nov_df <- as.data.frame(confint(emm_encar_nov_orig_scale))
+y_positions <- seq(19, 25, by=1.2)
+
+get_cis_marginal_means_plot(ci_df=confint_encar_nov_df, pairs_df=pairs_encar_nov_df, 
+                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_str="response", 
+                            y_lab="Encarsia Count (Per Tree)",
+                            title="CIs of Estimated Treatment Means - November Encarsia Count, Study 1")
+

@@ -230,27 +230,27 @@ plot(simr_zinb2_nov)
 ##### July #####
 ###### Means ######
 # Estimated marginal means
-emm_zinb2_july <- emmeans(zinb2_july, "Treatment")
-emm_zinb2_july_orig_scale <- emmeans(zinb2_july, 
+emm_nb1_july <- emmeans(nb1_july, "Treatment")
+emm_nb1_july_orig_scale <- emmeans(nb1_july, 
                                    "Treatment", type="response")
-confint(emm_zinb2_july_orig_scale)
+confint(emm_nb1_july_orig_scale)
 # effect size - Cohen's d
-eff_size(emm_zinb2_july, 
-         sigma=sigma(zinb2_july), edf=df.residual(zinb2_july))
+eff_size(emm_nb1_july, 
+         sigma=sigma(nb1_july), edf=df.residual(nb1_july))
 
 
 ###### Pairwise Comparisons ######
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
-plot(emm_zinb2_july_orig_scale, comparison=TRUE)
+plot(emm_nb1_july_orig_scale, comparison=TRUE)
 # Pairwise comparisons for ratios 
 # (happens if you take the pairs from emm on the original scale
 # due to needing to perform tests on log)
-confint(pairs(emm_zinb2_july_orig_scale, adjust="BH"))
+confint(pairs(emm_nb1_july_orig_scale, adjust="BH"))
 # CI for pairwise comparison on log scale
-confint(pairs(emm_zinb2_july, adjust="BH"))
+confint(pairs(emm_nb1_july, adjust="BH"))
 # CI for pairwise comparison on original scale
-confint(pairs(regrid(emm_zinb2_july), adjust="BH"))
+confint(pairs(regrid(emm_nb1_july), adjust="BH"))
 
 
 ##### November #####
@@ -279,34 +279,25 @@ confint(pairs(emm_nb1_nov, adjust="BH"))
 # CI for pairwise comparison on original scale
 confint(pairs(regrid(emm_nb1_nov), adjust="BH"))
 
-# Convert to data frame for graphing
-regrid_pairs <- as.data.frame(pairs(regrid(emm_nb1_nov), adjust="BH"))
-
 #### (7) Graphs ####
+##### July #####
+pairs_july_df <- as.data.frame(pairs(regrid(emm_nb1_july), adjust="BH"))
+confint_july_df <- as.data.frame(confint(emm_nb1_july_orig_scale))
+y_positions <- seq(5, 10, by=1)
 
-# Graph of sum of live scale per twig
-# Just testing, prefer plot from Study 2!! Commented below
-ggboxplot(scalecount_nov, x="Treatment", y="Sumlivescale_from_mean", 
-          ylab="Sum of Live Scale", title="Study 1 - Sum of Live Scale Per Twig", ggtheme=theme_gray(base_size=12))
+get_cis_marginal_means_plot(ci_df=confint_july_df, pairs_df=pairs_july_df, 
+                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_str="response", 
+                            y_lab="Sum of Live Scale Across Twig (Estimated By Mean of Shoots)",
+                            title="CIs of Estimated Treatment Means - July Live Scale Count, Study 1")
 
+##### November #####
+pairs_nov_df <- as.data.frame(pairs(regrid(emm_nb1_nov), adjust="BH"))
+confint_nov_df <- as.data.frame(confint(emm_nb1_nov_orig_scale))
+y_positions <- seq(7, 13, by=1.2)
 
-# Extracts treatments from pairs for graphing
-# Must be called group1 and group2 for stat_pvalue_manual
-pairs_july_df$group1 <- substring(pairs_july_df$contrast, first=10, last=10)
-pairs_july_df$group2 <- substring(pairs_july_df$contrast, first=23, last=23)
-pairs_july_df$p.value_round <- round(pairs_july_df$p.value, digits=3)
-# y position of each pairwise comparison bar
-pairs_july_df$y.position <- seq(1.5, 2.5, by=.2)
-
-# Plot of the CIs for the estimated marginal means for each treatment
-# ggplot(confint_july, aes(x = Treatment, y = response)) +
-#   geom_point(size = 3, color = "blue") +
-#   geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2) +
-#   labs(title = "CIs of the Estimated Marginal Means by Treatment",
-#        x = "Treatment",
-#        y = "Sumlivescale_from_mean") +
-#   stat_pvalue_manual(
-#     data = pairs_july_df, label = "p.value_round",
-#     xmin = "group1", xmax = "group2",
-#     y.position = "y.position"
-#   )
+get_cis_marginal_means_plot(ci_df=confint_nov_df, pairs_df=pairs_nov_df, 
+                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_str="response", 
+                            y_lab="Sum of Live Scale Across Twig (Estimated By Mean of Shoots)",
+                            title="CIs of Estimated Treatment Means - November Live Scale Count, Study 1")

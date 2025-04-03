@@ -108,5 +108,3 @@ get_cis_marginal_means_plot(ci_df=confint_fung_nov_df3, pairs_df=pairs_fung_nov_
                             y_str="prob", 
                             y_lab="Probability",
                             title="CIs of Estimated Treatment Means - Entomopathogenic Fungus, Study 3")
-
-

@@ -77,7 +77,7 @@ get_cis_marginal_means_plot <- function(ci_df, pairs_df, y_positions, trt_labels
   # Must be called group1 and group2 for stat_pvalue_manual
   pairs_df_graphing$group1 <- substring(pairs_df$contrast, first=10, last=10)
   pairs_df_graphing$group2 <- substring(pairs_df$contrast, first=23, last=23)
-  pairs_df_graphing$p.value_round <- round(pairs_df$p.value, digits=3)
+  pairs_df_graphing$p.value_round <- round(pairs_df$p.value, digits=5)
   # y position of each pairwise comparison bar
   pairs_df_graphing$y.position <- y_positions
   
