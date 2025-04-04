@@ -82,6 +82,10 @@ scalecountencar2_nov <-scalecount2_nov %>% drop_na(encarsia)
 scalecountencar2_july <- average_counts_across_twigs(scalecountencar2_july)
 scalecountencar2_nov <- average_counts_across_twigs(scalecountencar2_nov)
 
+# July and November have same data?
+scalecountencar2_july$encarsia
+scalecountencar2_nov$encarsia
+
 #### (2) Encarsia models ####
 
 ##### July #####
@@ -94,20 +98,20 @@ get_hist_all_trt(scalecountencar2_july,
                  trt_labels2)
 
 # Poisson model
-encar_pois_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_pois_july2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                            data=scalecountencar2_july, ziformula = ~0,
                            family = poisson)
 
-simr_encar_pois_july <- simulateResiduals(encar_pois_july)
-plot(simr_encar_pois_july)
+simr_encar_pois_july2 <- simulateResiduals(encar_pois_july2)
+plot(simr_encar_pois_july2)
 
 # Negative binomial, linear overdispersion
-encar_nb1_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_nb1_july2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                           data=scalecountencar2_july, ziformula = ~0,
                           family = nbinom1)
 
-simr_encar_nb1_july <- simulateResiduals(encar_nb1_july)
-plot(simr_encar_nb1_july)
+simr_encar_nb1_july2 <- simulateResiduals(encar_nb1_july2)
+plot(simr_encar_nb1_july2)
 
 ##### November #####
 
@@ -115,76 +119,100 @@ plot(simr_encar_nb1_july)
 # It's kinda ugly and the labels don't appear lmao...
 get_hist_all_trt(scalecountencar2_nov, 
                  "encarsia", "Encarsia", 
-                 "Study 2 Encarsia Count - Nov",
+                 "Study 2 Encarsia Count - November",
                  trt_labels2)
 
 # Poisson model
 # Since this is by tree, don't need label within block
-encar_pois_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_pois_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                           data=scalecountencar2_nov, ziformula = ~0,
                           family = poisson)
 
-simr_encar_pois_nov <- simulateResiduals(encar_pois_nov)
-plot(simr_encar_pois_nov)
+simr_encar_pois_nov2 <- simulateResiduals(encar_pois_nov2)
+plot(simr_encar_pois_nov2)
 
 # Negative binomial - type 1 (linearly overdispersed)
-encar_nb1_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_nb1_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          data=scalecountencar2_nov, ziformula = ~0,
                          family = nbinom1)
 
-simr_encar_nb1_nov <- simulateResiduals(encar_nb1_nov)
-plot(simr_encar_nb1_nov)
-testCategorical(simr_encar_nb1_nov, scalecountencar2_nov$Treatment)
+simr_encar_nb1_nov2 <- simulateResiduals(encar_nb1_nov2)
+plot(simr_encar_nb1_nov2)
+testCategorical(simr_encar_nb1_nov2, scalecountencar2_nov$Treatment)
 
 # Negative binomial - type 2 (quadratically overdispersed)
-encar_nb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_nb2_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          data=scalecountencar2_nov, ziformula = ~0,
                          family = nbinom2)
 
-simr_encar_nb2_nov <- simulateResiduals(encar_nb2_nov)
-plot(simr_encar_nb2_nov)
-testCategorical(simr_encar_nb2_nov, scalecountencar2_nov$Treatment) # gives error...
+simr_encar_nb2_nov2 <- simulateResiduals(encar_nb2_nov2)
+plot(simr_encar_nb2_nov2)
+testCategorical(simr_encar_nb2_nov2, scalecountencar2_nov$Treatment) # gives error...
 
 # Check zero inflated just in case...
 # No evidence of zero inflation
-encar_zinb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_zinb2_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                            data=scalecountencar2_nov, ziformula = ~1,
                            family = nbinom2)
 # Got a warning about "model convergence problem"
 
-simr_encar_zinb2_nov <- simulateResiduals(encar_zinb2_nov)
-plot(simr_encar_zinb2_nov)
+simr_encar_zinb2_nov2 <- simulateResiduals(encar_zinb2_nov2)
+plot(simr_encar_zinb2_nov2)
 
 # Test zero inflated Poisson
-encar_zip_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
+encar_zip_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          data=scalecountencar2_nov, ziformula = ~1,
                          family = poisson)
 
-simr_encar_zip_nov <- simulateResiduals(encar_zip_nov)
-plot(simr_encar_zip_nov)
+simr_encar_zip_nov2 <- simulateResiduals(encar_zip_nov2)
+plot(simr_encar_zip_nov2)
 
 #### (3) Analysis ####
 
 ##### July #####
 
 # Treatment means - July
-emm_encar_july <- emmeans(encar_nb1_july, "Treatment")
-emm_encar_july_orig_scale <- emmeans(encar_nb1_july, "Treatment", type="response")
-confint(emm_encar_july_orig_scale)
+emm_encar_july2 <- emmeans(encar_nb1_july2, "Treatment")
+emm_encar_july2_orig_scale <- emmeans(encar_nb1_july2, "Treatment", type="response")
+confint(emm_encar_july2_orig_scale)
 
-# Treatment means comparisons - July
-pairs_encar_july <- pairs(regrid(emm_encar_july), adjust="BH")
-pairs_encar_july
-confint(pairs_encar_july)
+# Treatment means comparisons - july2
+pairs_encar_july2 <- pairs(regrid(emm_encar_july2), adjust="BH")
+pairs_encar_july2
+confint(pairs_encar_july2)
 
 ##### November #####
 
-# Treatment means - Nov
-emm_encar_nov <- emmeans(encar_nb1_nov, "Treatment")
-emm_encar_nov_orig_scale <- emmeans(encar_nb1_nov, "Treatment", type="response")
-confint(emm_encar_nov_orig_scale)
+# Treatment means - nov2
+emm_encar_nov2 <- emmeans(encar_nb1_nov2, "Treatment")
+emm_encar_nov2_orig_scale <- emmeans(encar_nb1_nov2, "Treatment", type="response")
+confint(emm_encar_nov2_orig_scale)
 
-# Treatment means comparisons - Nov
-pairs_encar_nov <- pairs(regrid(emm_encar_nov), adjust="BH")
-pairs_encar_nov
-confint(pairs_encar_nov)
+# Treatment means comparisons - nov2
+pairs_encar_nov2 <- pairs(regrid(emm_encar_nov2), adjust="BH")
+pairs_encar_nov2
+confint(pairs_encar_nov2)
+
+
+#### (4) Graphs ####
+##### July #####
+pairs_encar_july2_df <- as.data.frame(pairs(regrid(emm_encar_july2), adjust="BH"))
+confint_encar_july2_df <- as.data.frame(confint(emm_encar_july2_orig_scale))
+y_positions <- seq(4, 9, by=1)
+
+get_cis_marginal_means_plot(ci_df=confint_encar_july2_df, pairs_df=pairs_encar_july2_df, 
+                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_str="response", 
+                            y_lab="Encarsia Count (Per Tree)",
+                            title="CIs of Estimated Treatment Means - July Encarsia Count, Study 2")
+
+##### November #####
+pairs_encar_nov2_df <- as.data.frame(pairs(regrid(emm_encar_nov2), adjust="BH"))
+confint_encar_nov2_df <- as.data.frame(confint(emm_encar_nov2_orig_scale))
+y_positions <- seq(4, 9, by=1)
+
+get_cis_marginal_means_plot(ci_df=confint_encar_nov2_df, pairs_df=pairs_encar_nov2_df, 
+                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_str="response", 
+                            y_lab="Encarsia Count (Per Tree)",
+                            title="CIs of Estimated Treatment Means - November Encarsia Count, Study 2")
