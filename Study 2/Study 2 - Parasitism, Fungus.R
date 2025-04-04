@@ -113,7 +113,8 @@ july_para_means_comp <- pairs(regrid(emm_para_july), adjust="BH")
 # CI for pairwise comp
 confint(july_para_means_comp)
 # CI for means
-confint(emm_para_july, type="response")
+confint_emm_para_july_orig_scale <- confint(emm_para_july, type="response")
+confint_emm_para_july_orig_scale
 
 ##### November #####
 
@@ -123,7 +124,32 @@ nov_para_means_comp <- pairs(regrid(emm_para_nov), adjust="BH")
 # Confint for pairwise comparison
 confint(nov_para_means_comp)
 # Confint for means
-confint(emm_para_nov, type="response")
+confint_emm_para_nov_orig_scale <- confint(emm_para_nov, type="response")
+confint_emm_para_nov_orig_scale
+
+#### Parasitism Graphs ####
+
+##### July #####
+
+pairs_para_july_df <- as.data.frame(pairs(regrid(emm_para_july), adjust="BH"))
+confint_para_july_df <- as.data.frame(confint_emm_para_july_orig_scale)
+y_positions <- seq(.8, 1.3, by=.1)
+get_cis_marginal_means_plot(ci_df=confint_para_july_df, pairs_df=pairs_para_july_df, 
+                            y_positions=y_positions, trt_labels=trt_labels2,
+                            y_str="prob", 
+                            y_lab="Probability",
+                            title="CIs of Estimated Treatment Means - July Parasitism, Study 2")
+
+##### November #####
+
+pairs_para_nov_df <- as.data.frame(pairs(regrid(emm_para_nov), adjust="BH"))
+confint_para_nov_df <- as.data.frame(confint_emm_para_nov_orig_scale)
+y_positions <- seq(1, 1.5, by=.1)
+get_cis_marginal_means_plot(ci_df=confint_para_nov_df, pairs_df=pairs_para_nov_df, 
+                            y_positions=y_positions, trt_labels=trt_labels2,
+                            y_str="prob", 
+                            y_lab="Probability",
+                            title="CIs of Estimated Treatment Means - Nov Parasitism, Study 2")
 
 #### (4) Fungus models ####
 
