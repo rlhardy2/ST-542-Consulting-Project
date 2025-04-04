@@ -89,19 +89,23 @@ plot(simr_para_mod_nov)
 emm_para_july <- emmeans(para_mod_july, "Treatment")
 pairs(emm_para_july, type="response", adjust="BH")
 july_para_means_comp <- pairs(regrid(emm_para_july), adjust="BH")
+july_para_means_comp
 # CI for pairwise comp
 confint(july_para_means_comp)
 # CI for means
 confint_emm_para_july_orig_scale <- confint(emm_para_july, type="response")
+confint_emm_para_july_orig_scale
 
 ##### November #####
 emm_para_nov <- emmeans(para_mod_nov, "Treatment")
 pairs(emm_para_nov, type="response", adjust="BH")
 nov_para_means_comp <- pairs(regrid(emm_para_nov), adjust="BH")
+nov_para_means_comp
 # Confint for pairwise comparison
 confint(nov_para_means_comp)
 # Confint for means
 confint_emm_para_nov_orig_scale <- confint(emm_para_nov, type="response")
+confint_emm_para_nov_orig_scale
 
 #### Parasitism Graphs ####
 
@@ -131,12 +135,14 @@ fung_mod_july <- glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
                          data=scalecount_para_july,
                          family=binomial)
 simr_fung_mod_july <- simulateResiduals(fung_mod_july)
+plot(simr_fung_mod_july)
 
 ##### November #####
 fung_mod_nov <-  glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
                          data=scalecount_para_nov,
                          family=binomial)
 simr_fung_mod_nov <- simulateResiduals(fung_mod_nov)
+plot(simr_fung_mod_nov)
 
 #### (5) Fungus Analysis ####
 
@@ -144,19 +150,23 @@ simr_fung_mod_nov <- simulateResiduals(fung_mod_nov)
 emm_fung_july <- emmeans(fung_mod_july, "Treatment")
 pairs(emm_fung_july, type="response", adjust="BH")
 july_fung_means_comp <- pairs(regrid(emm_fung_july), adjust="BH")
+july_fung_means_comp
 # CI for pairwise comp
 confint(july_fung_means_comp)
 # CI for means
 confint_emm_fung_july_orig_scale <- confint(emm_fung_july, type="response")
+confint_emm_fung_july_orig_scale
 
 ##### November #####
 emm_fung_nov <- emmeans(fung_mod_nov, "Treatment")
 pairs(emm_fung_nov, type="response", adjust="BH")
 nov_fung_means_comp <- pairs(regrid(emm_fung_nov), adjust="BH")
+nov_fung_means_comp
 # Confint for pairwise comparison
 confint(nov_fung_means_comp)
 # Confint for means
 confint_emm_fung_nov_orig_scale <- confint(emm_fung_nov, type="response")
+confint_emm_fung_nov_orig_scale
 
 #### Fungus Graphs ####
 

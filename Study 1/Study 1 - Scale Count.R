@@ -232,7 +232,8 @@ plot(simr_zinb2_nov)
 # Estimated marginal means
 emm_nb1_july <- emmeans(nb1_july, "Treatment")
 emm_nb1_july_orig_scale <- emmeans(nb1_july, 
-                                   "Treatment", type="response")
+                                   "Treatment",
+                                   type="response")
 confint(emm_nb1_july_orig_scale)
 # effect size - Cohen's d
 eff_size(emm_nb1_july, 
@@ -251,6 +252,7 @@ confint(pairs(emm_nb1_july_orig_scale, adjust="BH"))
 confint(pairs(emm_nb1_july, adjust="BH"))
 # CI for pairwise comparison on original scale
 confint(pairs(regrid(emm_nb1_july), adjust="BH"))
+pairs(regrid(emm_nb1_july), adjust="BH")
 
 
 ##### November #####
@@ -278,6 +280,7 @@ confint(pairs(emm_nb1_nov_orig_scale, adjust="BH"))
 confint(pairs(emm_nb1_nov, adjust="BH"))
 # CI for pairwise comparison on original scale
 confint(pairs(regrid(emm_nb1_nov), adjust="BH"))
+pairs(regrid(emm_nb1_nov), adjust="BH")
 
 #### (7) Graphs ####
 ##### July #####

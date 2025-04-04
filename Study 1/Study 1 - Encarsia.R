@@ -135,6 +135,7 @@ confint(emm_encar_july_orig_scale)
 
 # Treatment means comparisons - July
 pairs_encar_july <- pairs(regrid(emm_encar_july), adjust="BH")
+pairs_encar_july
 confint(pairs_encar_july)
 
 
@@ -146,6 +147,7 @@ confint(emm_encar_nov_orig_scale)
 
 # Treatment means comparisons - Nov
 pairs_encar_nov <- pairs(regrid(emm_encar_nov), adjust="BH")
+pairs_encar_nov
 confint(pairs_encar_nov)
 
 #### (4) Graphs ####
