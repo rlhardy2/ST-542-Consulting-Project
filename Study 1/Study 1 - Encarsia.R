@@ -158,7 +158,7 @@ get_cis_marginal_means_plot(ci_df=confint_encar_july_df, pairs_df=pairs_encar_ju
                             y_positions=y_positions, trt_labels=trt_labels,
                             y_str="response", 
                             y_lab="Encarsia Count (Per Tree)",
-                            title="CIs of Estimated Treatment Means - July Encarsia Count, Study 1")
+                            title="CIs of Estimated Treatment Means - July Encarsia, Study 1")
 
 ##### November #####
 pairs_encar_nov_df <- as.data.frame(pairs(regrid(emm_encar_nov), adjust="BH"))
@@ -169,5 +169,5 @@ get_cis_marginal_means_plot(ci_df=confint_encar_nov_df, pairs_df=pairs_encar_nov
                             y_positions=y_positions, trt_labels=trt_labels,
                             y_str="response", 
                             y_lab="Encarsia Count (Per Tree)",
-                            title="CIs of Estimated Treatment Means - November Encarsia Count, Study 1")
+                            title="CIs of Estimated Treatment Means - Nov Encarsia, Study 1")
 
