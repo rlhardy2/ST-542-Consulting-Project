@@ -97,8 +97,7 @@ average_counts_across_twigs <- function(scalecount) {
     group_by(Label, Date, Treatment, Block) %>% 
     summarize(across(where(is.numeric), mean)) %>%
     # drop rows that shouldn't use means
-    dplyr::select(-one_of(c('Sumlivescale', 'Sumdeadscale', 
-                            'Sumlivescale_from_mean',
+    dplyr::select(-one_of(c('Sumlivescale_from_mean',
                             'Sumdeadscale_from_mean')))
   
   return (scalecount_tree_mean)

@@ -18,7 +18,7 @@ library(pscl)
 library(emmeans)
 library(DHARMa)
 library(glmmTMB)
-
+library(rcompanion)
 library(performance)
 
 source("../graphing functions.r")
@@ -27,6 +27,7 @@ source("../Data Processing.r")
 # Reformatted version of Study 1, for scale count analysis
 
 #### (1) Data Pre-processing ####
+
 trt_labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 
 # Read in file
@@ -48,16 +49,16 @@ scalecount_nov <- subset(scalecount, grepl('November', Date)) # November data
 tmeans_july <- get_treatment_survival_means(scalecount_july)
 tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 
+# Getting the data by tree
+scalecount_tree_mean_july <- average_counts_across_twigs(scalecount_july)
+scalecount_tree_mean_nov <- average_counts_across_twigs(scalecount_nov)
+
 #### (2) Friedman + Nemenyi ####
 
 ##### July #####
-# Friedman test for block design
-# Study was technically blocked, but this may not be totally necessary given
-# that the blocking was performed randomly?
 
 # Friedman test only supports unreplicated complete block designs
 # This needs to be averaged across all treatments and will be less precise
-scalecount_tree_mean_july <- average_counts_across_twigs(scalecount_july)
 scalecount_tree_mean_across_block_trt <- 
   average_counts_across_block_trt(scalecount_tree_mean_july)
 
@@ -85,33 +86,52 @@ heatmap(p_values_july, main = "Nemenyi Test P-Values",
         scale = "none")
 
 ##### November #####
-# Doesn't work for November 
-# Not unreplicated complete block design due to uncollected labels
-scalecount_tree_mean_nov <- average_counts_across_twigs(scalecount_nov)
 
+# Doesn't work for November
+# Not an unreplicated complete block design due to uncollected labels
+# Blocks S-B and V-D do not contain data for all four treatments
 
-#### (3) Kruskal-Wallis + Dunn ####
-# Since the blocks were not truly specified (randomly assigned)
-# we may just be able to collapse this to one factor if 
-# we use the by-tree data set?
-# However, blocks seem to have quite an effect in Study 1 
-# (may be bc of diff counties)
+scalecount_tree_mean_across_block_trt_nov <- 
+  average_counts_across_block_trt(scalecount_tree_mean_nov)
 
-# Insignificant results for July?
-kruskal.test(Meanlivescale ~ Treatment, data = scalecount_tree_mean_july)
+# For some reason, this won't work without converting to a matrix
+scalecount_tree_mean_block_trt_matrix_nov <- 
+  as.matrix(scalecount_tree_mean_across_block_trt_nov)
 
-# Significant results for November
-kruskal.test(Meanlivescale ~ Treatment, data = scalecount_tree_mean_nov)
-dunn_nov <- dunnTest(Meanlivescale ~ Treatment, 
-                     data = scalecount_tree_mean_nov, method = "bh")
+#### (3) Scheirer–Ray–Hare Test / Dunn's Test ####
 
-print(dunn_nov, dunn.test.results=TRUE)
+##### July #####
+
+# It appears that we don't need an unreplicated complete block design here
+# In order to use this test the observations need to be independent, so I am
+# using the by tree data here
+
+scheirer_july <- scheirerRayHare(Meanlivescale ~ Treatment | Block,
+                                 data = scalecount_tree_mean_july)
+scheirer_july
+
+# Note that the p-value for Treatment is not significant
+# The p-value for Treatment:Block interaction is not significant
+
+##### November #####
+
+scheirer_nov <- scheirerRayHare(Meanlivescale ~ Treatment | Block,
+                                 data = scalecount_tree_mean_nov)
+scheirer_nov
+
+# Note that the p-value for Treatment is significant
+# The p-value for Treatment:Block interaction is not significant
+
+dunnTest(Meanlivescale ~ Treatment,
+         data = scalecount_tree_mean_nov,
+         method = "bh")
 
 #### (4) Poisson & Negative Binomial Models ####
 
 # Just to test fit and necessity of zero inflation
 
 ##### July #####
+
 # Mixed Poisson, no zero inflation
 pois_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                        data=scalecount_july, ziformula = ~0,
@@ -142,6 +162,7 @@ simr_nb1_july <- simulateResiduals(nb1_july)
 testCategorical(simr_nb1_july, scalecount_july$Treatment)
 
 ##### November #####
+
 # Mixed Poisson, no zero inflation
 pois_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_nov, ziformula = ~0,
@@ -173,6 +194,7 @@ testCategorical(simr_nb1_nov, scalecount_nov$Treatment)
 #### (5) Zero-Inflated & Hurdle Models ####
 
 ##### July #####
+
 zinb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                     data=scalecount_july, ziformula = ~1,
                     family = nbinom2)
@@ -181,6 +203,7 @@ simr_zinb2_july <- simulateResiduals(zinb2_july)
 plot(simr_zinb2_july)
 
 ##### November #####
+
 # Diagnostics easier with glmmTMB than PSCL due to DHARMa compatibility
 
 # Random block, zero inflation, over each twig
@@ -228,7 +251,9 @@ plot(simr_zinb2_nov)
 #### (6) Analysis ####
 
 ##### July #####
+
 ###### Means ######
+
 # Estimated marginal means
 emm_nb1_july <- emmeans(nb1_july, "Treatment")
 emm_nb1_july_orig_scale <- emmeans(nb1_july, 
@@ -241,6 +266,7 @@ eff_size(emm_nb1_july,
 
 
 ###### Pairwise Comparisons ######
+
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
 plot(emm_nb1_july_orig_scale, comparison=TRUE)
@@ -258,6 +284,7 @@ pairs(regrid(emm_nb1_july), adjust="BH")
 ##### November #####
 
 ###### Means ######
+
 # Estimated marginal means
 emm_nb1_nov <- emmeans(nb1_nov, "Treatment")
 emm_nb1_nov_orig_scale <- emmeans(nb1_nov, 
@@ -269,6 +296,7 @@ eff_size(emm_nb1_nov,
 
 
 ###### Pairwise Comparisons ######
+
 # EMMs differ if arrows don't overlap
 # https://cran.r-project.org/web/packages/emmeans/vignettes/xplanations.html#arrows
 plot(emm_nb1_nov_orig_scale, comparison=TRUE)
@@ -283,7 +311,9 @@ confint(pairs(regrid(emm_nb1_nov), adjust="BH"))
 pairs(regrid(emm_nb1_nov), adjust="BH")
 
 #### (7) Graphs ####
+
 ##### July #####
+
 pairs_july_df <- as.data.frame(pairs(regrid(emm_nb1_july), adjust="BH"))
 confint_july_df <- as.data.frame(confint(emm_nb1_july_orig_scale))
 y_positions <- seq(5, 10, by=1)
@@ -295,6 +325,7 @@ get_cis_marginal_means_plot(ci_df=confint_july_df, pairs_df=pairs_july_df,
                             title="CIs of Estimated Treatment Means - July Live Scale Count, Study 1")
 
 ##### November #####
+
 pairs_nov_df <- as.data.frame(pairs(regrid(emm_nb1_nov), adjust="BH"))
 confint_nov_df <- as.data.frame(confint(emm_nb1_nov_orig_scale))
 y_positions <- seq(7, 13, by=1.2)

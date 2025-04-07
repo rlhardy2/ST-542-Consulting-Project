@@ -34,5 +34,23 @@ pairwise.wilcox.test(scalecount_nov$Livescale1, scalecount_nov$Treatment,
 #   scalecount_para_nov %>% 
 #   drop_na(Label) #some samples only have one twig
 
+#### Kruskal-Wallis + Dunn
+
+# Since the blocks were not truly specified (randomly assigned)
+# we may just be able to collapse this to one factor if 
+# we use the by-tree data set?
+# However, blocks seem to have quite an effect in Study 1 
+# (may be bc of diff counties)
+
+# Insignificant results for July?
+kruskal.test(Meanlivescale ~ Treatment, data = scalecount_tree_mean_july)
+
+# Significant results for November
+kruskal.test(Meanlivescale ~ Treatment, data = scalecount_tree_mean_nov)
+dunn_nov <- dunnTest(Meanlivescale ~ Treatment, 
+                     data = scalecount_tree_mean_nov, method = "bh")
+
+print(dunn_nov, dunn.test.results=TRUE)
+
 
 
