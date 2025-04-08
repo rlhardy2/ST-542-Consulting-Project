@@ -53,7 +53,7 @@ tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 scalecount_tree_mean_july <- average_counts_across_twigs(scalecount_july)
 scalecount_tree_mean_nov <- average_counts_across_twigs(scalecount_nov)
 
-#### (2) Friedman + Nemenyi ####
+#### (2) Friedman Test + Nemenyi Test ####
 
 ##### July #####
 
@@ -121,10 +121,6 @@ scheirer_nov
 
 # Note that the p-value for Treatment is significant
 # The p-value for Treatment:Block interaction is not significant
-
-dunnTest(Meanlivescale ~ Treatment,
-         data = scalecount_tree_mean_nov,
-         method = "bh")
 
 #### (4) Poisson & Negative Binomial Models ####
 
