@@ -23,22 +23,29 @@ library(ggpubr)
 source("../graphing functions.r")
 source("../Data Processing.r")
 
-#### Data Pre-processing ####
-trt_labels3 <- c("Acetamiprid", "Dinotefuron", "Sulfoxaflor", "Flupyradifurone", "No Treatment" )
+#### (1) Data Pre-processing ####
+
+trt_labels3 <- c("Acetamiprid", "Dinotefuron", "Sulfoxaflor", "Flupyradifurone", "No Treatment")
+
 scalecount3 <- read.csv(file = "acety counting v3 (study 3).csv", strip.white=TRUE)
 
-colnames(scalecount3) <- c("Label", "Twigab","EHSLivescale1","EHSDeadscale1","EHSLivescale2","EHSDeadscale2",
-                          "EHSLivescale3","EHSDeadscale3","Prespara","CryptoLivescale1","CryptoDeadscale1",
-                          "CryptoLivescale2","CryptoDeadscale2","CryptoLivescale3","CryptoDeadscale3",
+colnames(scalecount3) <- c("Label", "Twigab","EHSLivescale1","EHSDeadscale1",
+                           "EHSLivescale2","EHSDeadscale2",
+                          "EHSLivescale3","EHSDeadscale3",
+                          "Prespara","CryptoLivescale1","CryptoDeadscale1",
+                          "CryptoLivescale2","CryptoDeadscale2",
+                          "CryptoLivescale3","CryptoDeadscale3",
                           "Presfungus")
 
-##### Special - study 3 only #####
+##### Special - Study 3 only #####
+
 # Create Livescale{x}, Deadscale{x} variables
 scalecount3 <- create_live_deadscale_vars(scalecount3)
 ## End study 3 only processing
 
 # Remove unused variables (crypto, ehs scale)
-scalecount3 <-subset(scalecount3, select = -c(EHSLivescale1,EHSLivescale2,EHSLivescale3,EHSDeadscale1,
+scalecount3 <-subset(scalecount3, select = -c(EHSLivescale1,EHSLivescale2,
+                                              EHSLivescale3,EHSDeadscale1,
                                            EHSDeadscale2,EHSDeadscale3,CryptoLivescale1,
                                            CryptoLivescale2,CryptoLivescale3,CryptoDeadscale1,
                                            CryptoDeadscale2,
@@ -49,8 +56,49 @@ scalecount3 <- process_scalecount(scalecount3)
 # Treatment survival means
 tmeans3_nov <- get_treatment_survival_means(scalecount3)
 
+# Getting the data by tree
+scalecount3_by_tree <- average_counts_across_twigs_study3(scalecount3)
 
-#### Poisson/Negative binomial ####
+#### (2) Friedman Test + Nemenyi Test ####
+
+# Friedman test only supports unreplicated complete block designs
+# This needs to be averaged across all treatments and will be less precise
+
+scalecount3_avg_across_block_trt <-
+  average_counts_across_block_trt_study3(scalecount3_by_tree)
+
+# For some reason, this won't work without converting to a matrix
+scalecount3_avg_block_trt_matrix <-
+  as.matrix(scalecount3_avg_across_block_trt)
+
+#### Friedman test -- mean live scale
+# For some reason this only works if you use as.matrix lol
+friedman <- friedman.test(Meanlivescale ~ Treatment | Block,
+                          data = scalecount3_avg_block_trt_matrix)
+friedman
+
+# P-value of 0.01147 from Friedman test is significant
+# We will conduct the post hoc Nemenyi test below
+
+nemenyi <- frdAllPairsNemenyiTest(Meanlivescale ~ Treatment | Block, 
+                                  data = scalecount3_avg_block_trt_matrix)
+PMCMRTable(nemenyi)
+
+#### (3) Scheirer–Ray–Hare Test ####
+
+# It appears that we don't need an unreplicated complete block design here
+# In order to use this test the observations need to be independent, so I am
+# using the by tree data here
+
+scheirer <- scheirerRayHare(Meanlivescale ~ Treatment | Block,
+                            data = scalecount3_by_tree)
+scheirer
+
+# Note that the p-value for Treatment is significant
+# The p-value for Treatment:Block interaction is not significant
+
+#### (4) Poisson & Negative Binomial ####
+
 # Mixed Poisson, no zero inflation
 pois_nov3 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                     data=scalecount3, ziformula = ~0,

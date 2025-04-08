@@ -103,6 +103,22 @@ average_counts_across_twigs <- function(scalecount) {
   return (scalecount_tree_mean)
 }
 
+#### For Study 3 ONLY!!!
+# Label denotes the same tree
+# Average count data (live scale, dead scale, encarsia) 
+# across both twigs to get by tree
+average_counts_across_twigs_study3 <- function(scalecount) {
+  scalecount_tree_mean <-
+    scalecount %>%
+    group_by(Label, Treatment, Block) %>% 
+    summarize(across(where(is.numeric), mean)) %>%
+    # drop rows that shouldn't use means
+    dplyr::select(-one_of(c('Sumlivescale_from_mean',
+                            'Sumdeadscale_from_mean')))
+  
+  return (scalecount_tree_mean)
+}
+
 # Label denotes the same tree
 # Sum count data (live scale, dead scale, encarsia) 
 # across both twigs to get by tree
@@ -123,6 +139,19 @@ average_counts_across_block_trt <- function(scalecount) {
   scalecount_block_trt_mean <-
     scalecount %>%
     group_by(Date, Treatment, Block) %>% 
+    summarize(across(where(is.numeric), mean)) %>%
+    arrange(Block, Treatment)
+  
+  return (scalecount_block_trt_mean)
+}
+
+#### For Study 3 ONLY!!!
+# Average counts across block-treatment combo
+# Must have already averaged across twigs first...
+average_counts_across_block_trt_study3 <- function(scalecount) {
+  scalecount_block_trt_mean <-
+    scalecount %>%
+    group_by(Treatment, Block) %>% 
     summarize(across(where(is.numeric), mean)) %>%
     arrange(Block, Treatment)
   

@@ -90,9 +90,6 @@ scalecount2_avg_nov <- average_counts_across_twigs(scalecount2_nov)
 scalecount2_avg_across_block_trt <-
   average_counts_across_block_trt(scalecount2_avg_july)
 
-# Note that after grouping data by treatment-block combination, there are only 16 observations!
-# Is that going to be a problem...??
-
 # For some reason, this won't work without converting to a matrix
 scalecount2_avg_block_trt_matrix <-
   as.matrix(scalecount2_avg_across_block_trt)
@@ -112,8 +109,6 @@ friedman
 scalecount2_avg_across_block_trt <-
   average_counts_across_block_trt(scalecount2_avg_nov)
 
-# Again, note that the data grouped by treatment-block combination only has 16 observations
-
 # For some reason, this won't work without converting to a matrix
 scalecount2_avg_block_trt_matrix <-
   as.matrix(scalecount2_avg_across_block_trt)
@@ -126,7 +121,7 @@ friedman
 # P-value of 0.1562 from Friedman test above is not significant!
 # Therefore we do not need to conduct the Nemenyi (or other) pairwise test!
 
-#### (3) Scheirer–Ray–Hare Test / Dunn's Test ####
+#### (3) Scheirer–Ray–Hare Test ####
 
 ##### July #####
 

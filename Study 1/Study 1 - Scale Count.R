@@ -59,11 +59,12 @@ scalecount_tree_mean_nov <- average_counts_across_twigs(scalecount_nov)
 
 # Friedman test only supports unreplicated complete block designs
 # This needs to be averaged across all treatments and will be less precise
-scalecount_tree_mean_across_block_trt <- 
+scalecount_tree_mean_across_block_trt <-
   average_counts_across_block_trt(scalecount_tree_mean_july)
 
 # For some reason, this won't work without converting to a matrix
-scalecount_tree_mean_block_trt_matrix <- as.matrix(scalecount_tree_mean_across_block_trt)
+scalecount_tree_mean_block_trt_matrix <-
+  as.matrix(scalecount_tree_mean_across_block_trt)
 
 #### Friedman test for July
 # For some reason this only works if you use as.matrix lol
@@ -91,14 +92,14 @@ heatmap(p_values_july, main = "Nemenyi Test P-Values",
 # Not an unreplicated complete block design due to uncollected labels
 # Blocks S-B and V-D do not contain data for all four treatments
 
-scalecount_tree_mean_across_block_trt_nov <- 
+scalecount_tree_mean_across_block_trt_nov <-
   average_counts_across_block_trt(scalecount_tree_mean_nov)
 
 # For some reason, this won't work without converting to a matrix
-scalecount_tree_mean_block_trt_matrix_nov <- 
+scalecount_tree_mean_block_trt_matrix_nov <-
   as.matrix(scalecount_tree_mean_across_block_trt_nov)
 
-#### (3) Scheirer–Ray–Hare Test / Dunn's Test ####
+#### (3) Scheirer–Ray–Hare Test ####
 
 ##### July #####
 
