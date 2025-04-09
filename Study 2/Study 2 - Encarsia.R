@@ -201,7 +201,7 @@ confint_encar_july2_df <- as.data.frame(confint(emm_encar_july2_orig_scale))
 y_positions <- seq(4, 9, by=1)
 
 get_cis_marginal_means_plot(ci_df=confint_encar_july2_df, pairs_df=pairs_encar_july2_df, 
-                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_positions=y_positions, trt_labels=trt_labels2,
                             y_str="response", 
                             y_lab="Encarsia Count (Per Tree)",
                             title="CIs of Estimated Treatment Means - July Encarsia Count, Study 2")
@@ -212,7 +212,7 @@ confint_encar_nov2_df <- as.data.frame(confint(emm_encar_nov2_orig_scale))
 y_positions <- seq(4, 9, by=1)
 
 get_cis_marginal_means_plot(ci_df=confint_encar_nov2_df, pairs_df=pairs_encar_nov2_df, 
-                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_positions=y_positions, trt_labels=trt_labels2,
                             y_str="response", 
                             y_lab="Encarsia Count (Per Tree)",
                             title="CIs of Estimated Treatment Means - November Encarsia Count, Study 2")
