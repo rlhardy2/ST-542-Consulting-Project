@@ -100,7 +100,7 @@ friedman <- friedman.test(Meanlivescale ~ Treatment | Block,
                           data = scalecount2_avg_block_trt_matrix)
 friedman
 
-# P-value of 0.5456 from Friedman test above is not significant!
+# P-value of 0.5779 from Friedman test above is not significant!
 # Therefore we do not need to conduct the Nemenyi (or other) pairwise test!
 
 ##### November #####
