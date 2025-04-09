@@ -26,7 +26,7 @@ source("../graphing functions.r")
 source("../Data Processing.r")
 
 #### (1) Data Pre-processing ####
-trt_labels3 <- c("Acetamiprid", "Dinotefuron", "Sulfoxaflor", "Flupyradifurone", "No Treatment" )
+trt_labels3 <- c("Acetamiprid", "Dinotefuran", "Sulfoxaflor", "Flupyradifurone", "No Treatment" )
 scalecount3 <- read.csv(file = "acety counting v3 (study 3).csv", strip.white=TRUE)
 
 colnames(scalecount3) <- c("Label", "Twigab","EHSLivescale1","EHSDeadscale1","EHSLivescale2","EHSDeadscale2",
