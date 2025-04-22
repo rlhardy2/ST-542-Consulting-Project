@@ -51,7 +51,35 @@ scalecount3 <- process_scalecount(scalecount3)
 # Only keep samples where scale (either live or dead) was found
 scalecount3_para <- scalecount3 %>% filter(Meanlivescale > 0 | Meandeadscale > 0)
 
-#### (2) Parasitism models ####
+# Treatment means
+tmeans_para3 <- scalecount3_para %>% 
+  group_by(Treatment) %>% 
+  summarise(
+    percent_yes_para = mean(Prespara == 1),
+    percent_yes_fung = mean(Presfungus == 1),
+    percent_yes_para_100 = round(percent_yes_para*100),
+    percent_yes_fung_100 = round(percent_yes_fung*100)
+  )
+
+#### (2) Graphs - Exploratory ####
+##### Parasitism #####
+plot_means(data=tmeans_para3, 
+                title="Study 3 - Mean Presence Percentage of Parasitism",
+                x_str="Treatment",
+                y_str="percent_yes_para_100",
+                labels=trt_labels3,
+                y_lab="Percent")
+
+##### Fungus #####
+plot_means(data=tmeans_para3, 
+           title="Study 3 - Mean Presence Percentage of Fungus",
+           x_str="Treatment",
+           y_str="percent_yes_fung_100",
+           labels=trt_labels3,
+           y_lab="Percent")
+
+
+#### (3) Parasitism models ####
 
 para_mod_nov3 <-  glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
                          data=scalecount3_para,
@@ -59,7 +87,7 @@ para_mod_nov3 <-  glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
 simr_para_mod_nov3 <- simulateResiduals(para_mod_nov3)
 plot(simr_para_mod_nov3)
 
-#### (3) Parasitism analysis ####
+#### (4) Parasitism analysis ####
 emm_para_nov3 <- emmeans(para_mod_nov3, "Treatment")
 pairs(emm_para_nov3, type="response", adjust="BH")
 nov_para_means_comp <- pairs(regrid(emm_para_nov3), adjust="BH")
@@ -68,7 +96,7 @@ confint(nov_para_means_comp)
 # Confint for means
 confint_emm_para_nov3_orig_scale <- confint(emm_para_nov3, type="response")
 
-#### (4) Parasitism Graphs ####
+#### (5) Parasitism Graphs ####
 pairs_para_nov_df3 <- as.data.frame(pairs(regrid(emm_para_nov3), adjust="BH"))
 confint_para_nov_df3 <- as.data.frame(confint_emm_para_nov3_orig_scale)
 y_positions <- seq(1, 1.9, by=.1)
@@ -80,7 +108,7 @@ get_cis_marginal_means_plot(ci_df=confint_para_nov_df3, pairs_df=pairs_para_nov_
                             title="CIs of Estimated Treatment Means - Parasitism, Study 3")
 
 
-#### (5) Fungus models ####
+#### (6) Fungus models ####
 
 fung_mod_nov3 <-  glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
                           data=scalecount3_para,
@@ -88,7 +116,7 @@ fung_mod_nov3 <-  glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
 simr_fung_mod_nov3 <- simulateResiduals(fung_mod_nov3)
 plot(simr_fung_mod_nov3)
 
-#### (6) Fungus analysis ####
+#### (7) Fungus analysis ####
 emm_fung_nov3 <- emmeans(fung_mod_nov3, "Treatment")
 pairs(emm_fung_nov3, type="response", adjust="BH")
 nov_fung_means_comp <- pairs(regrid(emm_fung_nov3), adjust="BH")
@@ -98,7 +126,7 @@ confint(nov_fung_means_comp)
 confint_emm_fung_nov3_orig_scale <- confint(emm_fung_nov3, type="response")
 
 
-#### (7) Fungus Graphs ####
+#### (8) Fungus Graphs ####
 pairs_fung_nov_df3 <- as.data.frame(pairs(regrid(emm_fung_nov3), adjust="BH"))
 confint_fung_nov_df3 <- as.data.frame(confint_emm_fung_nov3_orig_scale)
 y_positions <- seq(1, 1.9, by=.1)

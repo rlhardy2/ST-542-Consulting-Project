@@ -53,7 +53,35 @@ tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 scalecount_tree_mean_july <- average_counts_across_twigs(scalecount_july)
 scalecount_tree_mean_nov <- average_counts_across_twigs(scalecount_nov)
 
-#### (2) Friedman Test + Nemenyi Test ####
+
+#### (2) Graphs - Exploratory ####
+
+##### Distribution #####
+get_hist_livescale(scalecount_july, collection_date="July", study=1, 
+                   labels=trt_labels)
+get_hist_livescale(scalecount_nov, collection_date="Nov", study=1, 
+                   labels=trt_labels)
+
+get_hist_all_trt(scalecount_july, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 1 - Mean Live Scale, All Treatments, July",
+                 labels=trt_labels)
+
+get_hist_all_trt(scalecount_nov, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 1 - Mean Live Scale, All Treatments, Nov",
+                 labels=trt_labels)
+
+##### Mean Live Scale #####
+
+# Mean live scale by county, July
+plot_means_by_county(data=tmeans_county_july, 
+                     title="Study 1 - Mean Live Scale By County - July")
+
+
+# Mean live scale by county, Nov
+plot_means_by_county(data=tmeans_county_nov, 
+                     title="Study 1 - Mean Live Scale By County - Nov")
+
+#### (3) Friedman Test + Nemenyi Test ####
 
 ##### July #####
 
@@ -99,7 +127,7 @@ scalecount_tree_mean_across_block_trt_nov <-
 scalecount_tree_mean_block_trt_matrix_nov <-
   as.matrix(scalecount_tree_mean_across_block_trt_nov)
 
-#### (3) Scheirer–Ray–Hare Test ####
+#### (4) Scheirer–Ray–Hare Test ####
 
 ##### July #####
 
@@ -123,7 +151,7 @@ scheirer_nov
 # Note that the p-value for Treatment is significant
 # The p-value for Treatment:Block interaction is not significant
 
-#### (4) Poisson & Negative Binomial Models ####
+#### (5) Poisson & Negative Binomial Models ####
 
 # Just to test fit and necessity of zero inflation
 
@@ -188,7 +216,7 @@ simr_nb1_nov <- simulateResiduals(nb1_nov)
 plot(simr_nb1_nov)
 testCategorical(simr_nb1_nov, scalecount_nov$Treatment)
 
-#### (5) Zero-Inflated & Hurdle Models ####
+#### (6) Zero-Inflated & Hurdle Models ####
 
 ##### July #####
 
@@ -245,7 +273,7 @@ check_model(zinb2_nov)
 performance(zinb2_nov)
 plot(simr_zinb2_nov)
 
-#### (6) Analysis ####
+#### (7) Analysis ####
 
 ##### July #####
 
@@ -307,7 +335,7 @@ confint(pairs(emm_nb1_nov, adjust="BH"))
 confint(pairs(regrid(emm_nb1_nov), adjust="BH"))
 pairs(regrid(emm_nb1_nov), adjust="BH")
 
-#### (7) Graphs ####
+#### (8) Graphs - Model Analysis ####
 
 ##### July #####
 

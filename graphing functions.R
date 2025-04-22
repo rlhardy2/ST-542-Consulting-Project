@@ -3,6 +3,31 @@ library(tidyr)
 library(ggplot2)
 library(ggpubr)
 
+
+# Plot treatment means
+plot_means <- function(data, title, x_str, y_str, labels, y_lab=y_str) {
+  x_sym <- ensym(x_str)
+  y_sym <- ensym(y_str)
+  trt_plot <- ggplot(data=data, aes(x={{x_sym}}, y={{y_sym}}), na.rm = T) +
+    geom_bar(stat="identity", 
+             position = position_dodge2(width = 0.9, preserve = "single"))  +
+    labs(x=x_str, y=y_lab, title=title) +
+    theme_bw() + 
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          axis.text.x=element_text(angle = 45, vjust = 0.5, size=15), 
+          axis.title.x = element_text(size=18),
+          axis.title.y=element_text(size=18),
+          axis.text.y=element_text(size=18),
+          legend.text = element_text(size = 14),
+          legend.title = element_text(size = 18)
+    )+
+    scale_fill_brewer(palette = "Dark2") +
+    scale_color_brewer(palette = "Dark2")  + scale_x_discrete(label = labels)
+  
+  return(trt_plot)
+}
+
 # plot means by collection date and an X value (treatment, county)
 # "data" should have the tmeans format illustrated in Study 1
 plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_labels, y_lab=y_str) {
@@ -29,6 +54,31 @@ plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_label
     scale_color_brewer(palette = "Dark2")  + scale_x_discrete(label = labels)
   
   return(trt_coll_plot)
+}
+
+# Mean lives scale by county
+# data should be "tmeans"
+plot_means_by_county <- function(data, title) {
+  trt_plot <- 
+    ggplot(data=data, 
+         aes(x=Treatment, y=Mean, fill=County, colour=County
+         ), na.rm = T) +
+    geom_bar(stat="identity", position = position_dodge2(width = 0.9, preserve = "single"))  +
+    labs(x="Treatment", y="Mean Live Scale", title=title) +
+    theme_bw() + 
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          axis.text.x=element_text(angle = 35, vjust = 0.5, size=18), 
+          axis.title.x = element_text(size=18),
+          axis.title.y=element_text(size=18),
+          axis.text.y=element_text(size=18),
+          legend.text = element_text(size = 14),
+          legend.title = element_text(size = 18)
+    )+  ylim(0, 5)+
+    scale_fill_brewer(palette = "Dark2")+
+    scale_color_brewer(palette = "Dark2") + scale_x_discrete(label = trt_labels)
+  
+  return (trt_plot)
 }
 
 # Histograms - one plot for each treatment

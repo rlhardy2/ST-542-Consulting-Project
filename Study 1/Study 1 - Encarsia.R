@@ -54,7 +54,41 @@ scalecountencar_nov <-scalecount_nov %>% drop_na(encarsia)
 scalecountencar_july <- average_counts_across_twigs(scalecountencar_july)
 scalecountencar_nov <- average_counts_across_twigs(scalecountencar_nov)
 
-#### (2) Encarsia models ####
+# Treatment means
+tmeans_encar_july <- scalecountencar_july %>% 
+  group_by(Treatment) %>% 
+  dplyr::summarize(
+    Mean=round(mean(encarsia, na.rm = T),3),
+  )
+tmeans_encar_july$Collection<-"July"
+
+tmeans_encar_nov <- scalecountencar_nov %>% 
+  group_by(Treatment) %>% 
+  dplyr::summarize(
+    Mean=round(mean(encarsia, na.rm = T),3),
+  )
+tmeans_encar_nov$Collection<-"Nov"
+
+encar_table_trt <- dplyr::bind_rows(tmeans_encar_july, 
+                                    tmeans_encar_nov)
+
+#### (2) Exploratory Graphs ####
+get_hist_all_trt(scalecountencar_july, x_str="encarsia", x_lab="Encarsia Count",
+                 title="Study 1 - Encarsia, All Treatments, July",
+                 labels=trt_labels)
+
+get_hist_encarsia(data=scalecountencar_july, collection_date="July",
+                  study=1, labels=trt_labels)
+
+get_hist_encarsia(data=scalecountencar_nov, collection_date="November",
+                  study=1, labels=trt_labels)
+
+plot_means_by_collection(data=encar_table_trt, 
+                         title="Study 1 - Mean Encarsia Count Per Tree",
+                         x_str="Treatment",
+                         y_str="Mean")
+
+#### (3) Encarsia models ####
 
 ##### July #####
 # Graph histogram of encarsia
@@ -125,7 +159,7 @@ plot(simr_encar_zip_nov)
 
 # Best one looks to be type 1 NB
 
-#### (3) Analysis ####
+#### (4) Analysis ####
 
 ##### July #####
 # Treatment means - July
@@ -150,7 +184,7 @@ pairs_encar_nov <- pairs(regrid(emm_encar_nov), adjust="BH")
 pairs_encar_nov
 confint(pairs_encar_nov)
 
-#### (4) Graphs ####
+#### (5) Graphs ####
 ##### July #####
 pairs_encar_july_df <- as.data.frame(pairs(regrid(emm_encar_july), adjust="BH"))
 confint_encar_july_df <- as.data.frame(confint(emm_encar_july_orig_scale))

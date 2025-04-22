@@ -74,13 +74,38 @@ scalecount2_nov <- subset(scalecount2, grepl('November', Date))
 
 # Treatment survival means
 tmeans2_july <- get_treatment_survival_means(scalecount2_july)
+tmeans2_july$Collection<-"July"
 tmeans2_nov <- get_treatment_survival_means(scalecount2_nov)
+tmeans2_nov$Collection<-"Nov"
+tmeans2_table <- dplyr::bind_rows(tmeans2_july, tmeans2_nov)
 
 # Getting the data by tree
 scalecount2_avg_july <- average_counts_across_twigs(scalecount2_july)
 scalecount2_avg_nov <- average_counts_across_twigs(scalecount2_nov)
 
-#### (2) Friedman Test + Nemenyi Test ####
+#### (2) Graphs - Exploratory ####
+
+##### Distribution #####
+get_hist_livescale(scalecount2_july, collection_date="July", study=2, 
+                   labels=trt_labels2)
+get_hist_livescale(scalecount2_nov, collection_date="Nov", study=2, 
+                   labels=trt_labels2)
+
+get_hist_all_trt(scalecount2_july, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 2 - Mean Live Scale, All Treatments, July",
+                 labels=trt_labels2)
+
+get_hist_all_trt(scalecount2_nov, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 2 - Mean Live Scale, All Treatments, Nov",
+                 labels=trt_labels2)
+
+##### Mean Live Scale #####
+plot_means_by_collection(data=tmeans2_table, 
+                         title="Study 2 - Mean Live EHS & Crypto Scale",
+                         x_str="Treatment", y_str="Mean", labels=trt_labels2)
+
+
+#### (3) Friedman Test + Nemenyi Test ####
 
 ##### July #####
 
@@ -121,7 +146,7 @@ friedman
 # P-value of 0.1562 from Friedman test above is not significant!
 # Therefore we do not need to conduct the Nemenyi (or other) pairwise test!
 
-#### (3) Scheirer–Ray–Hare Test ####
+#### (4) Scheirer–Ray–Hare Test ####
 
 ##### July #####
 
@@ -145,7 +170,7 @@ scheirer_nov
 # Note that the p-value for Treatment is significant
 # The p-value for Treatment:Block interaction is significant
 
-#### (4) Poisson & Negative Binomial Models ####
+#### (5) Poisson & Negative Binomial Models ####
 
 ##### July #####
 
@@ -210,7 +235,7 @@ simr_nb1_nov2 <- simulateResiduals(nb1_nov2)
 plot(simr_nb1_nov2)
 #testCategorical(simr_nb1_nov, scalecount2_nov$Treatment) # gives error...
 
-#### (5) Zero-Inflated & Hurdle Models ####
+#### (6) Zero-Inflated & Hurdle Models ####
 
 ##### July #####
 
@@ -278,7 +303,7 @@ hpois_nov2 <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
 simr_hpois_nov2 <- simulateResiduals(hpois_nov2)
 plot(simr_hpois_nov2)
 
-#### (6) Analysis ####
+#### (7) Analysis ####
 
 ##### July #####
 
@@ -332,7 +357,7 @@ confint(pairs(emm_nb1_nov2, adjust="BH"))
 # CI for pairwise comparison on original scale
 confint(pairs(regrid(emm_nb1_nov2), adjust="BH"))
 
-#### (7) Graphs ####
+#### (8) Graphs ####
 
 ##### July #####
 

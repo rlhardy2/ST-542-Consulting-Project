@@ -59,7 +59,26 @@ tmeans3_nov <- get_treatment_survival_means(scalecount3)
 # Getting the data by tree
 scalecount3_by_tree <- average_counts_across_twigs_study3(scalecount3)
 
-#### (2) Friedman Test + Nemenyi Test ####
+#### (2) Graphs - Exploratory ####
+
+##### Distribution #####
+
+get_hist(data=scalecount3, 
+         x_str="Meanlivescale", 
+         x_lab="Mean Live Scale",
+         title="Study 3 - Mean Numbers of Live Scale Insects",
+         labels=trt_labels3)
+
+get_hist_all_trt(scalecount3, x_str="Meanlivescale", x_lab="Mean Live Scale",
+                 title="Study 3 - Mean Live Scale, All Treatments",
+                 labels=trt_labels3)
+
+##### Mean Live Scale #####
+plot_means(data=tmeans3_nov, title="Study 3 - Mean Live Scale", 
+           x_str="Treatment", y_str="Mean", labels=trt_labels3)
+
+
+#### (3) Friedman Test + Nemenyi Test ####
 
 # Friedman test only supports unreplicated complete block designs
 # This needs to be averaged across all treatments and will be less precise
@@ -84,7 +103,7 @@ nemenyi <- frdAllPairsNemenyiTest(Meanlivescale ~ Treatment | Block,
                                   data = scalecount3_avg_block_trt_matrix)
 PMCMRTable(nemenyi)
 
-#### (3) Scheirer–Ray–Hare Test ####
+#### (4) Scheirer–Ray–Hare Test ####
 
 # It appears that we don't need an unreplicated complete block design here
 # In order to use this test the observations need to be independent, so I am
@@ -97,7 +116,7 @@ scheirer
 # Note that the p-value for Treatment is significant
 # The p-value for Treatment:Block interaction is not significant
 
-#### (4) Poisson & Negative Binomial ####
+#### (5) Poisson & Negative Binomial ####
 
 # Mixed Poisson, no zero inflation
 pois_nov3 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
@@ -129,7 +148,7 @@ plot(simr_nb1_nov3)
 testCategorical(simr_nb1_nov3, scalecount3$Treatment)
 
 
-#### Zero-Inflated & Hurdle Models ####
+#### (6) Zero-Inflated & Hurdle Models ####
 
 # Zero inflation with nb2
 zinb2_nov3 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
@@ -164,7 +183,7 @@ plot(simr_hnb2_nov3)
 
 # Might prefer the standard models for study 3? IDK
 
-#### Analysis ####
+#### (7) Analysis ####
 
 # Maybe use nb1...?
 
@@ -193,7 +212,7 @@ confint(pairs(regrid(emm_nb1_nov3), adjust="BH"))
 
 pairs(regrid(emm_nb1_nov3), adjust="BH")
 
-#### Graphs ####
+#### (8) Graphs ####
 pairs_nov_df3 <- as.data.frame(pairs(regrid(emm_nb1_nov3), adjust="BH"))
 confint_nov_df3 <- as.data.frame(confint(emm_nb1_nov3_orig_scale))
 y_positions <- seq(18, 28.8, by=1.2)

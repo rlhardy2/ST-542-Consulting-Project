@@ -72,7 +72,6 @@ scalecount2_nov <- subset(scalecount2, grepl('November', Date))
 
 # Should look at Meanlivescale and Meandeadscale
 # Drop twigs with 0 scale
-
 scalecount2_para_july <- 
   scalecount2_july %>%
   filter(Meanlivescale > 0 | Meandeadscale > 0) %>%
@@ -83,7 +82,49 @@ scalecount2_para_nov <-
   filter(Meanlivescale > 0 | Meandeadscale > 0) %>%
   drop_na(Label)
 
-#### (2) Parasitism Models ####
+# Treatment means
+tmeans_july_para2 <- scalecount2_para_july %>% 
+  group_by(Treatment) %>% 
+  summarise(
+    percent_yes_para = mean(Prespara == 1),
+    percent_yes_fung = mean(Presfungus == 1),
+    percent_yes_para_100 = round(percent_yes_para*100),
+    percent_yes_fung_100 = round(percent_yes_fung*100)
+  )
+tmeans_july_para2$Collection<-"July"
+
+tmeans_nov_para2 <- scalecount2_para_nov %>% 
+  group_by(Treatment) %>% 
+  summarise(
+    percent_yes_para = mean(Prespara == 1),
+    percent_yes_fung = mean(Presfungus == 1),
+    percent_yes_para_100 = round(percent_yes_para*100),
+    percent_yes_fung_100 = round(percent_yes_fung*100)
+  )
+tmeans_nov_para2$Collection<-"Nov"
+
+para_table2 <-dplyr::bind_rows(tmeans_july_para2, tmeans_nov_para2)
+
+#### (2) Graphs - Exploratory ####
+
+##### Parasitism #####
+plot_means_by_collection(data=para_table2, 
+                         title="Study 2 - Mean Presence Percentage of Parasitism",
+                         x_str="Treatment",
+                         y_str="percent_yes_para_100",
+                         labels=trt_labels2,
+                         y_lab="Percent")
+
+##### Fungus #####
+plot_means_by_collection(data=para_table2, 
+                         title="Study 2 - Mean Presence Percentage of Fungus",
+                         x_str="Treatment",
+                         y_str="percent_yes_fung_100",
+                         labels=trt_labels2,
+                         y_lab="Percent")
+
+
+#### (3) Parasitism Models ####
 
 ##### July #####
 
@@ -103,7 +144,7 @@ para_mod_nov <-  glmmTMB(Prespara ~ Treatment + (1 | Block / Label),
 simr_para_mod_nov <- simulateResiduals(para_mod_nov)
 plot(simr_para_mod_nov)
 
-#### (3) Parasitism Analysis ####
+#### (4) Parasitism Analysis ####
 
 ##### July #####
 
@@ -127,7 +168,7 @@ confint(nov_para_means_comp)
 confint_emm_para_nov_orig_scale <- confint(emm_para_nov, type="response")
 confint_emm_para_nov_orig_scale
 
-#### Parasitism Graphs ####
+#### (5) Parasitism Graphs ####
 
 ##### July #####
 
@@ -151,7 +192,7 @@ get_cis_marginal_means_plot(ci_df=confint_para_nov_df, pairs_df=pairs_para_nov_d
                             y_lab="Probability",
                             title="CIs of Estimated Treatment Means - Nov Parasitism, Study 2")
 
-#### (4) Fungus models ####
+#### (6) Fungus models ####
 
 ##### July #####
 
@@ -172,7 +213,7 @@ fung_mod_nov <-  glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
 simr_fung_mod_nov <- simulateResiduals(fung_mod_nov)
 plot(simr_fung_mod_nov)
 
-#### (5) Fungus Analysis ####
+#### (7) Fungus Analysis ####
 
 ##### July #####
 

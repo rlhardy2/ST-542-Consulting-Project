@@ -67,10 +67,6 @@ scalecount2 <- process_scalecount(scalecount2_wide)
 scalecount2_july <- subset(scalecount2, grepl('July', Date))
 scalecount2_nov <- subset(scalecount2, grepl('November', Date))
 
-# Treatment survival means
-tmeans2_july <- get_treatment_survival_means(scalecount2_july)
-tmeans2_nov <- get_treatment_survival_means(scalecount2_nov)
-
 ##### Specialized Encarsia pre-processing #####
 
 # Drop counts where encarsia is NA
@@ -86,7 +82,28 @@ scalecountencar2_nov <- average_counts_across_twigs(scalecountencar2_nov)
 scalecountencar2_july$encarsia
 scalecountencar2_nov$encarsia
 
-#### (2) Encarsia models ####
+# Encarsia treatment means
+tmeans_encar_july <- scalecountencar2_july %>% 
+  group_by(Treatment) %>% 
+  dplyr::summarize(
+    Mean = round(mean(encarsia, na.rm = T),3)
+  )
+
+
+#### (2) Exploratory Graphs ####
+get_hist_all_trt(scalecountencar2_july, x_str="encarsia", x_lab="Encarsia Count",
+                 title="Study 2 - Encarsia, All Treatments, July",
+                 labels=trt_labels2)
+
+get_hist_encarsia(data=scalecountencar2_july, collection_date="July",
+                  study=2, labels=trt_labels2)
+
+plot_means(data=tmeans_encar_july, 
+                         title="Study 2 - Mean Encarsia Count Per Tree",
+                         x_str="Treatment",
+                         y_str="Mean", labels=trt_labels2)
+
+#### (3) Encarsia models ####
 
 ##### July #####
 
@@ -167,7 +184,7 @@ encar_zip_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
 simr_encar_zip_nov2 <- simulateResiduals(encar_zip_nov2)
 plot(simr_encar_zip_nov2)
 
-#### (3) Analysis ####
+#### (4) Analysis ####
 
 ##### July #####
 
@@ -194,7 +211,7 @@ pairs_encar_nov2
 confint(pairs_encar_nov2)
 
 
-#### (4) Graphs ####
+#### (5) Graphs ####
 ##### July #####
 pairs_encar_july2_df <- as.data.frame(pairs(regrid(emm_encar_july2), adjust="BH"))
 confint_encar_july2_df <- as.data.frame(confint(emm_encar_july2_orig_scale))
