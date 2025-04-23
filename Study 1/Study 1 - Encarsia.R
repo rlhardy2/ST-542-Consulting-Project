@@ -76,6 +76,9 @@ encar_table_trt <- dplyr::bind_rows(tmeans_encar_july,
 get_hist_all_trt(scalecountencar_july, x_str="encarsia", x_lab="Encarsia Count",
                  title="Study 1 - Encarsia, All Treatments, July",
                  labels=trt_labels)
+get_hist_all_trt(scalecountencar_nov, x_str="encarsia", x_lab="Encarsia Count",
+                 title="Study 1 - Encarsia, All Treatments, Nov",
+                 labels=trt_labels)
 
 get_hist_encarsia(data=scalecountencar_july, collection_date="July",
                   study=1, labels=trt_labels)
