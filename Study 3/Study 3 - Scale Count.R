@@ -70,8 +70,7 @@ get_hist(data=scalecount3,
          labels=trt_labels3)
 
 get_hist_all_trt(scalecount3, x_str="Meanlivescale", x_lab="Mean Live Scale",
-                 title="Study 3 - Mean Live Scale, All Treatments",
-                 labels=trt_labels3)
+                 title="Study 3 - Mean Live Scale, All Treatments")
 
 ##### Mean Live Scale #####
 plot_means(data=tmeans3_nov, title="Study 3 - Mean Live Scale", 

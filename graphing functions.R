@@ -2,6 +2,8 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(ggpubr)
+library(rstatix)
+library(glue)
 
 
 # Plot treatment means
@@ -109,18 +111,17 @@ get_hist_encarsia <- function(data, collection_date, study, labels) {
 
 # Histogram, all treatments merged
 # Change bin width as needed...
-get_hist_all_trt <- function(data, x_str, x_lab, title, labels, binwidth=1) {
+get_hist_all_trt <- function(data, x_str, x_lab, title, binwidth=1) {
   x_sym <- ensym(x_str)
   hist <- ggplot(data=data, aes(x={{x_sym}})) + 
     geom_histogram(binwidth=binwidth) + 
     labs(x=x_lab) + 
-    scale_fill_discrete(labels=labels) + 
     labs(title=title)
   return(hist)
 }
 
 get_cis_marginal_means_plot <- function(ci_df, pairs_df, y_positions, trt_labels,
-                                        y_str, y_lab, title) {
+                                        y_str, y_lab, title, alpha=.05) {
   y_sym <- ensym(y_str)
   pairs_df_graphing <- pairs_df
   
@@ -128,7 +129,13 @@ get_cis_marginal_means_plot <- function(ci_df, pairs_df, y_positions, trt_labels
   # Must be called group1 and group2 for stat_pvalue_manual
   pairs_df_graphing$group1 <- substring(pairs_df$contrast, first=10, last=10)
   pairs_df_graphing$group2 <- substring(pairs_df$contrast, first=23, last=23)
-  pairs_df_graphing$p.value_round <- round(pairs_df$p.value, digits=3)
+  pairs_df_graphing$p <- round(pairs_df$p, digits=3)
+  
+  # Add significance labels as "p.signif"
+  pairs_df_graphing <-
+   pairs_df_graphing %>%
+   add_significance('p', symbols = c("****", "***", "**", "*", ""))
+  
   # y position of each pairwise comparison bar
   pairs_df_graphing$y.position <- y_positions
   
@@ -141,7 +148,9 @@ get_cis_marginal_means_plot <- function(ci_df, pairs_df, y_positions, trt_labels
          y = y_lab) +
     # Add treatment means comparison bars
     stat_pvalue_manual(
-      data = pairs_df_graphing, label = "p.value_round",
+      data = pairs_df_graphing, 
+     # label="label",
+      label = "{p}{p.signif}",
       xmin = "group1", xmax = "group2",
       y.position = "y.position"
     ) +

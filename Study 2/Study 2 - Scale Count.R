@@ -92,12 +92,10 @@ get_hist_livescale(scalecount2_nov, collection_date="Nov", study=2,
                    labels=trt_labels2)
 
 get_hist_all_trt(scalecount2_july, x_str="Meanlivescale", x_lab="Mean Live Scale",
-                 title="Study 2 - Mean Live Scale, All Treatments, July",
-                 labels=trt_labels2)
+                 title="Study 2 - Mean Live Scale, All Treatments, July")
 
 get_hist_all_trt(scalecount2_nov, x_str="Meanlivescale", x_lab="Mean Live Scale",
-                 title="Study 2 - Mean Live Scale, All Treatments, Nov",
-                 labels=trt_labels2)
+                 title="Study 2 - Mean Live Scale, All Treatments, Nov")
 
 ##### Mean Live Scale #####
 plot_means_by_collection(data=tmeans2_table, 

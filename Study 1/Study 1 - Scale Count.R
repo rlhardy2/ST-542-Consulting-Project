@@ -49,6 +49,9 @@ scalecount_nov <- subset(scalecount, grepl('November', Date)) # November data
 tmeans_july <- get_treatment_survival_means(scalecount_july)
 tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 
+tmeans_county_july <- get_treatment_survival_means_county(scalecount_july)
+tmeans_county_nov <- get_treatment_survival_means_county(scalecount_nov)
+
 # Getting the data by tree
 scalecount_tree_mean_july <- average_counts_across_twigs(scalecount_july)
 scalecount_tree_mean_nov <- average_counts_across_twigs(scalecount_nov)
@@ -63,19 +66,16 @@ get_hist_livescale(scalecount_nov, collection_date="Nov", study=1,
                    labels=trt_labels)
 
 get_hist_all_trt(scalecount_july, x_str="Meanlivescale", x_lab="Mean Live Scale",
-                 title="Study 1 - Mean Live Scale, All Treatments, July",
-                 labels=trt_labels)
+                 title="Study 1 - Mean Live Scale, All Treatments, July")
 
 get_hist_all_trt(scalecount_nov, x_str="Meanlivescale", x_lab="Mean Live Scale",
-                 title="Study 1 - Mean Live Scale, All Treatments, Nov",
-                 labels=trt_labels)
+                 title="Study 1 - Mean Live Scale, All Treatments, Nov")
 
 ##### Mean Live Scale #####
 
 # Mean live scale by county, July
 plot_means_by_county(data=tmeans_county_july, 
                      title="Study 1 - Mean Live Scale By County - July")
-
 
 # Mean live scale by county, Nov
 plot_means_by_county(data=tmeans_county_nov, 
@@ -153,8 +153,6 @@ scheirer_nov
 
 #### (5) Poisson & Negative Binomial Models ####
 
-# Just to test fit and necessity of zero inflation
-
 ##### July #####
 
 # Mixed Poisson, no zero inflation
@@ -185,6 +183,7 @@ nb1_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 simr_nb1_july <- simulateResiduals(nb1_july)
 # Homogeneity of variance looks okay...
 testCategorical(simr_nb1_july, scalecount_july$Treatment)
+
 
 ##### November #####
 

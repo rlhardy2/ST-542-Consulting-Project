@@ -92,8 +92,7 @@ tmeans_encar_july <- scalecountencar2_july %>%
 
 #### (2) Exploratory Graphs ####
 get_hist_all_trt(scalecountencar2_july, x_str="encarsia", x_lab="Encarsia Count",
-                 title="Study 2 - Encarsia, All Treatments, July",
-                 labels=trt_labels2)
+                 title="Study 2 - Encarsia, All Treatments, July")
 
 get_hist_encarsia(data=scalecountencar2_july, collection_date="July",
                   study=2, labels=trt_labels2)
@@ -106,13 +105,6 @@ plot_means(data=tmeans_encar_july,
 #### (3) Encarsia models ####
 
 ##### July #####
-
-# Graph histogram of encarsia -- this needs to be double checked...
-# It's kinda ugly and the labels don't appear lmao...
-get_hist_all_trt(scalecountencar2_july, 
-                 "encarsia", "Encarsia", 
-                 "Study 2 Encarsia Count - July",
-                 trt_labels2)
 
 # Poisson model
 encar_pois_july2 <- glmmTMB(encarsia ~ Treatment + (1| Block),

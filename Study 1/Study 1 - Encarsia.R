@@ -74,11 +74,9 @@ encar_table_trt <- dplyr::bind_rows(tmeans_encar_july,
 
 #### (2) Exploratory Graphs ####
 get_hist_all_trt(scalecountencar_july, x_str="encarsia", x_lab="Encarsia Count",
-                 title="Study 1 - Encarsia, All Treatments, July",
-                 labels=trt_labels)
+                 title="Study 1 - Encarsia, All Treatments, July")
 get_hist_all_trt(scalecountencar_nov, x_str="encarsia", x_lab="Encarsia Count",
-                 title="Study 1 - Encarsia, All Treatments, Nov",
-                 labels=trt_labels)
+                 title="Study 1 - Encarsia, All Treatments, Nov")
 
 get_hist_encarsia(data=scalecountencar_july, collection_date="July",
                   study=1, labels=trt_labels)
@@ -94,10 +92,6 @@ plot_means_by_collection(data=encar_table_trt,
 #### (3) Encarsia models ####
 
 ##### July #####
-# Graph histogram of encarsia
-get_hist_all_trt(scalecountencar_july, 
-                 "encarsia", "Encarsia", 
-                 "Study 1 Encarsia Count - July", trt_labels)
 
 # Poisson model
 encar_pois_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
@@ -115,9 +109,6 @@ simr_encar_nb1_july <- simulateResiduals(encar_nb1_july)
 plot(simr_encar_nb1_july)
 
 ##### November #####
-get_hist_all_trt(scalecountencar_nov, 
-                 "encarsia", "Encarsia", 
-                 "Study 1 Encarsia Count - Nov", trt_labels)
 
 # Poisson model
 # Since this is by tree, don't need label within block
