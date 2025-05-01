@@ -14,7 +14,6 @@ library(FSA)
 library(stats)
 library(PMCMRplus)
 library(PMCMR)
-library(pscl)
 library(emmeans)
 library(glmmTMB)
 
@@ -199,7 +198,6 @@ get_cis_marginal_means_plot(ci_df=confint_para_nov_df, pairs_df=pairs_para_nov_d
 fung_mod_july <- glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
                          data=scalecount2_para_july,
                          family=binomial)
-
 simr_fung_mod_july <- simulateResiduals(fung_mod_july)
 plot(simr_fung_mod_july)
 
@@ -208,8 +206,6 @@ plot(simr_fung_mod_july)
 fung_mod_nov <-  glmmTMB(Presfungus ~ Treatment + (1 | Block / Label),
                          data=scalecount2_para_nov,
                          family=binomial)
-# Warning about "model convergence problem"
-
 simr_fung_mod_nov <- simulateResiduals(fung_mod_nov)
 plot(simr_fung_mod_nov)
 

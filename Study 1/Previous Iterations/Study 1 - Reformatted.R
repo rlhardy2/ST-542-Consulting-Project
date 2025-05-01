@@ -54,7 +54,7 @@ tmeans_nov <- get_treatment_survival_means(scalecount_nov)
 # Friedman test
 # Friedman test only supports unreplicated complete block designs
 # This needs to be averaged across all treatments and will be less precise
-scalecount_avg_july <- average_counts_across_twigs(scalecount_july)
+scalecount_avg_july <- average_counts_by_tree(scalecount_july)
 scalecount_avg_across_block_trt <- average_counts_across_block_trt(scalecount_avg_july)
 
 # For some reason, this won't work without converting to a matrix
@@ -86,7 +86,7 @@ heatmap(p_values_matrix, main = "Nemenyi Test P-Values",
 # Therefore we cannot use the Friedman test!!
 
 # Again, but for November (doesn't work!)
-scalecount_avg_nov <- average_counts_across_twigs(scalecount_nov)
+scalecount_avg_nov <- average_counts_by_tree(scalecount_nov)
 scalecount_avg_across_block_trt <- 
   average_counts_across_block_trt(scalecount_avg_nov)
 

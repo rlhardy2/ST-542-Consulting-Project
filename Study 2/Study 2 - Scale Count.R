@@ -56,6 +56,7 @@ scalecount2$Presfungus <- as.numeric(scalecount2$Presfungus)
 
 # Expand scalecount2 to "wide" format, creating vars for Live/Dead scale
 # and presence to add together more easily
+# Preferred so that we can tie scale count to parasitism/fungus properly
 scalecount2_wide  <- 
   scalecount2 %>%
   pivot_wider(names_from=Type, values_from=c(Livescale1, Livescale2, Livescale3,
@@ -80,8 +81,8 @@ tmeans2_nov$Collection<-"Nov"
 tmeans2_table <- dplyr::bind_rows(tmeans2_july, tmeans2_nov)
 
 # Getting the data by tree
-scalecount2_avg_july <- average_counts_across_twigs(scalecount2_july)
-scalecount2_avg_nov <- average_counts_across_twigs(scalecount2_nov)
+scalecount2_avg_july <- average_counts_by_tree(scalecount2_july)
+scalecount2_avg_nov <- average_counts_by_tree(scalecount2_nov)
 
 #### (2) Graphs - Exploratory ####
 
@@ -189,8 +190,6 @@ nb2_july2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 simr_nb2_july2 <- simulateResiduals(nb2_july2)
 plot(simr_nb2_july2)
 
-#testCategorical(simr_nb2_july, scalecount2_july$Treatment) # gives error...
-
 # Mixed NB model, no zero inflation
 # Negative Binomial 1 (linear dispersion)
 nb1_july2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
@@ -199,8 +198,6 @@ nb1_july2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 
 simr_nb1_july2 <- simulateResiduals(nb1_july2)
 plot(simr_nb1_july2)
-
-#testCategorical(simr_nb1_july, scalecount2_july$Treatment) # gives error...
 
 ##### November #####
 
@@ -211,18 +208,14 @@ pois_nov2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 
 simr_pois_nov2 <- simulateResiduals(pois_nov2)
 plot(simr_pois_nov2)
-check_overdispersion(pois_nov2)
 
 # Mixed NB model, no zero inflation
 # Using type 2 nbinom as is typical
 nb2_nov2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                    data=scalecount2_nov, ziformula = ~0,
                    family = nbinom2)
-
 simr_nb2_nov2 <- simulateResiduals(nb2_nov2)
 plot(simr_nb2_nov2)
-
-#testCategorical(simr_nb2_nov, scalecount2_nov$Treatment) # gives error...
 
 # Mixed NB1 model, no zero inflation
 nb1_nov2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
@@ -231,7 +224,6 @@ nb1_nov2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
 
 simr_nb1_nov2 <- simulateResiduals(nb1_nov2)
 plot(simr_nb1_nov2)
-#testCategorical(simr_nb1_nov, scalecount2_nov$Treatment) # gives error...
 
 #### (6) Zero-Inflated & Hurdle Models ####
 
@@ -241,7 +233,6 @@ plot(simr_nb1_nov2)
 zinb2_july2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                       data=scalecount2_july, ziformula = ~1,
                       family = nbinom2)
-# Got a warning about "model convergence problem"
 
 simr_zinb2_july2 <- simulateResiduals(zinb2_july2)
 plot(simr_zinb2_july2)
@@ -256,7 +247,6 @@ simr_zinb1_july2 <- simulateResiduals(zinb1_july2)
 plot(simr_zinb1_july2)
 
 ##### November #####
-# Diagnostics easier with glmmTMB than PSCL due to DHARMa compatibility
 
 # Using negative binomial 2 - quadratic overdispersion
 zinb2_nov2 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
@@ -287,7 +277,6 @@ hnbinom_nov2 <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label
                         data=scalecount2_nov,
                         ziformula = ~1,
                         family=truncated_nbinom2)
-# Got a warning about "model convergence problem"
 
 simr_hnb2_nov2 <- simulateResiduals(hnbinom_nov2)
 plot(simr_hnb2_nov2)
@@ -381,4 +370,3 @@ get_cis_marginal_means_plot(ci_df=confint_nov2_df, pairs_df=pairs_nov2_df,
                             y_str="response", 
                             y_lab="Sum of Live Scale Across Twig (Estimated By Mean of Shoots)",
                             title="CIs of Estimated Treatment Means - November Live Scale Count, Study 2")
-

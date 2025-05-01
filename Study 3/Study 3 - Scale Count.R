@@ -56,8 +56,8 @@ scalecount3 <- process_scalecount(scalecount3)
 # Treatment survival means
 tmeans3_nov <- get_treatment_survival_means(scalecount3)
 
-# Getting the data by tree
-scalecount3_by_tree <- average_counts_across_twigs_study3(scalecount3)
+# Getting the data by tree for 2-factor nonparametric tests
+scalecount3_by_tree <- average_counts_by_tree_study3(scalecount3)
 
 #### (2) Graphs - Exploratory ####
 
@@ -121,29 +121,24 @@ scheirer
 pois_nov3 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                     data=scalecount3, ziformula = ~0,
                     family = poisson)
-# Doesn't look very good...variance issues
 simr_pois_nov3 <- simulateResiduals(pois_nov3)
-check_overdispersion(pois_nov3)
+plot(simr_pois_nov3)
 
 # Mixed NB model, no zero inflation
-# Using type 2 nbinom as is typical
+# Using type 2 nbinom (typical NB2)
 nb2_nov3 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                    data=scalecount3, ziformula = ~0,
                    family = nbinom2)
-# Variance looks a little weird, but actually pretty decent
-# Underfitting zeroes a little
 simr_nb2_nov3 <- simulateResiduals(nb2_nov3)
+plot(simr_nb2_nov3)
 testCategorical(simr_nb2_nov3, scalecount3$Treatment)
 
 # Mixed NB1 model, no zero inflation
 nb1_nov3 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                    data=scalecount3, ziformula = ~0,
                    family = nbinom1)
-
-# Variance looks a little weird still, but not bad? (very narrow for Trt 4)
 simr_nb1_nov3 <- simulateResiduals(nb1_nov3)
 plot(simr_nb1_nov3)
-# Zeroes look ok
 testCategorical(simr_nb1_nov3, scalecount3$Treatment)
 
 
@@ -168,24 +163,19 @@ zip_nov3 <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                       data=scalecount3, ziformula = ~1,
                       family = poisson)
 simr_zip_nov3 <- simulateResiduals(zip_nov3)
-# Homogeneity of variance issues
 plot(simr_zip_nov3)
 
-# Hurdle negative binomial
+# Hurdle negative binomial 2
 hnbinom2_nov3 <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                         data=scalecount3,
                         ziformula = ~1,
                         family=truncated_nbinom2)
-# residual variance issues, don't use
 simr_hnb2_nov3 <- simulateResiduals(hnbinom2_nov3)
 plot(simr_hnb2_nov3)
 
-# Might prefer the standard models for study 3? IDK
-
 #### (7) Analysis ####
 
-# Maybe use nb1...?
-
+# Using NB1
 # Estimated marginal means
 emm_nb1_nov3 <- emmeans(nb1_nov3, "Treatment")
 emm_nb1_nov3_orig_scale <- emmeans(nb1_nov3, 

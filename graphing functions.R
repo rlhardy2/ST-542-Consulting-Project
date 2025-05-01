@@ -30,7 +30,7 @@ plot_means <- function(data, title, x_str, y_str, labels, y_lab=y_str) {
   return(trt_plot)
 }
 
-# plot means by collection date and an X value (treatment, county)
+# Plot treatment means by collection date and an X value (treatment, county)
 # "data" should have the tmeans format illustrated in Study 1
 plot_means_by_collection <- function(data, title, x_str, y_str, labels=trt_labels, y_lab=y_str) {
   x_sym <- ensym(x_str)
@@ -103,6 +103,7 @@ get_hist_livescale <- function(data, collection_date, study, labels) {
                   title=title, labels=labels))
 }
 
+# Histogram of Encarsia - one plot for each treatment
 get_hist_encarsia <- function(data, collection_date, study, labels) {
   title <- paste("Study", study, "- Encarsia Count,", collection_date)
   return (get_hist(data=data, x_str="encarsia", 
@@ -120,6 +121,7 @@ get_hist_all_trt <- function(data, x_str, x_lab, title, binwidth=1) {
   return(hist)
 }
 
+# Get confidence intervals of estimated marginal means
 get_cis_marginal_means_plot <- function(ci_df, pairs_df, y_positions, trt_labels,
                                         y_str, y_lab, title, alpha=.05) {
   y_sym <- ensym(y_str)
@@ -148,8 +150,7 @@ get_cis_marginal_means_plot <- function(ci_df, pairs_df, y_positions, trt_labels
          y = y_lab) +
     # Add treatment means comparison bars
     stat_pvalue_manual(
-      data = pairs_df_graphing, 
-     # label="label",
+      data = pairs_df_graphing,
       label = "{p}{p.signif}",
       xmin = "group1", xmax = "group2",
       y.position = "y.position"

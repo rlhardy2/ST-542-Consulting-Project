@@ -26,10 +26,6 @@ library(performance)
 source("../graphing functions.r")
 source("../Data Processing.r")
 
-# Reformatted version of Study 1. 
-# Maybe just use for some of the analysis? Live scale analysis?
-# Make study 1 a folder with sub-files instead?
-
 #### (1) Data Pre-processing ####
 trt_labels <- c("May 2-3", "May 17", "May 28", "No Treatment")
 
@@ -82,7 +78,7 @@ tmeans_nov_para <- scalecount_para_nov %>%
   )
 tmeans_nov_para$Collection<-"Nov"
 
-para_table <-dplyr::bind_rows(tmeans_july_para, tmeans_nov_para)
+para_table <- dplyr::bind_rows(tmeans_july_para, tmeans_nov_para)
 
 #### (2) Exploratory Analysis ####
 
@@ -104,6 +100,7 @@ plot_means_by_collection(data=para_table,
 
 
 #### (3) Parasitism models ####
+
 # Use mixed models to account for random block and tree effects
 
 ##### July #####

@@ -14,11 +14,9 @@ library(FSA)
 library(stats)
 library(PMCMRplus)
 library(PMCMR)
-library(pscl)
 library(emmeans)
 library(DHARMa)
 library(glmmTMB)
-library(rcompanion)
 library(performance)
 
 source("../graphing functions.r")
@@ -53,8 +51,8 @@ tmeans_county_july <- get_treatment_survival_means_county(scalecount_july)
 tmeans_county_nov <- get_treatment_survival_means_county(scalecount_nov)
 
 # Getting the data by tree
-scalecount_tree_mean_july <- average_counts_across_twigs(scalecount_july)
-scalecount_tree_mean_nov <- average_counts_across_twigs(scalecount_nov)
+scalecount_tree_mean_july <- average_counts_by_tree(scalecount_july)
+scalecount_tree_mean_nov <- average_counts_by_tree(scalecount_nov)
 
 
 #### (2) Graphs - Exploratory ####
@@ -153,23 +151,29 @@ scheirer_nov
 
 #### (5) Poisson & Negative Binomial Models ####
 
-##### July #####
+# Random block, zero inflation, over each twig
+# Random block seems to make the most sense in that we don't
+# exactly know the effect of each block and it would vary across time, etc
+# (soil quality changes?)
+# Since the tree is within the block, theoretically should be nested
+# Doesn't matter in this case since each block has a different name
+# Will be the same if you do (1 | Block) + (1 | Label) ("crossed factors")
 
+##### July #####
 # Mixed Poisson, no zero inflation
 pois_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                        data=scalecount_july, ziformula = ~0,
                        family = poisson)
-# Doesn't look very good...
 simr_pois_july <- simulateResiduals(pois_july)
+plot(simr_pois_july, title="Poisson")
 
 # Mixed NB model, no zero inflation
-# Negative Binomial 2 (typical)
+# Negative Binomial 2 (typical) - quadratic overdispersion
 nb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_july, ziformula = ~0,
                      family = nbinom2)
-# Has some zero inflation issues
-# Also deviation issues
 simr_nb2_july <- simulateResiduals(nb2_july)
+plot(simr_nb2_july, title="Negative Binomial 2")
 testCategorical(simr_nb2_july, scalecount_july$Treatment)
 
 # Mixed NB model, no zero inflation
@@ -177,12 +181,8 @@ testCategorical(simr_nb2_july, scalecount_july$Treatment)
 nb1_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                    data=scalecount_july, ziformula = ~0,
                    family = nbinom1)
-# Doesn't strictly have zero inflation
-# Actually looks quite good?
-# Should probably have similar assumptions as November though??
-simr_nb1_july <- simulateResiduals(nb1_july)
-# Homogeneity of variance looks okay...
-testCategorical(simr_nb1_july, scalecount_july$Treatment)
+simr_nb1_july <- simulateResiduals(nb1_july, title="Negative Binomial 1")
+plot(simr_nb1_july)
 
 
 ##### November #####
@@ -191,29 +191,23 @@ testCategorical(simr_nb1_july, scalecount_july$Treatment)
 pois_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_nov, ziformula = ~0,
                      family = poisson)
-# Doesn't look very good...
 simr_pois_nov <- simulateResiduals(pois_nov)
-check_overdispersion(pois_nov)
+plot(simr_pois_nov, title="Poisson")
 
 # Mixed NB model, no zero inflation
 # Using type 2 nbinom as is typical
 nb2_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                      data=scalecount_nov, ziformula = ~0,
                      family = nbinom2)
-# Doesn't technically fail zero inflation test
-# But lots of issues
 simr_nb2_nov <- simulateResiduals(nb2_nov)
-testCategorical(simr_nb2_nov, scalecount_nov$Treatment)
+plot(simr_nb2_nov, title="Negative Binomial 2")
 
 # Mixed NB1 model, no zero inflation
 nb1_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1| Block / Label),
                   data=scalecount_nov, ziformula = ~0,
                   family = nbinom1)
-# Doesn't technically fail zero inflation test
-# Issue with homogeneity of variance
 simr_nb1_nov <- simulateResiduals(nb1_nov)
-plot(simr_nb1_nov)
-testCategorical(simr_nb1_nov, scalecount_nov$Treatment)
+plot(simr_nb1_nov, title="Negative Binomial 1")
 
 #### (6) Zero-Inflated & Hurdle Models ####
 
@@ -222,55 +216,40 @@ testCategorical(simr_nb1_nov, scalecount_nov$Treatment)
 zinb2_july <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                     data=scalecount_july, ziformula = ~1,
                     family = nbinom2)
-# looks quite nice
 simr_zinb2_july <- simulateResiduals(zinb2_july)
 plot(simr_zinb2_july)
 
 ##### November #####
 
 # Diagnostics easier with glmmTMB than PSCL due to DHARMa compatibility
-
-# Random block, zero inflation, over each twig
-# Random block seems to make the most sense in that we don't
-# exactly know the effect of each block and it would vary across time, etc
-# (soil quality changes?)
-# Actually, since the tree is within the block, I guess this theoretically should be nested?
-# Tree within block - doesn't matter in this case since each block has a different name
-# Will be the same if you do (1 | Block) + (1 | Label) ("crossed factors")
-# Using negative binomial 2 - quadratic overdispersion
 zinb2_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                                   data=scalecount_nov, ziformula = ~1,
                                   family = nbinom2)
-# looks quite nice
 simr_zinb2_nov <- simulateResiduals(zinb2_nov)
+plot(simr_zinb2_nov)
 
 # Zero-inflated Poisson
 zip_nov <- glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                    data=scalecount_nov, ziformula = ~1,
                    family = poisson)
-# some residual variance issues
 simr_zip_nov <- simulateResiduals(zip_nov)
+plot(simr_zip_nov)
 
 # Hurdle negative binomial
 hnbinom_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                         data=scalecount_nov,
                         ziformula = ~1,
                         family=truncated_nbinom2)
-# residual variance issues
 simr_hnb2_nov <- simulateResiduals(hnbinom_nov)
+plot(simr_hnb2_nov)
 
 # Hurdle Poisson
 hpois_nov <-  glmmTMB(Sumlivescale_from_mean ~ Treatment + (1 | Block / Label),
                         data=scalecount_nov,
                         ziformula = ~1,
                         family=truncated_poisson)
-# Homogeneity of variance issues
 simr_hpois_nov <- simulateResiduals(hpois_nov)
-
-# Check performance
-check_model(zinb2_nov)
-performance(zinb2_nov)
-plot(simr_zinb2_nov)
+plot(simr_hpois_nov)
 
 #### (7) Analysis ####
 

@@ -51,8 +51,8 @@ scalecountencar_nov <-scalecount_nov %>% drop_na(encarsia)
 
 # Study 1's data set has encarsia count for each twig
 # Combine by tree, as encarsia is by tree
-scalecountencar_july <- average_counts_across_twigs(scalecountencar_july)
-scalecountencar_nov <- average_counts_across_twigs(scalecountencar_nov)
+scalecountencar_july <- average_counts_by_tree(scalecountencar_july)
+scalecountencar_nov <- average_counts_by_tree(scalecountencar_nov)
 
 # Treatment means
 tmeans_encar_july <- scalecountencar_july %>% 
@@ -91,32 +91,32 @@ plot_means_by_collection(data=encar_table_trt,
 
 #### (3) Encarsia models ####
 
+# Since these are by tree, only need random intercept for Block
+
 ##### July #####
 
 # Poisson model
 encar_pois_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
                           data=scalecountencar_july, ziformula = ~0,
                           family = poisson)
-# Looks like there's more data at extremes
 simr_encar_pois_july <- simulateResiduals(encar_pois_july)
+plot(simr_encar_pois_july)
 
 # Negative binomial, linear overdispersion
 encar_nb1_july <- glmmTMB(encarsia ~ Treatment + (1| Block),
                         data=scalecountencar_july, ziformula = ~0,
                         family = nbinom1)
-# Better looking residuals than Poisson
 simr_encar_nb1_july <- simulateResiduals(encar_nb1_july)
 plot(simr_encar_nb1_july)
 
 ##### November #####
 
 # Poisson model
-# Since this is by tree, don't need label within block
 encar_pois_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                           data=scalecountencar_nov, ziformula = ~0,
                           family = poisson)
-# Some deviation issues...looks like there's more data at extremes
 simr_encar_pois_nov <- simulateResiduals(encar_pois_nov)
+plot(simr_encar_pois_nov)
 
 # Negative binomial - type 1 (linearly overdispersed)
 encar_nb1_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
@@ -131,27 +131,25 @@ testCategorical(simr_encar_nb1_nov, scalecountencar_nov$Treatment)
 encar_nb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          data=scalecountencar_nov, ziformula = ~0,
                          family = nbinom2)
-# doesn't fit quite as well as nb type 1
 simr_encar_nb2_nov <- simulateResiduals(encar_nb2_nov)
 plot(simr_encar_nb2_nov)
 testCategorical(simr_encar_nb2_nov, scalecountencar_nov$Treatment)
 
-# Check zero inflated just in case...
-# No evidence of zero inflation
+###### Zero Inflation Test ######
+
+# negative binomial 2
 encar_zinb2_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          data=scalecountencar_nov, ziformula = ~1,
                          family = nbinom2)
 simr_encar_zinb2_nov <- simulateResiduals(encar_zinb2_nov)
 plot(simr_encar_zinb2_nov)
 
-# Test zero inflated Poisson
+# Poisson
 encar_zip_nov <- glmmTMB(encarsia ~ Treatment + (1| Block),
                            data=scalecountencar_nov, ziformula = ~1,
                            family = poisson)
 simr_encar_zip_nov <- simulateResiduals(encar_zip_nov)
 plot(simr_encar_zip_nov)
-
-# Best one looks to be type 1 NB
 
 #### (4) Analysis ####
 

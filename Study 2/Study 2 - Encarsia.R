@@ -14,7 +14,6 @@ library(FSA)
 library(stats)
 library(PMCMRplus)
 library(PMCMR)
-library(pscl)
 library(emmeans)
 
 source("../graphing functions.r")
@@ -75,8 +74,8 @@ scalecountencar2_nov <-scalecount2_nov %>% drop_na(encarsia)
 
 # Study 1's data set has encarsia count for each twig
 # Combine by tree, as encarsia is by tree
-scalecountencar2_july <- average_counts_across_twigs(scalecountencar2_july)
-scalecountencar2_nov <- average_counts_across_twigs(scalecountencar2_nov)
+scalecountencar2_july <- average_counts_by_tree(scalecountencar2_july)
+scalecountencar2_nov <- average_counts_by_tree(scalecountencar2_nov)
 
 # July and November have same data?
 scalecountencar2_july$encarsia
@@ -124,13 +123,6 @@ plot(simr_encar_nb1_july2)
 
 ##### November #####
 
-# Graph histogram of encarsia -- this needs to be double checked...
-# It's kinda ugly and the labels don't appear lmao...
-get_hist_all_trt(scalecountencar2_nov, 
-                 "encarsia", "Encarsia", 
-                 "Study 2 Encarsia Count - November",
-                 trt_labels2)
-
 # Poisson model
 # Since this is by tree, don't need label within block
 encar_pois_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
@@ -158,17 +150,16 @@ simr_encar_nb2_nov2 <- simulateResiduals(encar_nb2_nov2)
 plot(simr_encar_nb2_nov2)
 testCategorical(simr_encar_nb2_nov2, scalecountencar2_nov$Treatment) # gives error...
 
-# Check zero inflated just in case...
-# No evidence of zero inflation
+###### Zero-Inflated ######
+
+# Negative binomial 2
 encar_zinb2_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                            data=scalecountencar2_nov, ziformula = ~1,
                            family = nbinom2)
-# Got a warning about "model convergence problem"
-
 simr_encar_zinb2_nov2 <- simulateResiduals(encar_zinb2_nov2)
 plot(simr_encar_zinb2_nov2)
 
-# Test zero inflated Poisson
+# Poisson
 encar_zip_nov2 <- glmmTMB(encarsia ~ Treatment + (1| Block),
                          data=scalecountencar2_nov, ziformula = ~1,
                          family = poisson)

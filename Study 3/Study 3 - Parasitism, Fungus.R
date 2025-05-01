@@ -14,7 +14,6 @@ library(FSA)
 library(stats)
 library(PMCMRplus)
 library(PMCMR)
-library(pscl)
 library(emmeans)
 
 library(DHARMa)

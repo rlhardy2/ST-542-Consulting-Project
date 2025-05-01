@@ -14,7 +14,8 @@ create_live_deadscale_vars <- function(scalecount) {
   return (summed)
 }
 
-# Create live and deadscale variables out of pivot wide table
+# Study 2
+# Create live and deadscale variables out of wide table
 create_live_deadscale_pres_vars_wide <- function(scalecount_wide) {
   summed <- 
     scalecount_wide %>%
@@ -70,8 +71,7 @@ create_live_deadscale_pres_vars_wide <- function(scalecount_wide) {
   return (summed)
 }
 
-
-# Check for na in live, dead scale counts
+# Check for NA in live, dead scale counts
 check_na_scale_counts <- function(scalecount) {
   has_na <- scalecount %>% 
     filter(if_any(c(Livescale1, Livescale2, Livescale3, 
@@ -91,7 +91,7 @@ check_counts <- function(scalecount) {
 # Label denotes the same tree
 # Average count data (live scale, dead scale, encarsia) 
 # across both twigs to get by tree
-average_counts_across_twigs <- function(scalecount) {
+average_counts_by_tree <- function(scalecount) {
   scalecount_tree_mean <-
     scalecount %>%
     group_by(Label, Date, Treatment, Block) %>% 
@@ -107,7 +107,7 @@ average_counts_across_twigs <- function(scalecount) {
 # Label denotes the same tree
 # Average count data (live scale, dead scale, encarsia) 
 # across both twigs to get by tree
-average_counts_across_twigs_study3 <- function(scalecount) {
+average_counts_by_tree_study3 <- function(scalecount) {
   scalecount_tree_mean <-
     scalecount %>%
     group_by(Label, Treatment, Block) %>% 
@@ -119,22 +119,8 @@ average_counts_across_twigs_study3 <- function(scalecount) {
   return (scalecount_tree_mean)
 }
 
-# Label denotes the same tree
-# Sum count data (live scale, dead scale, encarsia) 
-# across both twigs to get by tree
-sum_counts_across_twigs <- function(scalecount) {
-  scalecount_tree_sum <-
-    scalecount %>%
-    group_by(Label, Date, Treatment, Block) %>% 
-    summarize(across(where(is.numeric), sum)) %>%
-    # drop rows that shouldn't use sums
-    dplyr::select(-one_of(c('encarsia', 'Meanlivescale', 'Meandeadscale')))
-  
-  return (scalecount_tree_sum)
-}
-
 # Average counts across block-treatment combo
-# Must have already averaged across twigs first...
+# Must have already averaged by tree first...
 average_counts_across_block_trt <- function(scalecount) {
   scalecount_block_trt_mean <-
     scalecount %>%
@@ -186,12 +172,13 @@ extract_block <- function(scalecount) {
 
 # mean live and dead scale are not integers for count data
 # Because we have missing shoots
-# need to multiply all means by 3 instead of summing for accuracy...
+# need to multiply all means by 3 to get an adjusted sum of scale
 get_sum_scale_from_mean <- function(mean_scale) {
   sum_scale_from_mean <- round(mean_scale *3)
   return (sum_scale_from_mean)
 }
 
+# Extract treatment from label in scalecount data
 extract_treatment <- function(scalecount) {
   # if label doesn't include county
   if (str_length(scalecount[1,]$Label) == 3) {
@@ -233,8 +220,8 @@ process_scalecount <- function(scalecount_raw, in_group=FALSE) {
                     Deadscale2, Livescale3, Deadscale3), 
                   as.numeric))
   
-  # Add mean live scale and Mean dead scale columns
-  # This will technically retain labels with 2 shoots?
+  # Add mean live scale and Mean dead scale columns, ignoring NA
+  # Will retain labels with 2 shoots
   scalecount<-scalecount %>%
     mutate(Meanlivescale = rowMeans(dplyr::select(., Livescale1, Livescale2, Livescale3), na.rm = TRUE))
   scalecount<-scalecount %>%
@@ -252,7 +239,7 @@ process_scalecount <- function(scalecount_raw, in_group=FALSE) {
   return (scalecount)
 }
 
-# Extracts treatment means by treatment
+# Calculate treatment means by treatment
 get_treatment_survival_means <- function(scalecount) {
   tmeans <- scalecount %>% 
     group_by(Treatment) %>% 
@@ -267,7 +254,7 @@ get_treatment_survival_means <- function(scalecount) {
   return (tmeans)
 }
 
-# Extracts treatment means by county
+# Calculate treatment means by county
 get_treatment_survival_means_county <- function(scalecount) {
   tmeans <- scalecount %>% 
     group_by(Treatment, County) %>% 
@@ -281,4 +268,3 @@ get_treatment_survival_means_county <- function(scalecount) {
     )
   return (tmeans)
 }
-
