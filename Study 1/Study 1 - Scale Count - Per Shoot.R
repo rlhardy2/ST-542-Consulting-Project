@@ -46,7 +46,14 @@ scalecount_nov <- subset(scalecount, grepl('November', Date)) # November data
 
 ##### New Processing for Per-Shoot Modeling ######
 
-# Get long scalecount
+# Get long scalecount for July
+scalecount_july_long <- get_per_shoot_scalecount(scalecount_july)
+
+# Get only live scalecount from long, without NAs
+scalecount_july_long_live <- get_per_shoot_scalecount_live(scalecount_july_long)
+
+
+# Get long scalecount for November
 scalecount_nov_long <- get_per_shoot_scalecount(scalecount_nov)
 
 # Get only live scalecount from long, without NAs
