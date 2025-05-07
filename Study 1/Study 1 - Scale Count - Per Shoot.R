@@ -62,6 +62,33 @@ scalecount_nov_long_live <- get_per_shoot_scalecount_live(scalecount_nov_long)
 
 #### Models - Non-Zero Inflated ####
 
+
+##### July #####
+# Mixed Poisson, no zero inflation
+pois_july <- glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab),
+                    data=scalecount_july_long_live, ziformula = ~0,
+                    family = poisson)
+simr_pois_july <- simulateResiduals(pois_july)
+plot(simr_pois_july, title="Poisson")
+
+# Mixed NB model, no zero inflation
+# Negative Binomial 2 (typical) - quadratic overdispersion
+nb2_july <- glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab),
+                   data=scalecount_july_long_live, ziformula = ~0,
+                   family = nbinom2)
+simr_nb2_july <- simulateResiduals(nb2_july)
+plot(simr_nb2_july, title="Negative Binomial 2")
+
+# Mixed NB model, no zero inflation
+# Negative Binomial 1 (linear dispersion)
+nb1_july <- glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab),
+                   data=scalecount_july_long_live, ziformula = ~0,
+                   family = nbinom1)
+simr_nb1_july <- simulateResiduals(nb1_july, title="Negative Binomial 1")
+plot(simr_nb1_july)
+
+
+##### November #####
 # Mixed Poisson, no zero inflation
 pois_nov <- glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab),
                      data=scalecount_nov_long_live, ziformula = ~0,
@@ -116,8 +143,50 @@ hpois_nov <-  glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab)
 simr_hpois_nov <- simulateResiduals(hpois_nov)
 plot(simr_hpois_nov)
 
+#### Analysis - July ####
 
-#### Analysis ####
+##### Means #####
+# Estimated marginal means
+emm_nb1_july <- emmeans(nb1_july, "Treatment")
+emm_nb1_july_orig_scale <- emmeans(nb1_july, 
+                                  "Treatment", type="response")
+
+# Per-shoot scale
+confint(emm_nb1_july_orig_scale)
+# effect size - Cohen's d
+eff_size(emm_nb1_july, 
+         sigma=sigma(nb1_july), edf=df.residual(nb1_july))
+
+##### Pairwise Comparisons #####
+plot(emm_nb1_july_orig_scale, comparison=TRUE)
+# Pairwise comparisons for ratios 
+# (happens if you take the pairs from emm on the original scale
+# due to needing to perform tests on log)
+confint(pairs(emm_nb1_july_orig_scale, adjust="BH"))
+# CI for pairwise comparison on log scale
+confint(pairs(emm_nb1_july, adjust="BH"))
+
+
+# CI for pairwise comparison on original scale (per-shoot)
+confint(pairs(regrid(emm_nb1_july), adjust="BH"))
+
+# Pairwise comparisons per-shoot (p-values)
+pairs(regrid(emm_nb1_july), adjust="BH")
+
+
+##### Graphs #####
+pairs_july_df <- as.data.frame(pairs(regrid(emm_nb1_july), adjust="BH"))
+confint_july_df <- as.data.frame(confint(emm_nb1_july_orig_scale))
+y_positions <- seq(3, 9, by=1.2)
+
+get_cis_marginal_means_plot(ci_df=confint_july_df, pairs_df=pairs_july_df, 
+                            y_positions=y_positions, trt_labels=trt_labels,
+                            y_str="response", 
+                            y_lab="Scale Count (Per Shoot)",
+                            title="CIs of Estimated Treatment Means - July Live Scale Count, Study 1")
+
+
+#### Analysis - November ####
 
 ##### Means #####
 # Estimated marginal means
@@ -148,7 +217,7 @@ confint(pairs(regrid(emm_nb1_nov), adjust="BH"))
 pairs(regrid(emm_nb1_nov), adjust="BH")
 
 
-#### Graphs ####
+##### Graphs #####
 pairs_nov_df <- as.data.frame(pairs(regrid(emm_nb1_nov), adjust="BH"))
 confint_nov_df <- as.data.frame(confint(emm_nb1_nov_orig_scale))
 y_positions <- seq(3, 9, by=1.2)
