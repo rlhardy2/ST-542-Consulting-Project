@@ -79,7 +79,7 @@ get_per_shoot_scalecount <- function(scalecount) {
     pivot_longer(
       cols = c(Livescale1:Deadscale3),
       names_to = c("type", "shoot"),
-      names_pattern = "(Live|Dead)scale(\\d+)",
+      names_pattern = "(Live|Dead)scale(\\d)",
       values_to = "scalecount_shoot"
     )
   
