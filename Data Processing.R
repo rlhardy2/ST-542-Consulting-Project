@@ -71,6 +71,31 @@ create_live_deadscale_pres_vars_wide <- function(scalecount_wide) {
   return (summed)
 }
 
+
+# Transform to per-shoot livescale/deadscale counts
+get_per_shoot_scalecount <- function(scalecount) {
+  # Transform to per-shoot observations
+  scalecount_long <- scalecount %>%
+    pivot_longer(
+      cols = c(Livescale1:Deadscale3),
+      names_to = c("type", "shoot"),
+      names_pattern = "(Live|Dead)scale(\\d+)",
+      values_to = "scalecount_shoot"
+    )
+  
+  return (scalecount_long)
+}
+
+# Get only live scale and no NAs
+get_per_shoot_scalecount_live <- function(scalecount_long) {
+  # Get per-shoot observations
+  scalecount_long_live <- 
+    scalecount_long %>% 
+    filter(type == "Live", !is.na(scalecount_shoot))
+  
+  return (scalecount_long_live)
+}
+
 # Check for NA in live, dead scale counts
 check_na_scale_counts <- function(scalecount) {
   has_na <- scalecount %>% 
@@ -170,6 +195,7 @@ extract_block <- function(scalecount) {
   return (scalecount_block)
 }
 
+
 # mean live and dead scale are not integers for count data
 # Because we have missing shoots
 # need to multiply all means by 3 to get an adjusted sum of scale
@@ -227,7 +253,9 @@ process_scalecount <- function(scalecount_raw, in_group=FALSE) {
   scalecount<-scalecount %>%
     mutate(Meandeadscale = rowMeans(dplyr::select(., Deadscale1, Deadscale2, Deadscale3), na.rm = TRUE))
 
-  # Get the scaled "sum: of the mean live scale for use with count models
+  # Get the scaled sum of the mean live scale for use with count models
+  # ACTUALLY, best to just use "scalecount_shoot" and model by shoot if want shoot-level means!
+  # Can remove if only want per-shoot analysis...
   scalecount$Sumlivescale_from_mean <- 
     get_sum_scale_from_mean(scalecount$Meanlivescale)
   scalecount$Sumdeadscale_from_mean <- 
