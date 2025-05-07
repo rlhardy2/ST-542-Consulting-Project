@@ -112,8 +112,8 @@ plot(simr_nb2_july2, title="Negative Binomial 2")
 nb1_july2 <- glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab),
                     data=scalecount2_july_long_live, ziformula = ~0,
                     family = nbinom1)
-simr_nb1_july2 <- simulateResiduals(nb1_july2, title="Negative Binomial 1")
-plot(simr_nb1_july2)
+simr_nb1_july2 <- simulateResiduals(nb1_july2)
+plot(simr_nb1_july2, title="Negative Binomial 1")
 
 
 ##### November #####
@@ -137,8 +137,8 @@ plot(simr_nb2_nov2, title="Negative Binomial 2")
 nb1_nov2 <- glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab),
                    data=scalecount2_nov_long_live, ziformula = ~0,
                    family = nbinom1)
-simr_nb1_nov2 <- simulateResiduals(nb1_nov2, title="Negative Binomial 1")
-plot(simr_nb1_nov2)
+simr_nb1_nov2 <- simulateResiduals(nb1_nov2)
+plot(simr_nb1_nov2, title="Negative Binomial 1")
 
 #### Analysis - July ####
 

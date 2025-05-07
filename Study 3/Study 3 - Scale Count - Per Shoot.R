@@ -84,8 +84,8 @@ plot(simr_nb2_nov3, title="Negative Binomial 2")
 nb1_nov3 <- glmmTMB(scalecount_shoot ~ Treatment + (1| Block / Label / Twigab),
                     data=scalecount3_long_live, ziformula = ~0,
                     family = nbinom1)
-simr_nb1_nov3 <- simulateResiduals(nb1_nov3, title="Negative Binomial 1")
-plot(simr_nb1_nov3)
+simr_nb1_nov3 <- simulateResiduals(nb1_nov3)
+plot(simr_nb1_nov3, title="Negative Binomial 1")
 
 #### (7) Analysis ####
 
