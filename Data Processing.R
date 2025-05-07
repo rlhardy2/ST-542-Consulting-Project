@@ -15,7 +15,7 @@ create_live_deadscale_vars <- function(scalecount) {
 }
 
 # Study 2
-# Create live and deadscale variables out of wide table
+# Create live and deadscale variables out of wide table, and prespara/presfungus per twig
 create_live_deadscale_pres_vars_wide <- function(scalecount_wide) {
   summed <- 
     scalecount_wide %>%
@@ -32,13 +32,13 @@ create_live_deadscale_pres_vars_wide <- function(scalecount_wide) {
            ) %>%
     # Replace Prespara and Presfungus >=1 with 1 as it's a binary variable
     # Sometimes there's data across crypto/ehs/both observations where several had presence marked as 1
-    # So rowSums adds this to 1
+    # So rowSums will be > 1...
     # There is probably a better way to do this
     mutate(across(.cols = c(Prespara, Presfungus), .fns = function(x) ifelse(x >= 1, 1, 0)))
   
   # If all entries are NA, then rowSums will calculate a 0...
   # Check if all are NA, and change to NA
-  # There's probably a better way to do this
+  # There's probably a better way to do this...
   summed[is.na(summed$Livescale1_both) & is.na(summed$Livescale1_Crypto) 
          & is.na(summed$Livescale1_EHS), "Livescale1"] <- NA
   summed[is.na(summed$Livescale2_both) & is.na(summed$Livescale2_Crypto) 
